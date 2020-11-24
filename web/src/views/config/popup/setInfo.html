@@ -1,0 +1,41 @@
+<form class="content layui-form layui-form-pane layui-hide1" id="content-alert" style="padding: 0px;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">模块英文名</label>
+        <div class="layui-input-block">
+            <input type="text" class="layui-input" name="name" id="name" placeholder="请输入模块名字">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">选择游戏</label>
+        <div class="layui-input-block">
+            <select id="pro_id" lay-verify="required">
+                <option value="xiuzhen">仙命决</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">选择类型</label>
+        <div class="layui-input-block">
+            <select id="ide_id" lay-verify="required">
+                <option value="1">表格类型</option>
+                <option value="2">输入框类型</option>
+                <option value="3">按钮类型</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">请求路由</label>
+        <div class="layui-input-block">
+            <input type="text" class="layui-input" name="url" id="url" placeholder="请输入请求路由">
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label"><span style="padding-left: 10px;">模块备注说明</span></label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入模块备注说明" class="layui-textarea" name="remarks" id="remarks"></textarea>
+        </div>
+    </div>
+</form>

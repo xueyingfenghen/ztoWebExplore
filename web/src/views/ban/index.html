@@ -1,0 +1,296 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <label class="layui-form-label">选择区服：</label>
+        <div class="layui-input-block" style="width: 92%">
+            <input onclick="area()" type="text" name="area" lay-verify="area" autocomplete="off" placeholder="请选择区服" class="layui-input" readonly>
+            <span>*点击输入框进行区服勾选</span>
+        </div>
+
+            <form class="layui-form">
+                <div class="layui-input-inline">
+                    <label class="layui-form-label">角色ID：</label>
+                    <div class="layui-input-inline">
+                        <input  type="text" name="banned_list_id" autocomplete="off" placeholder="请选择角色ID:" class="layui-input">
+                    </div>
+                </div>
+<!--                <div class="layui-input-inline">-->
+<!--                    <label class="layui-form-label">角色昵称：</label>-->
+<!--                    <div class="layui-input-inline">-->
+<!--                        <input  type="text" name="nickname" autocomplete="off" placeholder="请选择角色昵称:" class="layui-input">-->
+<!--                    </div>-->
+<!--                </div>-->
+                <div class="layui-input-inline">
+                    <label class="layui-form-label">封禁类型</label>
+                    <div class="layui-input-inline">
+                        <select name="ban_type" lay-filter="ban_type_select"></select>
+                    </div>
+                </div>
+                <div class="layui-input-inline">
+                    <label class="layui-form-label">封禁理由</label>
+                    <div class="layui-input-inline">
+                        <select name="ban_reason" lay-filter="ban_reason_select"></select>
+                    </div>
+                </div>
+                <div class="layui-input-inline">
+                    <label class="layui-form-label">操作人</label>
+                    <div class="layui-input-inline">
+                        <select name="user" lay-filter="user_select"></select>
+                    </div>
+                </div>
+                <div class="layui-input-inline">
+                        <div class="layui-inline">
+                                <label class="layui-form-label">封禁时间</label>
+                                <div class="layui-input-inline" style="width: 290px">
+                                    <input type="text" name="ban_time" class="layui-input" id="datetime" placeholder="请选择开始时间 - 请选择结束时间">
+                                </div>
+                        </div>
+                </div>
+
+
+                <div class="layui-input-inline">
+                    <button type="button" class="layui-btn layui-btn-normal" lay-submit lay-filter="ban_search">查询</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="font-weight: bolder;font-size: 16px;width: 100px">个人角色封禁</label>
+
+                <button type="button" class="layui-btn layui-btn-primary" style="float: right" id="batch_relieve">一键解禁</button>
+                <button type="button" class="layui-btn layui-btn-normal" style="float: right" id="add_ban">添加角色封禁</button>
+            </div>
+        </form>
+    </div>
+    <table id="ban_table" lay-filter="ban_table"></table>
+    <div id="ban_table-paginate" lay-filter="ban_table-paginate"></div>
+</div>
+<script src="/src/views/ban/ban.js"></script>
+<script>
+    //定义表头
+    var cols = [ //表头
+        {type: 'checkbox', fixed: 'left'}
+        ,{field: 'server_id', title: '区服',align: 'center'}
+        ,{field: 'banned_list_id', title: '角色ID',align: 'center'}
+        ,{field: 'nickname', title: '角色昵称',align: 'center'}
+        ,{field: 'type_name', title: '封禁类型',align: 'center'}
+        ,{field: 'banned_min', title: '封禁时长(分)',align: 'center'}
+        ,{field: 'banned_reason', title: '封禁理由',align: 'center'}
+        ,{field: 'operator_time', title: '封禁时间',align: 'center'}
+        ,{field: 'relieve_time', title: '解禁时间',align: 'center'}
+        ,{field: 'operator', title: '操作人',align: 'center'}
+        ,{field: 'status', title: '操作',align: 'center',fixed: 'right', toolbar: '#ban_btn'}
+    ];
+    //渲染、监听 表格属性、数据
+    layui.use('table', function(){
+        var page = 1,pageSize = 10,filter = {},$ = layui.jquery;
+        var loadTadle = function(){
+            filter.page = page;filter.limit = pageSize;filter.banned_name = 'roles';
+            layui.admin.req({
+                url:layui.admin.getUrl('/api/ban/roles/index'),
+                method: 'get',
+                data: filter,
+                dataType: 'json',
+                done: function (res) {
+                    layui.table.render({
+                        elem: '#ban_table'
+                        ,cols: [cols]
+                        ,data:res.data.list,
+                        limit: pageSize
+                    });
+                    layui.laypage.render({
+                        elem: 'ban_table-paginate'
+                        ,count: res.data.count //数据总数
+                        , limit: pageSize
+                        , curr: page
+                        , limits: [10, 20, 30, 40, 50]
+                        , layout: ['prev', 'page', 'next', 'skip', 'count', 'limit']
+                        , prev: '<i class="layui-icon">&#xe603;</i>'
+                        , next: '<i class="layui-icon">&#xe602;</i>'
+                        , jump: function (obj, first) {
+                            page = obj.curr;
+                            pageSize = obj.limit;
+                            if (!first) {loadTadle();}
+                        }
+                    });
+                }
+            })
+        };loadTadle();
+        loadBanReason();
+        loadBanTypeDrop();
+        loadUser();
+        //新增角色封禁
+        $("#add_ban").on('click',function () {
+            layui.admin.popup({
+                title: '添加角色封禁'
+                ,area:  ['800px', '550px']
+                ,id: 'ban_roles'
+                ,success: function(layero, index){
+                    layui.view(this.id).render('ban/add_form').done(function () {
+                        $("#ban_close").on('click',function () {
+                            layer.close(index);
+                        })
+                        layui.form.on('submit(ban_submit)', function (data) {
+                            var formData = data.field;
+                            formData.banned_name = 'roles';
+                            formData.check_result = $("#checkResult").text();
+                            console.log(formData);
+
+                            //封禁类型必填
+                            // var len = $(".ban_single:checked").length;
+                            // if (len < 1) {
+                            //     layer.msg('请至少选择一项:封禁类型！', { icon: 5 });
+                            //     return false;
+                            // }
+                            // if($("#checkResult").text() != '校验成功'){
+                            //     layer.msg('未校验或校验失败,请重新检验', {icon: 5, anim: 6});
+                            //     return false;
+                            // }
+                            layui.admin.req({
+                                url:layui.admin.getUrl('/api/ban/roles'),
+                                method: 'get',
+                                data: formData,
+                                dataType: 'json',
+                                done: function (res) {
+                                    if(res.code == 0){
+                                        layer.msg(res.msg);
+                                        layer.close(index);
+                                        loadTadle();
+                                    }else {
+                                        layer.msg(res.msg,{icon:5});
+                                    }
+                                }
+                            })
+                            return false;
+                        });
+                    });
+                }
+            })
+        })
+        //监听搜索
+        layui.form.on('submit(ban_search)', function(data){
+            var field = data.field;
+            console.log(field);
+            //执行重载
+            filter = {
+                banned_list_id:field.banned_list_id,
+                nickname:field.nickname,
+                type:field.ban_type,
+                banned_reason:field.ban_reason,
+                operator:field.user,
+                operator_time:field.ban_time,
+                server_id:area_arr,
+            };
+            page = 1;
+            pageSize = 10;
+            loadTadle();
+        });
+
+
+        //渲染表单的样式(表单组件样式必须用表单才有)
+        layui.use(['form','laydate'], function(){
+            var form = layui.form;
+            var laydate = layui.laydate;
+            form.render();
+            //日期时间范围
+            laydate.render({
+                elem: '#datetime'
+                ,type: 'datetime'
+                ,range: true
+            });
+        });
+
+        layui.table.on('tool(ban_table)', function(obj){
+            relieve([obj.data]);
+        });
+
+        //一键解禁
+        $("#batch_relieve").on('click',function () {
+            var checkStatus = layui.table.checkStatus('ban_table').data;//得到选中的数据
+            if(checkStatus.length == 0) {
+                layer.msg('请勾选要操作的用户',{icon:5});
+            }else {
+                relieve(checkStatus);
+            }
+        })
+
+        //处理解禁事件
+       var relieve = function (obj){
+           layui.admin.popup({
+               title: '角色信息'
+               ,area:  ['550px', '500px']
+               ,id: 'relieve'
+               ,btn: ['下一步', '取消']
+               ,success: function(layero, index){
+                   layui.view(this.id).render('./ban/relieve',obj);
+               },yes: function(index, layero){
+                   layui.admin.popup({
+                       title: '解禁'
+                       ,area:  ['555px', '300px']
+                       ,id: 'relieve_next'
+                       //,btn: ['确定', '取消']
+                       ,success: function(layero, index){
+                           layui.view(this.id).render('./ban/relieve_next',[obj,'roles']).done(function () {
+                               $("#relieve_close").on('click',function () {
+                                   layer.close(index);
+                               })
+                               layui.form.on('submit(relieve_submit)', function (data) {
+
+                                   var relieve_rests_reason = data.field.relieve_rests_reason;
+                                   var option = $("select[name=relieve_reason]").find("option:selected").text();
+                                   if(option == '其他'){
+                                       if(!relieve_rests_reason){
+                                           layer.msg('请输入解禁理由', { icon: 5 });
+                                           return false;
+                                       }
+                                   }
+                                   layui.admin.req({
+                                       url:layui.admin.getUrl('/api/relieve'),
+                                       method: 'post',
+                                       data: {relieve_info:obj,'banned_name':'role'},
+                                       dataType: 'json',
+                                       done: function (res) {
+                                           if(res.code==0){
+                                               layer.msg(res.msg,{icon:1});
+                                               layer.closeAll();
+                                               loadTadle();
+                                           }else {
+                                               layer.msg(res.msg,{icon:5});
+                                           }
+                                       }
+                                   })
+                                   return false;
+                               })
+                           });
+                       }
+                   })
+               }
+           });
+       }
+    });
+    //选择区服
+    var area_arr = '';
+    function area(data){
+        layui.admin.popup({
+            title: '选择区服'
+            ,area:  ['1200px', '500px']
+            ,id: 'select_area'
+            ,btn: ['确定', '取消']
+            ,success: function(layero, index){
+                layui.view(this.id).render('area',{...data});
+            },yes: function(index, layero){
+                //layui.jquery('#get_area').val(); 区服拼接后的值
+                area_arr = layui.jquery('#get_area_all').val(); //区服转数组的值
+                layui.jquery("input[name=area]").val(layui.jquery('#get_area').val());
+                layer.close(index);
+            }
+        });
+    }
+</script>
+<script type="text/html" id="ban_btn">
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="relieve">解禁</a>
+</script>
+

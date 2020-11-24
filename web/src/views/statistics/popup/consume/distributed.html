@@ -1,0 +1,23 @@
+<!-- 分布弹出层 -->
+<div id="chart" style="width: 950px; height: 750px;">
+    <div id="echart_summ" style="width: 900px; height: 400px;"></div>
+    <table class="" id="table_summ" lay-filter="table_summ"></table>
+</div>
+
+<!-- 元宝消耗详情 -->
+<script type="text/html" id="op_detail_gc-consume-change">
+    <a class="layui-btn layui-btn-normal layui-btn-xs" data-obj='{"event": "detail", "id": "{{ d.res_id }}", "name": "{{ d.res_name }}","itemId": "ingots_consume_detail"}'>详情</a>
+</script>
+<!-- 元宝产出详情 -->
+<script type="text/html" id="op_detail_gc-output-change">
+    <a class="layui-btn layui-btn-normal layui-btn-xs" data-obj='{"event": "detail", "id": "{{ d.res_id }}", "name": "{{ d.res_name }}","itemId": "ingots_output_detail"}'>详情</a>
+</script>
+
+<!-- 道具消耗详情 -->
+<script type="text/html" id="op_detail_prop-consume-change">
+    <a class="layui-btn layui-btn-normal layui-btn-xs" data-obj='{"event": "detail", "id": "{{ d.res_id }}", "name": "{{ d.res_name }}","itemId": "props_consume_detail"}'>详情</a>
+</script>
+<!-- 道具产出详情 -->
+<script type="text/html" id="op_detail_prop-output-change">
+    <a class="layui-btn layui-btn-normal layui-btn-xs" data-obj='{"event": "detail", "id": "{{ d.res_id }}", "name": "{{ d.res_name }}","itemId": "props_output_detail"}'>详情</a>
+</script>

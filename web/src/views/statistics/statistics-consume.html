@@ -1,0 +1,185 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+
+                <!-- 元宝变更 -->
+                <div class="layui-tab-item" id="search_gc-change" style="display: none;">
+                    <form class="layui-form layui-form-pane form_gc-change">
+                        <div class="layui-form-item" id="statistics_gc-change_form">
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_gc-change","tableId": "table_gc-change","itemId":"gc-change"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_gc-change","tableId": "table_gc-change","itemId":"gc-change"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "exportData","formClass": ".form_gc-change","itemId":"gc-change"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 道具变更 -->
+                <div class="layui-tab-item" id="search_prop-change" style="display: none;">
+                    <form class="layui-form layui-form-pane form_prop-change">
+                        <div class="layui-form-item" id="statistics_prop-change_form">
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_prop-change","tableId": "table_prop-change","itemId":"prop-change"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_prop-change","tableId": "table_prop-change","itemId":"prop-change"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "exportData","formClass": ".form_prop-change","itemId":"prop-change"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 道具库存 -->
+                <div class="layui-tab-item" id="search_prop-stock" style="display: none;">
+                    <form class="layui-form layui-form-pane form_prop-stock">
+                        <div class="layui-form-item" id="statistics_prop-stock_form">
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_prop-stock","tableId": "table_prop-stock","itemId":"prop-stock"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_prop-stock","tableId": "table_prop-stock","itemId":"prop-stock"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "exportData","formClass": ".form_prop-stock","itemId":"prop-stock"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 商场购买 -->
+                <div class="layui-tab-item" id="search_shop-buy" style="display: none;">
+                    <form class="layui-form layui-form-pane form_shop-buy">
+                        <div class="layui-form-item" id="statistics_shop-buy_form">
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_shop-buy","tableId": "table_shop-buy","itemId":"shop-buy"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_shop-buy","tableId": "table_shop-buy","itemId":"shop-buy"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "exportData","formClass": ".form_shop-buy","itemId":"shop-buy"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 元宝变更 -->
+<div class="layui-card tabs" id="list_gc-change" data-tab="gc-change" style="display: none;">
+
+    <div class="layui-card-body">
+        <div id="echart_gc-change" style="width: 100%;height: 450px;"></div>
+    </div>
+
+    <div class="layui-card-body">
+        <table id="table_gc-change"></table>
+    </div>
+
+</div>
+
+<!-- 道具变更 -->
+<div class="layui-card tabs" id="list_prop-change" data-tab="prop-change" style="display: none;">
+
+    <div class="layui-card-body">
+        <div id="echart_prop-change" style="width: 100%;height: 450px;"></div>
+    </div>
+
+    <div class="layui-card-body">
+        <table id="table_prop-change"></table>
+    </div>
+
+</div>
+
+<!-- 道具库存 -->
+<div class="layui-card tabs" id="list_prop-stock" data-tab="prop-stock" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_prop-stock"></table>
+    </div>
+</div>
+
+<!-- 商场购买 -->
+<div class="layui-card tabs" id="list_shop-buy" data-tab="shop-buy" style="display: none;">
+    <div class="layui-card-body">
+        <div class="layui-row">
+            <div class="layui-col-md6" id="echart_shop-buy" style="width: 50%;height: 550px">
+            </div>
+            <div class="layui-col-md6">
+                <table id="table_shop-buy"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // layui.use('statistics/consume', layui.factory('statistics/consume'));
+</script>
+
+<!-- 元宝变更分布 -->
+<script type="text/html" id="op_gc-change">
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "distributed", "date":"{{ d.date_time }}", "itemId": "ingots_consume_distributed"}'>消费分布</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "distributed", "date":"{{ d.date_time }}", "itemId": "ingots_output_distributed"}'>产出分布</a>
+</script>
+
+<!-- 道具变更分布 -->
+<script type="text/html" id="op_prop-change">
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "distributed", "date":"{{ d.date_time }}","itemId": "props_consume_distributed"}'>消耗分布</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "distributed", "date":"{{ d.date_time }}","itemId": "props_output_distributed"}'>产出分布</a>
+</script>
+
+<!-- 道具库存 -->
+<script type="text/html" id="op_prop-stock">
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "stock", "prop_type":"{{ d.prop_type  || '' }}", "prop_id":"{{ d.prop_id }}","itemId": "props_stock_distributed"}'>分布情况</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "stock", "prop_type":"{{ d.prop_type  || '' }}", "prop_id":"{{ d.prop_id }}","itemId": "props_stock_detail"}'>库存详情</a>
+</script>
+
+<input type="hidden" id="record" value="0">
+
+
+<script>
+
+    layui.use('statistics/consume', layui.factory('statistics/consume'));
+</script>

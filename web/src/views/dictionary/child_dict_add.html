@@ -1,0 +1,127 @@
+<style>
+    .layui-btn-primary {
+        border: none;
+        color: #1E9FFF;
+    }
+</style>
+<form class="layui-form">
+<div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-primary add_child_dict"><i class="layui-icon" style="font-size: 30px;"></i></button>
+        <button type="button" class="layui-btn layui-btn-primary top_move" style="margin-left: -20px;color: green"><i class="layui-icon" style="font-size: 30px;">&#xe619;</i></button>
+        <button type="button" class="layui-btn layui-btn-primary bottom_move" style="margin-left: -20px;color: green"><i class="layui-icon" style="font-size: 30px;">&#xe61a;</i></button>
+</div>
+<div class="layui-form-item">
+    <div class="layui-input-block child_dict_radio" style="margin-left: 15px"></div>
+</div>
+</form>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+
+<script>
+    var $ = layui.jquery;
+    layui.use('form',function () {
+        var form = layui.form;
+        var dict_type = ''; //对应后端字典配置文件类型
+        form.render();
+        layui.data.sendParams = function (params) {
+            console.log('新增子字典进来了',params);
+            dict_type = params.type;
+            layui.admin.req({
+                url:layui.admin.getUrl('/api/dict'),
+                method: 'get',
+                data: {dict_id:params.dict_id,game_id:params.game_id},
+                dataType: 'json',
+                done: function (res) {
+                    var data = res.data.list;
+                    var str = '';
+                    if(res.data.list.length > 0){
+                        for (i=0;i<res.data.list.length;i++){
+                             str += '<div class="radio_dict" style="width: 250px"><input type="radio" name="dict_id" value="'+data[i]['dict_id']+'" title="'+data[i]['name']+'">' +
+                                '<div class="layui-unselect layui-form-radio">' +
+                                '<i class="layui-anim layui-icon"></i>' +
+                                '<div>'+data[i]['name']+'</div>' +
+                                '</div></div>';
+                        }
+                    }
+                    $(".child_dict_radio").append(str);
+                    form.render();
+                }
+            })
+        }
+        //上下移动操作
+        $(".top_move").on('click',function () {
+            var dict_id = $('input:radio[name="dict_id"]:checked');//当前选中的子字典input
+            if(dict_id.length > 0){
+                var dict_id_parent = dict_id.parent();//选中字典的父类div
+                var dict_id_prev = dict_id_parent.prev('.radio_dict');//父类div上级兄弟元素
+                if(dict_id_prev.length > 0){
+                    dict_id_prev.before(dict_id_parent);
+                }else{
+                    layer.msg('已经到顶啦',{icon: 5});
+                }
+            }else {
+                layer.msg('请先选择子字典名称',{icon: 5});
+            }
+        })
+        $(".bottom_move").on('click',function () {
+            var dict_id = $('input:radio[name="dict_id"]:checked');//当前选中的子字典input
+            if(dict_id.length > 0){
+                var dict_id_parent = dict_id.parent();//选中字典的父类div
+                var dict_id_prev = dict_id_parent.next('.radio_dict');//父类div上级兄弟元素
+                if(dict_id_prev.length > 0){
+                    dict_id_prev.after(dict_id_parent);
+                }else{
+                    layer.msg('已经到底啦',{icon: 5});
+                }
+            }else {
+                layer.msg('请先选择子字典名称',{icon: 5});
+            }
+        })
+        //新增子字典
+        $(".add_child_dict").on('click',function () {
+            layui.admin.popup({
+                title:  '新增'
+                ,area: ['500px', '500px']
+                ,id: 'child_dict_add_form'
+                ,btn: ['确定','取消']
+                ,success: function(layero, index){
+                    layui.view(this.id).render('dictionary/dict_add_form',{id:this.id,type:dict_type}).done(function(){});
+                }
+                ,yes:function (index,v) {
+                    var n = $("input[name=name]").val();
+                    var type = $("select[name=dict_type]").val();
+                    if(n){
+                        if(!type && dict_type == 'VerifyPassword') {//目前只针对密码子字典控制读取配置 下拉框无所谓
+                            layer.msg('请选择字典类型',{icon: 5});return false;
+                        }
+                        var obj = $("input[type=radio][name=dict_id]");
+                        for (i=0;i<obj.length;i++){
+                            if(obj[i].title == n) {
+                             layer.msg('子字典名称重复了',{icon: 5}); return false;
+                            }
+                        }
+                                var new_dict_id = 0;
+                                var new_value = $("input[name=value]").val();
+                                var new_remark = $("input[name=remark]").val();
+                                var str = '<div class="radio_dict" style="width: 250px">' +
+                                    '<input data-t="'+type+'" data-v="'+new_value+'" data-r="'+new_remark+'" type="radio" name="dict_id" value="'+new_dict_id+'" title="'+n+'">' +
+                                    '<div class="layui-unselect layui-form-radio">' +
+                                    '<i class="layui-anim layui-icon"></i>' +
+                                    '<div>'+n+'</div>' +
+                                    '</div></div>';
+                                $(".child_dict_radio").append(str);
+                                form.render();
+                                layer.close(index);
+                    }else {
+                        layer.msg('请输入子字典名称',{icon: 5});
+                    }
+                }
+            })
+        })
+        //删除留一个不然进不来子字典页面
+
+    })
+
+
+</script>

@@ -1,0 +1,270 @@
+<input type="hidden" name="filename" id="filename">
+<input type="hidden" name="roleid" id="roleid">
+<input type="hidden" name="originalname" id="originalname">
+    <div class="layui-form-item" id="future_hide_server">
+        <label class="layui-form-label">选择区服：</label>
+        <div class="layui-input-block" style="width: 70%">
+            <input id="area" onclick="area()" type="text" name="area" lay-verify="area" autocomplete="off" placeholder="请点击输入框进行区服勾选" class="layui-input" readonly>
+        </div>
+    </div>
+    <div class="layui-form-item" id="upload_file">
+        <label class="layui-form-label">上传文件：</label>
+        <div class="layui-input-inline" style="width: 59%">
+            <button type="button" class="layui-btn layui-btn-normal" style="margin-right: 10px" id="upload_roles">选择文件</button>
+            <span style="position: absolute;font-size: 12px">备注：上传【xlsx】格式文件时,行数 < 1000条,且重新上传则会覆盖当前已上传文件</span>
+        </div>
+    </div>
+    <div class="layui-form-item" id="upload_res">
+        <label class="layui-form-label">上传结果：</label>
+        <div class="layui-input-inline">
+            <button type="button" class="layui-btn" style="margin-right: 10px" id="export">导出数据</button>
+            <span style="color: red;position: absolute;width: 200px;top: 8px" id="check_res" >未校验</span>
+        </div>
+    </div>
+<form class="layui-form ban_form">
+    <input type="hidden" name="server_id">
+    <div class="layui-form-item layui-form-text" id="future_hide_user">
+        <label class="layui-form-label">角色ID：</label>
+        <div class="layui-input-block " style="width: 70%">
+            <textarea  placeholder="请输入角色ID，多角色ID间需分行标识" class="layui-textarea" name="user_list" onchange="userListChange()"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="button" class="layui-btn layui-btn-normal" id="check">校验</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="clear">清除</button>
+            <label class="layui-red" id="checkResult">未校验</label>
+        </div>
+    </div>
+    <div class="layui-form-item" pane="">
+        <label class="layui-form-label">封禁类型：</label>
+        <div class="layui-input-inline ban_type" style="width: 400px"></div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">封禁时长：</label>
+        <div class="layui-input-inline" style="width: 400px">
+            <input type="radio" name="ban_min_type" value="1" title="自动定时"  lay-filter="ban_min_type" checked>
+            <input type="radio" name="ban_min_type" value="2" title="永久封禁" lay-filter="ban_min_type">
+            <input type="radio" name="ban_min_type" value="3" title="手动定时" lay-filter="ban_min_type">
+        </div>
+    </div>
+    <div class="layui-form-item ban_min" style="display: none">
+        <label class="layui-form-label">输入时长：</label>
+        <div class="layui-input-inline">
+            <input type="text" name="ban_min"  autocomplete="off" placeholder="请输入时长" class="layui-input" onkeyup="this.value=this.value.replace(/\D/g,'')" value="999999999" disabled>
+        </div>
+        <div class="layui-form-mid" style="color: red">分</div>
+    </div>
+    <div class="layui-form-item ban_min_">
+        <div class="layui-input-block" style="color: red">（自动定时：指根据【自动定时设置】功能中的规则自动取对应封禁时长）</div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">封禁理由：</label>
+            <div class="layui-input-inline">
+                <select name="ban_reason"  lay-search="" lay-filter="ban_reason">
+                    <option value="">直接选择或搜索选择</option>
+                </select>
+            </div>
+            <div class="layui-input-block rests_reason" style="display: none;width: 211px">
+                <input type="text" name="rests_reason"  autocomplete="off" placeholder="请输入其他理由" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="btn-wrapper">
+        <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="ban_submit">确定</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="ban_close">取消</button>
+    </div>
+</form>
+    <script src="/src/views/ban/ban.js"></script>
+    <script type="text/html" template lay-done="layui.data.sendParams(d.params)"></script>
+<script>
+    var $ = layui.jquery;
+    layui.data.sendParams = function (params) {
+        if(params.event == 'ban_batch_roles'){
+           $("#future_hide_server").hide();
+           $("#future_hide_user").hide();
+        }else {
+            $("#upload_file").hide();
+            $("#upload_res").hide();
+        }
+    }
+    layui.use('form',function () {
+        var form = layui.form;
+        form.render();
+        loadBanType();
+        loadBanReason();
+        //监听全选操作
+        form.on('checkbox(ban_allChoose)', function (data) {
+            var child = $(".ban_type input[type='checkbox']");
+            child.each(function (index, item) {
+                item.checked = data.elem.checked;
+            });
+            form.render('checkbox');
+        });
+        //监听单个复选框操作
+        form.on('checkbox(ban_single)', function (data) {
+            var count=0,items = $(".ban_single");
+            var allChoose = $("#ban_allChoose");
+            for(var i=0;i<items.length;i++){
+                if(items[i].checked==true){
+                    count++;
+                }
+            }
+            if(count==items.length){
+                allChoose[0].checked=true;
+            }else{
+                allChoose[0].checked=false;
+            }
+            form.render('checkbox');
+        });
+        //封禁时长监听 ban_min_type
+        form.on('radio(ban_min_type)',function (e) {
+            if(e.value == 2){
+                $(".ban_min").css('display','block');
+                $(".ban_min_").css('display','none');
+                $("input[name=ban_min]").val(999999999);
+                $("input[name=ban_min]").attr('disabled',true);
+            }else if (e.value == 3){
+                $(".ban_min").css('display','block');
+                $(".ban_min_").css('display','none');
+                $("input[name=ban_min]").val('');
+                $("input[name=ban_min]").attr('disabled',false);
+            }else if(e.value == 1){
+                $(".ban_min").css('display','none');
+                $(".ban_min_").css('display','block');
+            }else {
+                $(".ban_min").css('display','none');
+            }
+        })
+        //封禁理由 ban_reason
+        form.on('select(ban_reason)',function (e) {
+            if($(this)[0].innerText == '其他' || $(this)[0].innerText == '其它'){
+                $(".rests_reason").css('display','block');
+            }else {
+                $(".rests_reason").css('display','none');
+            }
+        })
+    })
+
+    // 校验
+    $('#check').on('click',function () {
+        layui.admin.req({
+            url: layui.admin.getUrl('/api/public/checkUser'),
+            data: {
+                server_list: $("#area").val(),
+                user_list: $("textarea[name='user_list']").val(),
+            },
+            type: 'post',
+            done: function (data) {
+                if (data.code == 0) {
+                    // 弹出角色校验结果
+                    layui.admin.checkUser('角色校验结果', data.data);
+                    layui.form.render('checkbox');
+                    checkResult(data.data);
+                } else {
+                    layer.msg(data.msg, {icon: 5, anim: 6});
+                }
+            }
+        });
+    });
+
+    //检验结果文件提示
+        function checkResult(array){
+            for (i=0;i<array.length;i++){
+                if(array[i].state == 1){
+                    $("#checkResult").html('校验失败');
+                    $("#checkResult").attr('class','layui-red');
+                    return;
+                }
+            }
+           $("#checkResult").attr('class','layui-green');
+           $("#checkResult").html('校验成功');
+        }
+
+    //角色文本域修改移出事件
+    function userListChange()
+    {
+        $("#checkResult").html('校验失败');
+        $("#checkResult").attr('class','layui-red');
+    }
+
+    //清除
+    $('#clear').on('click',function () {
+        $('.layui-textarea').val('');
+    })
+
+    //指定允许上传的文件类型
+
+    layui.use('upload', function(){
+        var header = layui.setter.header;
+        var headers = {};
+        if (header.tokenName) {
+            headers[header.tokenName] = layui.data(layui.setter.tableName)[header.tokenName] || '';
+        }
+        var upload = layui.upload;
+        var admin = layui.admin;
+        upload.render({
+            elem: '#upload_roles'
+            ,url: layui.admin.getUrl('/api/ban/upload-roles')
+            ,accept: 'file' //普通文件
+            ,headers:headers
+            ,done: function(res){
+                var n= res.msg.indexOf("校验");
+                $("input[name=roleid]").val(res.data.user_list);
+                $("input[name=filename]").val(res.data.filename);
+                $("#originalname").val(res.data.originalname);
+                if(res.code == 0){
+                    $("#check_res").html(res.msg);
+                    $("#check_res").css('color','green');
+                }else {
+                    if(n == -1){
+                        layer.msg(res.msg,{icon:5});
+                        $("#check_res").html('校验失败');
+                        $("#check_res").css('color','red');
+                    }
+                    if(n > -1){
+                        $("#check_res").html(res.msg);
+                        $("#check_res").css('color','red');
+                    }
+                }
+            }
+        });
+
+        //导出
+        $(document).off('click', '#export').on('click', '#export',function () {
+            if($("#check_res").html() == '未校验' || $("#check_res").html() == '校验失败'){
+                layer.msg('请先上传xlsx文件',{icon:5});
+                return false;
+            }
+            admin.download({
+                url: admin.getUrl('/api/ban/export-roles'),
+                data: {filename:$("input[name=filename]").val(),expost:true},
+                method: 'get',
+                dataType: 'json'
+            });
+        })
+    })
+
+
+    //选择区服
+    var area_arr = '';
+    function area(data){
+        layui.admin.popup({
+            title: '选择区服'
+            // ,area: layui.admin.screen() < 2 ? ['80%', '300px'] : ['700px', '500px']
+            ,area:  ['1200px', '500px']
+            ,id: 'select_area'
+            ,btn: ['确定', '取消']
+            ,success: function(layero, index){
+                layui.view(this.id).render('area', {...data});
+            },yes: function(index, layero){
+                //layui.jquery('#get_area').val(); 区服拼接后的值
+                area_arr = layui.jquery('#get_area_all').val(); //区服转数组的值
+                layui.jquery("#area").val(layui.jquery('#get_area').val());
+                layui.jquery("input[name=server_id]").val(area_arr);
+                layer.close(index);
+            }
+        });
+    }
+</script>

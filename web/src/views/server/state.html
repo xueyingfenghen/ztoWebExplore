@@ -1,0 +1,117 @@
+<style>
+    .layui-input a {
+        color: #1E9FFF;
+        line-height: 38px;
+        text-decoration: underline;
+    }
+
+    .layui-input span {
+        line-height: 38px;
+    }
+
+    #content-alert .layui-inline {
+        width: 300px;
+    }
+
+
+    .layui-input-block {
+        /* width: 130px; */
+        height: 40px;
+    }
+
+    .layui-table-cell{
+        display:table-cell;
+        vertical-align: middle;
+        height:auto;
+        overflow:visible;
+        text-overflow:inherit;
+        white-space:normal;
+    }
+
+    .state-color {
+        color: #01AAED;
+    }
+</style>
+
+<!--<div class="layui-card">-->
+<!--    <div class="layui-card-header">-->
+<!--        <a lay-href="/server/status">区服状态</a>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div id="main-container" class="layui-fluid">-->
+
+
+    <div class="layui-card" id="top-card">
+        <div class="layui-card-body">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+                </ul>
+                <div class="layui-tab-content">
+                    <form class="layui-form layui-form-pane">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">选择区服</label>
+                                <div class="layui-input-block" style="width: 500px">
+                                    <input id="selectArea" type="text" name="area" lay-verify="area" autocomplete="off"
+                                           placeholder="请点击输入框进行区服勾选" class="layui-input" readonly="">
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">区服状态</label>
+                                <div class="layui-input-inline">
+                                    <select id="stateSelect" name="state" lay-filter="stateSelect">
+                                        <option value="0">全部</option>
+                                        <option value="1">维护</option>
+                                        <option value="2">火爆</option>
+                                        <option value="3">推荐</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">开区时间</label>
+                                <div class="layui-input-inline" style="width: 500px">
+                                    <input type="text" class="layui-input" id="openTime" name="open_time" placeholder="请选择开始时间 - 请选择结束时间">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="districtSearchBtn">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="districtResetBtn">重置</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<div class="layui-card tabs" id="list_state">
+    <div class="layui-card-body">
+        <div class="layui-btn-container">
+            <button type="button" class="layui-btn layui-btn-warm" id="cancelAutoSwitch">取消定时切换状态</button>
+            <button type="button" class="layui-btn layui-btn-theme" id="changeStateBtn">更改区服状态</button>
+            <button type="button" class="layui-btn layui-btn-danger" id="endProtect">结束维护</button>
+        </div>
+        <table id="districtTable" lay-filter="districtTable"></table>
+        <div id="district-page"></div>
+    </div>
+</div>
+
+
+<script>
+
+    var jsArr = {
+        'server-state': 'server/server_state',
+    };
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+
+    // layui.use('server/server_state', layui.factory('server/server_state'));
+
+</script>

@@ -1,0 +1,103 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+                <div class="layui-tab-item" id="search_activity-import-config" style="display: none;">
+                    <div class="layui-form layui-form-pane">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">选择区服：</label>
+                                <div class="layui-input-block" style="width: 500px">
+                                    <input onclick="area({area:this.value})" type="text" name="area" lay-verify="area"
+                                           autocomplete="off" placeholder="请选择区服" class="layui-input" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item layui-upload">
+                            <button type="button" class="layui-btn layui-btn-theme" id="uploadActivity"><i
+                                    class="layui-icon"></i>上传文件
+                            </button>
+                            <div class="layui-upload-list">
+                                <table class="layui-table">
+                                    <thead>
+                                    <tr>
+                                        <th>文件名称</th>
+                                        <th>大小</th>
+                                        <th>上传进度</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="activityList">
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="color: #afb9c3">请选择上传文件</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <div class="layui-progress layui-progress-big" lay-showpercent="true" lay-filter="demo"
+                                     style="margin-top: 10px">
+                                    <div class="layui-progress-bar layui-bg-green" lay-percent="0%"></div>
+                                </div>
+
+                                <div class="site-demo-button" style="margin-top: 20px; margin-bottom: 0;">
+                                    <button class="layui-btn site-demo-active layui-hide" data-type="setPercent"
+                                            id="setPercent">设置100%
+                                    </button>
+                                    <!--                    <button class="layui-btn site-demo-active layui-hide" data-type="loading">模拟loading</button>-->
+                                </div>
+                                <div class="layui-form">
+                                    <input type="checkbox" name="force_import" lay-skin="primary" title="强制导入"
+                                           value="1">
+                                </div>
+                            </div>
+                            <button type="button" class="layui-btn layui-hide" id="activityListAction">开始上传</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card">
+    <div class="layui-card-header">导入情况</div>
+    <div class="layui-card-body">
+        <table class="layui-table">
+            <thead>
+            <tr>
+                <th>错误</th>
+                <th>正常</th>
+            </tr>
+            </thead>
+            <tbody id="activitySituation"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="layui-card">
+    <div class="layui-card-header">导入文件记录</div>
+    <div class="layui-card-body">
+        <table class="layui-table">
+            <thead>
+            <tr>
+                <th>文件名称</th>
+                <th>文件大小</th>
+                <th>上传进度</th>
+                <th>状态</th>
+            </tr>
+            </thead>
+            <tbody id="activityLog"></tbody>
+        </table>
+    </div>
+</div>
+
+
+<script src="/src/controller/activity/import.js"></script>

@@ -1,0 +1,45 @@
+<div class="layui-fluid" style="padding: 0px 15px">
+    <div class="layui-text" id="title"></div>
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table id="financial-detail-tb" lay-filter="financial-detail-tb"></table>
+        </div>
+    </div>
+</div>
+<script>
+    layui.data.sendParams = function (params) {
+        var $ = layui.jquery;
+        $('#title').html(params.title);
+        layui.table.render({
+            id: 'financial-detail-tb',
+            elem: '#financial-detail-tb',
+            title: params.title,
+            url: layui.admin.getUrl(params.url),
+            method: 'GET',
+            where: {
+                time_type: params.time_type,
+                date: params.day,
+                channel_id: params.channel_id
+            },  // 请求参数(额外)
+            request: {
+                pageName: 'page',   // 页码的参数名称，默认：page
+                limitName: 'page_size'  // 每页数据量的参数名，默认：limit
+            },
+            parseData: function (res) {
+                return {
+                    "code": res.code,          // 解析接口状态
+                    "msg": '',                // 解析提示文本
+                    "count": res.data.count,  // 解析数据长度
+                    "data": res.data.list
+                };
+            },
+            page: true,
+            loading: true,
+            cols: params.cols
+        });
+    };
+</script>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>

@@ -1,0 +1,362 @@
+<style>
+    .layui-inline {
+        margin-bottom: 10px !important;
+        margin-right: 20px !important;
+    }
+
+    .layui-input-block {
+        width: 190px;
+    }
+</style>
+
+<title>切换平台</title>
+
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb">
+        <a lay-href="">权限管理</a>
+        <a><cite>用户管理</cite></a>
+    </div>
+</div>
+
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form layui-form-pane" lay-filter="user-form">
+                <div class="layui-form-item" id="user-search">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">游戏</label>
+                        <div class="layui-input-block">
+                            <select id="game-id" lay-filter="game-id" name="game_id">
+                                <option value="0">请选择游戏</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">组别</label>
+                        <div class="layui-input-block" style="width: 378px">
+                            <select id="group-ids" lay-filter="group-ids" xm-select="group-ids" xm-select-show-count="3" name="group_ids">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">姓名</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="nick_name" class="layui-input" id="nick-name">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <button type="button" class="layui-btn layui-btn-theme" id="search-commit">查询</button>
+                    <button type="button" class="layui-btn layui-btn-primary" id="search-reset">重置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="layui-card">
+        <div class="layui-card-header">用户管理
+            <button data-type="add" class="layui-btn layui-btn-normal  btn-add layui-btn-sm" style="margin-left: 88%">
+                新增用户
+            </button>
+        </div>
+        <div class="layui-card-body">
+            <table id="user_list" lay-filter="user_list"></table>
+            <div id="user_list-paginate" lay-filter="user_list-paginate">
+            </div>
+
+            <script type="text/html" id="bar">
+                <a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="edit">编辑</a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+            </script>
+
+            <script type="text/html" id="switchStatus">
+                <input type="checkbox" name="status" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用"
+                       lay-filter="status" {{ d.status ? 'checked' : '' }} >
+            </script>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    layui.use(['table', 'admin', 'form', 'formSelects'], function () {
+        let admin = layui.admin;
+        let tableOjb = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        // 玩家列表
+        tableOjb.render({
+            id: 'user_list',
+            elem: '#user_list',
+            loading: true,
+            cols: [[
+                {field: 'nick_name', title: '姓名', align: 'center'},
+                {field: 'user_name', title: '用户名', align: 'center'},
+                {field: 'email', title: '邮箱', align: 'center'},
+                {field: 'tel', title: '手机号', align: 'center'},
+                {field: 'groups', title: '游戏', align: 'center'},
+                {field: '', title: '操作', align: 'center', toolbar: '#bar', fixed: 'right', minWidth: '120'},
+                {field: '', title: '状态', align: 'center', fixed: 'right', templet: '#switchStatus', minWidth: '95'}
+            ]]
+        });
+
+        //行工具栏
+        tableOjb.on('tool(user_list)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {
+                layer.confirm('真的删除?', function (index) {
+                    admin.req({
+                        url: admin.getUrl('/api/system/user/delete?id=' + data.id), //实际使用请改成服务端真实接口
+                        data: {},
+                        method: 'post',
+                        dataType: 'json',
+                        done: function (res) {
+                            if (res.code == 0) {
+                                obj.del();
+                                layer.close(index);
+                            }
+                        }
+                    });
+                });
+            } else if (obj.event === 'edit') {
+                //请求数据接口
+                layui.admin.req({
+                    url: admin.getUrl('/api/system/user/get'), //实际使用请改成服务端真实接口
+                    data: {'id': data.id},
+                    method: 'get',
+                    dataType: 'json',
+                    done: function (res) {
+                        if (res.code == 0) {
+                            obj.nick_name = res.data.info.nick_name;
+                            obj.user_name = res.data.info.user_name;
+                            obj.email = res.data.info.email;
+                            obj.tel = res.data.info.tel;
+                            obj.groups = res.data.info.groups || [];
+
+                            admin.popup({
+                                title: '修改用户信息'
+                                , area: ['850px', '550px']
+                                , id: 'LAY-popup-content'
+                                , shadeClose: false
+                                , success: function (layero, index) {
+                                    layui.view(this.id).render('permission/user_edit', obj).done(function () {
+                                        form.render(null, 'layuiadmin-permission-user-form-list');
+
+                                        //监听提交按钮
+                                        form.on('submit(layuiadmin-permission-user-form-submit)', function (data) {
+                                            var field = data.field; //获取提交的字段
+                                            //提交修改
+                                            layui.admin.req({
+                                                url: layui.admin.getUrl('/api/system/user/edit?id=' + obj.data.id), //实际使用请改成服务端真实接口
+                                                data: field,
+                                                method: 'post',
+                                                dataType: 'json',
+                                                done: function (res) {
+                                                    if (res.code == 0) {
+                                                        loadTableData(); //重载表格
+                                                        layer.close(index); //执行关闭
+                                                    }
+                                                }
+                                            });
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        //监听启禁操作
+        form.on('switch(status)', function (obj) {
+            admin.req({
+                url: admin.getUrl('/api/system/user/change_status?id=' + this.value), //实际使用请改成服务端真实接口
+                data: {
+                    status: obj.elem.checked ? 1 : 0
+                },
+                method: 'post',
+                dataType: 'json',
+                done: function (res) {
+
+                }
+            });
+        });
+
+        //请求数据接口
+        var page = 1;
+        var pageSize = 10;
+        var filter = {};
+        var loadTableData = function () {
+            filter.page = page;
+            filter.page_size = pageSize;
+            admin.req({
+                url: admin.getUrl('/api/system/user'), //实际使用请改成服务端真实接口
+                data: filter,
+                method: 'get',
+                dataType: 'json',
+                done: function (res) {
+                    if (res.code == 0) {
+                        table = [];
+                        $.each(res.data.list, function (line, item) {
+                            //组别处理
+                            var groupStr = '';
+                            $.each(item.groups, function (index, group) {
+                                groupStr += (group.game_name + '-' + group.group_name + '|');
+                            });
+                            table[line] = {
+                                id: item.id,
+                                nick_name: item.nick_name || '',
+                                user_name: item.user_name || '',
+                                email: item.email || '',
+                                tel: item.tel || '',
+                                groups: groupStr.trim(),
+                                status: item.status
+                            };
+                        });
+
+                        tableOjb.reload('user_list', {
+                            data: table,
+                            limit: pageSize
+                        });
+
+                        layui.laypage.render({
+                            elem: 'user_list-paginate'
+                            , count: res.data.total //数据总数，从服务端得到
+                            , limit: pageSize
+                            , curr: page
+                            , limits: [10, 20, 30, 40, 50]
+                            , layout: ['prev', 'page', 'next', 'skip', 'count', 'limit']
+                            , prev: '<i class="layui-icon">&#xe603;</i>'
+                            , next: '<i class="layui-icon">&#xe602;</i>'
+                            , jump: function (obj, first) {
+                                //obj包含了当前分页的所有参数，比如：
+                                console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                                console.log(obj.limit); //得到每页显示的条数
+                                page = obj.curr;
+                                pageSize = obj.limit;
+
+                                if (!first) {
+                                    loadTableData();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        };
+
+
+        loadTableData();
+
+        $('.layui-btn.btn-add').on('click', function () {
+            admin.popup({
+                title: '新增用户信息'
+                , area: ['850px', '550px']
+                , id: 'LAY-popup-content'
+                , shadeClose: false
+                , success: function (layero, index) {
+                    layui.view(this.id).render('permission/user_edit', {event: 'add'}).done(function () {
+                        form.render(null, 'layuiadmin-permission-user-form-list');
+
+                        //监听提交按钮
+                        form.on('submit(layuiadmin-permission-user-form-submit)', function (data) {
+                            var field = data.field; //获取提交的字段
+                            //提交修改
+                            layui.admin.req({
+                                url: admin.getUrl('/api/system/user/add'), //实际使用请改成服务端真实接口
+                                data: field,
+                                method: 'post',
+                                dataType: 'json',
+                                done: function (res) {
+                                    if (res.code == 0) {
+                                        loadTableData(); //重载表格
+                                        layer.close(index); //执行关闭
+                                    }
+                                }
+                            });
+                        });
+                    });
+                }
+            });
+        });
+
+        $(function () {
+            var formSelects = layui.formSelects;
+
+            layui.admin.req({
+                url: layui.admin.getUrl('/api/system/common/group_list'),
+                data: {},
+                method: 'get',
+                dataType: 'json',
+                done: function (res) {
+                    if (res.code == 0) {
+                        var groupPermissions = res.data.list;
+                        //渲染游戏列表
+                        formSelects.render('group-ids', {direction: "190px"});
+                        for (i = 0; i < groupPermissions.length; i++) {
+                            var gameId = groupPermissions[i]['id'];
+                            var gameName = groupPermissions[i]['name'];
+                            $("#game-id").append("<option value='" + gameId + "'>" + gameName + "</option>");
+                        }
+                        $("#game-id").val(0);
+                        form.render();
+
+                        var loadGroups = function () {
+                            //游戏下拉框选择
+                            var selectedGame = $("#game-id").val() || 0;
+
+                            console.log(selectedGame);
+                            var list = [];
+                            for (i = 0; i < groupPermissions.length; i++) {
+                                var gameId = groupPermissions[i]['id'];
+                                if (gameId == selectedGame) {
+                                    for (j = 0; j < groupPermissions[i]['groups'].length; j++) {
+                                        var groupId = groupPermissions[i]['groups'][j]['id'];
+                                        var groupName = groupPermissions[i]['groups'][j]['name'];
+
+                                        list.push({
+                                            name: groupName, value: groupId
+                                        });
+                                    }
+                                }
+                            }
+                            console.log(list);
+
+                            formSelects.data('group-ids', 'local', {arr: list});
+                        };
+
+                        form.on('select(game-id)', function (data) {
+                            loadGroups();
+                        });
+                    }
+                }
+            });
+
+            //重置
+            $('#search-reset').click(function () {
+                $("#game-id").val(0);
+                form.render();
+                formSelects.data('group-ids', 'local', {arr: []});
+                $("#nick-name").val('');
+            });
+
+            //提交搜索
+            $('#search-commit').click(function () {
+                filter = {
+                    game_id: $("#game-id").val(),
+                    nick_name: $("#nick-name").val(),
+                    group_ids: formSelects.value('group-ids', 'val')
+                };
+                page = 1;
+
+                console.log(filter);
+                loadTableData();
+            });
+        });
+
+    });
+</script>

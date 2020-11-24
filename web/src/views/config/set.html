@@ -1,0 +1,121 @@
+
+<title>玩家信息查询</title>
+
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb">
+        <a lay-href="">游戏配置</a>
+        <a><cite>通用后台自定义配置</cite></a>
+    </div>
+</div>
+
+<div class="layui-fluid">
+
+    <div class="layui-card">
+        <div class="layui-card-header">数据配置</div>
+        <div class="layui-card-body">
+            <button type="button" class="layui-btn layui-btn-theme" id="add">添加配置</button>
+        </div>
+    </div>
+
+
+    <div class="layui-card">
+        <div class="layui-card-header">配置信息</div>
+        <div class="layui-card-body">
+            <blockquote class="layui-elem-quote" style="margin-top: 0">当前区服总创建角色数：<span id="allCount"></span></blockquote>
+            <table id="user_list"></table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    layui.use( ['table', 'admin', 'form', 'view'], function(){
+        let admin = layui.admin;
+        let table = layui.table;
+        let form = layui.form;
+        let view = layui.view;
+        let $ = layui.jquery;
+
+        // 玩家列表
+        table.render({
+            id: 'user_list',
+            elem: '#user_list',
+            url: admin.getUrl('/api/config/getConfigList'),
+            method: 'GET',
+            where: {
+
+            },//请求参数(额外)
+            request: {
+                pageName: 'page' //页码的参数名称，默认：page
+                ,limitName: 'limit' //每页数据量的参数名，默认：limit
+            },
+            response: { //定义后端 json 格式，详细参见官方文档
+                statusName: 'code', //状态字段名称
+                statusCode: '0', //状态字段成功值
+                msgName: 'msg', //消息字段
+                countName: 'countAll', //总页数字段
+                dataName: 'data', //数据字段
+            },
+            page: true,
+            loading: true,
+            cols: [[
+                {field:'id',  title: 'ID',align: 'center'},
+                {field:'game',  title: '游戏',align: 'center'},
+                {field:'name',  title: '配置名称',align: 'center'},
+                {field:'remarks',  title: '备注',align: 'center'},
+                {field:'type',  title: '类型',align: 'center'},
+                {field:'url',  title: 'url',align: 'center'},
+                {field:'',  title: '操作',align: 'center', templet: '#edit'},
+            ]],
+            done: function (res) {
+
+            }
+        });
+
+        // 测试url请求
+        admin.req({
+            url: admin.getUrl('/api/player/test'),
+            data: {
+
+            },
+            type: 'post',
+            done: function (data) {
+
+            }
+        });
+
+
+        $('#add').click(function () {
+            admin.popup({
+                title: '添加模块配置'
+                ,area: ['550px', '550px']
+                ,id: 'content-alert'
+                ,btn: ['确定', '取消']
+                ,success: function(layero, index){
+                    view(this.id).render('config/popup/setInfo').done(function(){
+                        form.render();
+                    });
+                }
+                ,yes: function(index, layero){
+                    alert($('#work_hours').val());
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                    alert(1)
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                },
+            });
+        })
+
+
+
+
+    });
+</script>
+<script type="text/html" id="edit">
+    <button type="button" class="layui-btn layui-btn-warm layui-btn-sm edit" data-type=@{{  d.id }}>修改</button>
+    <button type="button" class="layui-btn layui-btn-danger layui-btn-sm del" data-type=@{{  d.id }}>删除</button>
+</script>
+

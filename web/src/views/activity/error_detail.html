@@ -1,0 +1,45 @@
+<title>失败详情</title>
+
+<div class="layui-fluid">
+
+    <div class="layui-card tabs  layui-show" id="list_error-detail" style="display: none;">
+        <div class="layui-card-body">
+            <table class="layui-hide" id="table_error-detail"></table>
+            <script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+          </script>
+        </div>
+    </div>
+
+</div>
+<script type="text/html" id="detail_op">
+    <a id="re-operation" class="layui-btn  layui-btn-xs"
+       data-obj='{"event": "reOperation",  "tableId": "table_error-detail", "index":"{{ d.LAY_TABLE_INDEX }}"}'>重新推送</a>
+</script>
+<script>
+    var $ =layui.jquery;
+    var table =layui.table;
+    // 渲染表格
+    $(function () {
+        layui.data.sendParams = function (params) {
+            table.render({
+                id: 'table_error-detail',
+                elem: '#' + 'table_error-detail',
+                limit: Number.MAX_VALUE, // 数据表格默认全部显示-->
+                data: params,
+                title: '用户表',
+                cols: [[ //表头
+                    {field: 'server_name', title: '区服', align: 'center', unresize: true}
+                    , {field: 'activity_type', title: '活动类型', align: 'center', unresize: true}
+                    , {field: 'activity_title', title: '活动名称', align: 'center', unresize: true}
+                    , {field: 'operate_type', title: '操作类型', align: 'center', unresize: true}
+                    , {field: 'state', title: '操作状态', align: 'center', unresize: true,style: "color: red;"}
+                    , {field: 'error_msg', title: '失败原因', align: 'center', unresize: true,style: "color: red;"}
+                    , {field: 'op', title: '操作', align: 'center', unresize: true, templet: '#detail_op'}
+                ]
+                ]
+            });
+        }
+    });
+
+</script>

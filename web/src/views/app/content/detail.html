@@ -1,0 +1,93 @@
+<style>
+    #email_audit_dialog {
+        padding: 20px;
+    }
+    .layui-input-block span {
+        display: block;
+        line-height: 38px;
+        height: auto;
+        overflow: hidden;
+    }
+</style>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    var $ = layui.$;
+    $(function () {
+        layui.data.sendParams = function (params){
+            console.log(params);
+            if(params.type == 'login'){
+                $("#server_id").hide();//隐藏div
+                $("#no").hide();//隐藏div
+                $("#jump_url").hide();//隐藏div
+            }
+            if (params.jump_url == '')  $("#jump_url").hide();//隐藏div
+            $("span[name=title]").html(params.title);
+            $("textarea[name=content]").html(params.content);
+            $("span[name=op_user_id]").html(params.op_user);
+            $("span[name=update_time]").html(params.update_time);
+            $("span[name=start_time]").html(params.start_time);
+            $("span[name=end_time]").html(params.end_time);
+
+            $("span[name=server_id]").html(params.server_id);
+            $("span[name=no]").html(params.no);
+            $("span[name=jump_url]").html(params.jump_url);
+        }
+    })
+</script>
+<form class="layui-form" action="">
+    <div class="layui-form-item" id="server_id">
+        <label class="layui-form-label">区服：</label>
+        <div class="layui-input-block">
+            <span name="server_id"></span>
+        </div>
+    </div>
+    <div class="layui-form-item" id="no">
+        <label class="layui-form-label">排序序号：</label>
+        <div class="layui-input-block">
+            <span name="no"></span>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">公告标题：</label>
+        <div class="layui-input-block">
+            <span name="title"></span>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">公告内容：</label>
+        <div class="layui-input-block">
+            <textarea name="content" class="layui-textarea" style="height: 200px" disabled></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item" id="jump_url">
+        <label class="layui-form-label">跳转链接：</label>
+        <div class="layui-input-block">
+            <span name="jump_url"></span>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">操作人：</label>
+        <div class="layui-input-block">
+            <span name="op_user_id"></span>
+        </div>
+    </div>    <div class="layui-form-item">
+    <label class="layui-form-label">操作时间：</label>
+    <div class="layui-input-block">
+        <span name="update_time"></span>
+    </div>
+</div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">开始时间：</label>
+        <div class="layui-input-block">
+            <span name="start_time"></span>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">结束时间：</label>
+        <div class="layui-input-block">
+            <span name="end_time"></span>
+        </div>
+    </div>
+</form>

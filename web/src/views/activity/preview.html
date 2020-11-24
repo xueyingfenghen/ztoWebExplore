@@ -1,0 +1,104 @@
+
+<div class="layui-card">
+    <div class="layui-card-body area_body">
+        <label class="layui-form-label">区服：</label>
+        <div class="layui-input-block" style="width: 92%">
+            <input type="text" name="area" lay-verify="area" autocomplete="off" placeholder="请选择区服" class="layui-input" readonly>
+        </div>
+    </div>
+</div>
+<table class="layui-hide" id="preview" lay-filter="test"></table>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    var $ = layui.jquery;
+    var admin = layui.admin;
+    //定义表头
+    var cols = [ //表头
+            {
+                width: 50,
+                event: 'collapse',
+                templet: function(d) {
+                    return '&nbsp<i lay-tips="展开" class="layui-icon layui-colla-icon layui-icon-addition"></i>'
+                }
+            }
+            ,{field: 'activity_type', title: '活动类型',align:'center',unresize:true}
+            ,{field: 'activity_title', title: '活动名称',align:'center',unresize:true}
+            ,{field: 'logo_start_time', title: '图标出现时间',align:'center',unresize:true,hide:false}
+            ,{field: 'logo_end_time', title: '图标结束时间',align:'center',unresize:true,hide:false}
+            ,{field: 'start_time', title: '活动开始时间',align:'center',unresize:true,hide:false}
+            ,{field: 'end_time', title: '活动结束时间',align:'center',unresize:true,hide:false}
+    ];
+    layui.data.sendParams = function (params) {
+        layui.use('table',
+            function() {
+                var table = layui.table //表格
+                //执行一个 table 实例
+                table.render({
+                    id:"preview",
+                    elem: '#preview',
+                    limit: Number.MAX_VALUE, // 数据表格默认全部显示-->
+                    data:params.data,
+                    title: '用户表',
+                    cols: [cols]
+                });
+
+                //选择区服  填充数据
+                $("input[name=area]").val(params.server_id);
+                //如果是开区活动  隐藏一些字段
+                if(params.open_server){
+                    cols[3].hide = true;
+                    cols[4].hide = true;
+                    $(".area_body").hide();
+                    table.reload('preview');
+                }
+                //监听工具条
+                table.on('tool(test)',
+                    function(obj) {
+                        var data = obj.data;
+                        console.log(666,obj);
+                        var column_name = data.column_name;//cols
+                        var cols = [];
+                        $.each(column_name,function (en,cn) {
+                            cols.push(
+                                {
+                                    field: en,
+                                    title: cn,
+                                    align:'center',
+                                    unresize:true
+                                }
+                            );
+                        })
+                        if (obj.event === 'collapse') {
+                            var trObj = layui.$(this).parent('tr'); //当前行
+                            var accordion = true //开启手风琴，那么在进行折叠操作时，始终只会展现当前展开的表格。
+                            var content = '<table></table>' //内容
+                            //表格行折叠方法
+                            admin.collapseTable({
+                                elem: trObj,
+                                accordion: accordion,
+                                content: content,
+                                success: function(trObjChildren, index) { //成功回调函数
+                                    //trObjChildren 展开tr层DOM
+                                    //index 当前层索引
+                                    trObjChildren.find('table').attr("id", index);
+                                    table.render({
+                                        elem: "#" + index,
+                                        //url: '/demo/table/user',
+                                        limit: Number.MAX_VALUE, // 数据表格默认全部显示-->
+                                        data:data.activity_config,
+                                        cols: [cols]
+                                    });
+                                }
+                            });
+
+                        }
+                    });
+
+
+            });
+    }
+
+</script>
+

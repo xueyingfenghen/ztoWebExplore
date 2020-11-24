@@ -1,0 +1,116 @@
+<div class="layui-form layui-form-pane email_form" lay-filter="layuiadmin-app-form-list"
+     id="email_add_dialog">
+    <input type="hidden" name="id" value="{{ d.params.id || '' }}">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">模板名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="template_name" value="" placeholder="请输入模板名称" autocomplete="off"
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item audit">
+        <label class="layui-form-label">邮件类型</label>
+        <div class="layui-input-inline">
+            <select name="email_type">
+                <option value="">请选择邮件类型</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">邮件标题</label>
+        <div class="layui-input-block">
+            <input type="text" name="email_title" value="" placeholder="请输入邮件标题" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label"><span style="padding-left: 10px;">邮件内容</span></label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入邮件内容" class="layui-textarea" name="email_content"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item" pane="">
+        <label class="layui-form-label">编辑</label>
+        <div class="layui-input-block" id="enable_edit">
+            <input type="radio" name="enable_edit" value="1" title="是" checked="">
+            <div class="layui-unselect layui-form-radio layui-form-radioed"><i class="layui-anim layui-icon"></i>
+                <div>是</div>
+            </div>
+            <input type="radio" name="enable_edit" value="0" title="否">
+            <div class="layui-unselect layui-form-radio"><i class="layui-anim layui-icon"></i>
+                <div>否</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/html" template>
+        <input type="hidden" name="id" value="{{ d.params.id || '' }}">
+    </script>
+    <div class="layui-form-item audit">
+        <label class="layui-form-label">审核人</label>
+        <div class="layui-input-inline">
+            <select name="auditor">
+                <option value="">请选择审核人</option>
+            </select>
+        </div>
+    </div>
+    <script type="text/html" template>
+        {{#  if(d.params.event != 'detail'){ }}
+        <div class="layui-form-item">
+            <button type="button" lay-submit lay-filter="layuiadmin-app-form-submit" class="layui-btn layui-btn-theme">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" onclick="layer.closeAll();">取消</button>
+            <button type="button" class="layui-btn layui-btn-normal" id="look_email_to">效果预览</button>
+        </div>
+        {{#  } }}
+    </script>
+    <div id="show_gm_content">
+
+    </div>
+</div>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    let admin = layui.admin;
+    var $ = layui.jquery;
+
+    // 渲染表单数据
+
+    $(function () {
+        layui.data.sendParams = function (params) {
+            $.initData = function () {
+                return new Promise(function (resolve, reject) {
+                    layui.admin.req({
+                        url: admin.getUrl('/api/email_template/initAddEmailData'),
+                        data: {},
+                        type: 'get',
+                        done: function (data) {
+                            admin.initSelect(data.data['auditor'], "select[name='auditor']", '请选择审核人');
+                            admin.initSelect(data.data['type'], "select[name='email_type']", '请选择邮件类型');
+                            layui.form.render();
+                            resolve();
+                        }
+                    });
+                });
+            }
+            $.initData().then(function () {
+                if (params.event === 'edit') {
+                    // 单独渲染道具添加列表
+                    let options = {jsonValue: JSON.stringify(params), isDebug: false};
+                    $('.email_form').initForm(options);
+                    layui.form.render();
+                }
+            });
+
+        }
+        $(document).off('click', '#look_email_to').on('click', '#look_email_to', function () {
+            layui.view('show_gm_content').render('email/email_show/email_show_shengong', {
+                propData: []
+            }).done(function () {
+            });
+        });
+
+    })
+</script>
+
+

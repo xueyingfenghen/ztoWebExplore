@@ -1,0 +1,161 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+
+                <div class="layui-tab-item" id="search_gift-list" style="display: none;">
+                    <form class="layui-form layui-form-pane form_gift-list">
+                        <div class="layui-form-item" id="template_gift-list_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_gift-list","tableId": "table_gift-list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_gift-list","tableId": "table_gift-list"}'>
+                                重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="layui-tab-item" id="search_gift-audit" style="display: none;">
+                    <form class="layui-form layui-form-pane form_gift-audit">
+                        <div class="layui-form-item" id="template_gift-audit_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_gift-audit","tableId": "table_gift-audit"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_gift-audit","tableId": "table_gift-audit"}'>
+                                重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="layui-tab-item" id="search_email-list" style="display: none;">
+                    <form class="layui-form layui-form-pane form_email-list">
+                        <div class="layui-form-item" id="template_email-list_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_email-list","tableId": "table_email-list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_email-list","tableId": "table_email-list"}'>
+                                重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="layui-tab-item" id="search_email-audit" style="display: none;">
+                    <form class="layui-form layui-form-pane form_email-audit">
+                        <div class="layui-form-item" id="template_email-audit_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_email-audit","tableId": "table_email-audit"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_email-audit","tableId": "table_email-audit"}'>
+                                重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-card tabs" id="list_gift-list" style="display: none;">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme btn-add" style="margin-bottom: 10px;"
+                data-obj='{"event": "add","type":"gift", "tableId": "table_gift-list"}'>新增礼包模板
+        </button>
+        <table id="table_gift-list">
+        </table>
+    </div>
+</div>
+<div class="layui-card tabs" id="list_gift-audit" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_gift-audit">
+        </table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_email-list" style="display: none;">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme btn-add" style="margin-bottom: 10px;"
+                data-obj='{"event": "add","type":"email", "tableId": "table_email-list"}'>新增邮件模板
+        </button>
+        <table id="table_email-list">
+        </table>
+    </div>
+</div>
+<div class="layui-card tabs" id="list_email-audit" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_email-audit">
+        </table>
+    </div>
+</div>
+
+
+<script>
+    layui.use('template_manage/list', layui.factory('template_manage/list'));
+</script>
+
+<script type="text/html" id="op">
+    {{#  if(d.state===0){ }}
+    -
+    {{#  } else { }}
+    {{#  if(d.state===1){ }}
+    <a class="layui-btn layui-btn-warm layui-btn-xs"
+       data-obj='{"event": "edit", "tableId": "table_{{ d.type }}-list", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"修改邮件模板"}'>修改</a>
+    <a class="layui-btn layui-btn-theme layui-btn-xs"
+       data-obj='{"event": "audit_log", "tableId": "table_{{ d.type }}-list", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"审核记录"}'>审核记录</a>
+
+    {{#  } else { }}
+    <a class="layui-btn layui-btn-theme layui-btn-xs"
+       data-obj='{"event": "audit_log", "tableId": "table_{{ d.type }}-list", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"审核记录"}'>审核记录</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs"
+       data-obj='{"event": "del", "tableId": "table_{{ d.type }}-list", "index":"{{ d.LAY_TABLE_INDEX }}"}'>删除</a>
+
+    {{#  } }}
+    {{#  } }}
+</script>
+
+<script type="text/html" id="check">
+
+    <a class="layui-btn layui-btn-theme layui-btn-xs"
+       data-obj='{"event": "audit","type":"{{ d.type }}", "tableId": "table_{{ d.type }}-audit", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"审核"}'>审核</a>
+
+</script>
+
+<script type="text/html" id="state_desc">
+    {{#  if(d.state===0){ }}
+    <div class="layui-table-cell " style="color: deepskyblue;">{{ d.state_desc }}</div>
+    {{#  } else { }}
+    {{#  if(d.state===2){ }}
+    <div class="layui-table-cell ">{{ d.state_desc }}</div>
+    {{#  } else { }}
+    <div class="layui-table-cell " style="color: red;">{{ d.state_desc }}</div>
+    {{#  } }}
+    {{#  } }}
+</script>
+

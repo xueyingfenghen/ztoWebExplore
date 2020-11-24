@@ -1,0 +1,141 @@
+<form class="layui-form" lay-filter="user-form">
+    <div class="layui-form" lay-filter="layuiadmin-group-form-list" id="layuiadmin-group-form-list"
+         style="padding: 20px 30px 0 0;">
+
+        <div class="layui-form-item ">
+            <label class="layui-form-label">上级组别</label>
+            <div class="layui-input-inline" id="pid-drop" style="width: 300px;">
+                <select name="pid" xm-select="pid-drop" xm-select-radio="" lay-verify="required">
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">组别名称</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="name" value="" lay-verify="required|name"
+                           placeholder="请输入组别名称" lay-filter="name-edit" id="name-edit"
+                           autocomplete="off" class="layui-input" style="width: 300px;">
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <textarea name="remark" lay-verify="remark" lay-filter="remark-edit"
+                              style="width: 400px; height: 100px;" autocomplete="off" class="layui-textarea">
+                    </textarea>
+                </script>
+            </div>
+        </div>
+
+        <script type="text/html" template>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-inline">
+                    <input type="button" lay-submit lay-filter="layuiadmin-group-form-submit" value="提交" id="commit"
+                           class="layui-btn layui-btn-theme">
+                </div>
+            </div>
+        </script>
+    </div>
+</form>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+
+<script>
+    var $ = layui.jquery;
+    $(function () {
+        layui.data.sendParams = function (params) {
+            //数组转树形结构
+            var array2tree = function (array, pid, selectId, disable) {
+                var result = [];
+                $.each(array, function (i, item) {
+                    if (item.pid == pid) {
+                        item.selected = (selectId == item.id);
+                        item.disabled = disable;
+                        if (disable === undefined || disable === false) {
+                            item.disabled = (item.id == params.data.id);
+                        }
+
+                        item.value = item.id;
+                        item.children = array2tree(array, item.id, selectId, item.disabled);
+
+                        //无子节点，删除children
+                        if (item.children.length <= 0) {
+                            delete item.children;
+                        }
+                        result.push(item);
+                    }
+                });
+                return result;
+            };
+
+            var renderPidDrop = function (pid) {
+                //树形组别建立
+                var parentMap = {};
+                for (j = 0; j < params.drops.length; j++) {
+                    parentMap[params.drops[j]['id']] = params.drops[j]['pid'];
+                }
+
+                var rootId = 0;
+                $.each(parentMap, function (id, pid) {
+                    if (typeof parentMap[pid] === 'undefined') {
+                        rootId = pid;
+                    }
+                });
+
+                //渲染下菜单
+                var treeMap = array2tree(params.drops, rootId, pid);
+                layui.use(['formSelects'], function () {
+                    layui.formSelects.data('pid-drop', 'local', {
+                        arr: treeMap
+                    });
+
+                    var selected = [];
+                    selected.push(pid);
+                    layui.formSelects.value('pid-drop', selected);
+                });
+            };
+
+            if (params.event == 'edit') {
+                layui.admin.req({
+                    url: layui.admin.getUrl('/api/system/group/get'), //实际使用请改成服务端真实接口
+                    data: {
+                        group_id: params.data.id
+                    },
+                    method: 'get',
+                    dataType: 'json',
+                    done: function (res) {
+                        if (res.code == 0) {
+                            $('input[name="name"]').val(res.data.info.name);
+                            $('textarea[name="remark"]').html(res.data.info.remark);
+                            renderPidDrop(res.data.info.pid);
+                        }
+                    }
+                });
+            } else {
+                renderPidDrop(0);
+            }
+        };
+
+        //表单验证
+        layui.form.verify({
+            name: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (value.length > 35) {
+                    return '组别不能超过35字';
+                }
+            },
+            remark: function (value, item) {
+                if (value.length > 150) {
+                    return '备注限150字!!';
+                }
+            }
+        });
+    });
+</script>

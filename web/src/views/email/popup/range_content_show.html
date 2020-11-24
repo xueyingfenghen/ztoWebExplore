@@ -1,0 +1,90 @@
+<div class="layui-form-item">
+    <label class="layui-form-label label_tips fsdx">指定渠道：</label>
+    <div class="layui-input-block">
+        <textarea name="channel" autoHeight="true" class="layui-textarea" readonly></textarea>
+    </div>
+</div>
+
+<div class="layui-form-item">
+    <label class="layui-form-label label_tips fsdx">VIP等级：</label>
+    <div class="layui-input-block">
+        <textarea name="vip" autoHeight="true" class="layui-textarea" readonly></textarea>
+    </div>
+</div>
+
+<div class="layui-form-item">
+    <label class="layui-form-label label_tips fsdx">指定门派：</label>
+    <div class="layui-input-block">
+        <textarea name="school" autoHeight="true" class="layui-textarea" readonly></textarea>
+    </div>
+</div>
+
+<div class="layui-form-item">
+    <label class="layui-form-label label_tips fsdx">侠客品阶：</label>
+    <div class="layui-input-block">
+        <textarea name="xiake" autoHeight="true" class="layui-textarea" readonly></textarea>
+    </div>
+</div>
+
+<div class="layui-form-item">
+    <label class="layui-form-label">创角时间：</label>
+    <div class="layui-input-block">
+        <span name="create_time"></span>
+    </div>
+</div>
+
+<div class="layui-form-item" style="margin-bottom: 0;">
+    <label class="layui-form-label">指定帮会：</label>
+<!--    <div class="layui-input-block">-->
+<!--        &lt;!&ndash;    审核记录table   &ndash;&gt;-->
+<!--        <table id="league_content"></table>-->
+<!--    </div>-->
+</div>
+<div style="padding-left: 28px;">
+    <table id="league_content"></table>
+</div>
+
+<script type="text/html" template lay-done="layui.data.done(d)">
+
+</script>
+<script>
+
+    layui.data.done = function (d) {
+
+        let editId = d.params.editId;
+        let showData = d.params.showData;
+
+        console.log(showData);
+        layui.use( ['table', 'admin', 'form', 'element', 'common'], function(){
+            let admin = layui.admin;
+            let table = layui.table;
+            let form = layui.form;
+            let element = layui.element;
+            let $ = layui.jquery;
+
+            $("#range_content_show textarea[name='vip']").val(showData['range_content_show']['vip']);
+            $("#range_content_show textarea[name='xiake']").val(showData['range_content_show']['xiake']);
+            $("#range_content_show textarea[name='school']").val(showData['range_content_show']['school']);
+            $("#range_content_show textarea[name='channel']").val(showData['range_content_show']['channel']);
+            $("#range_content_show span[name='create_time']").html(showData['range_content_show']['create_time']);
+
+            table.render({
+                id: 'league_content',
+                elem: '#league_content',
+                page: false,
+                loading: true,
+                cols: [[
+                    {field:'server_id', title: '区服', align: 'center'},
+                    {field:'league_id', title: '帮会编号', align: 'center'},
+                    {field:'league_name', title: '帮会名称', align: 'center'},
+                ]],
+                limit: 1000,
+                data: showData['range_content_show']['league_content']
+            });
+
+        });
+
+    };
+
+</script>
+

@@ -1,0 +1,253 @@
+<style>
+    #replenish_person_add_dialog {
+        padding: 20px;
+    }
+    .green {
+        color: green;
+    }
+    .red {
+        color: red;
+    }
+    .layui-input-block {
+        width: 190px;
+    }
+</style>
+<!--解禁/一键解禁-->
+<form class="layui-form layui-form-pane mass_pay_dialog" id="mass_pay_dialog">
+
+    <!-- layui文件上传 -->
+    <div class="layui-upload import_excel" style="margin-bottom: 20px;" style="display: none">
+        <button type="button" class="layui-btn layui-btn-normal" id="testList">选择文件</button>
+        <div class="layui-upload-list">
+            <table class="layui-table">
+                <thead>
+                <tr><th>文件名</th>
+                    <th>大小</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr></thead>
+                <tbody id="demoList"></tbody>
+            </table>
+        </div>
+        <div>
+            <button type="button" class="layui-btn layui-btn-theme" id="testListAction">上传</button>
+            <button type="button" class="layui-btn" id="export">导出</button>
+            <span class="import_excel_check_type red">未校验</span>
+        </div>
+    </div>
+
+    <!-- 充值理由 -->
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">充值理由</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <select name="replenish_reason" lay-filter="mass_pay_reason">
+                    <option value="">请选择充值理由</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline rename_reason_other" style="display: none">
+            <label class="layui-form-label">其他</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="text" name="replenish_reason_other" class="layui-input" placeholder="请输入充值理由">
+            </div>
+        </div>
+    </div>
+
+    <!-- 密码 -->
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="password" name="pwd" class="layui-input" placeholder="请输入密码" autocomplete="new-password">
+            </div>
+        </div>
+    </div>
+
+    <!-- 组合按钮 -->
+    <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-theme" id="send_mass_pay">确定</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="channel_mass_pay">取消</button>
+    </div>
+
+</form>
+<script>
+    layui.use(['table', 'admin', 'form', 'upload'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let admin = layui.admin;
+        let upload = layui.upload;
+        let $ = layui.jquery;
+
+        let excel_path = '';    // 上传的excel名字
+        let original_path = ''; // 上传的真实excel名字
+        let check_type = false; // excel的校验状态 true 校验成功 false 校验失败
+
+        voucher = '';
+
+        form.render();
+
+        admin.req({
+            url: admin.getUrl('/api/public/getReason'),
+            data: {
+                dict_name: 'InteriorPayMassReason'
+            },
+            type: 'get',
+            done: function (data) {
+                admin.initSelect(data.data, "#mass_pay_dialog select[name='replenish_reason']", '请选择充值理由');
+                form.render();
+            }
+        });
+
+        // 修改理由切换
+        form.on('select(mass_pay_reason)', function (data) {
+            if (data.value === '0') {
+                $('#mass_pay_dialog .rename_reason_other').show();
+            } else {
+                $('#mass_pay_dialog .rename_reason_other').hide();
+            }
+        });
+
+        // 设置文件上传token
+        let header = layui.setter.header;
+        let headers = {};
+        if (header.tokenName) {
+            headers[header.tokenName] = layui.data(layui.setter.tableName)[header.tokenName] || '';
+        }
+        
+        // 文件上传
+        var demoListView = $('#demoList')
+            ,uploadListIns = upload.render({
+            elem: '#testList'
+            ,url: admin.getUrl('/api/upload/uploadPayMass')
+            ,accept: 'file'
+            ,multiple: false
+            ,auto: false
+            ,bindAction: '#testListAction'
+            ,exts: 'xlsx'
+            ,headers:headers
+            ,choose: function(obj){
+                //读取本地文件
+                obj.preview(function(index, file, result){
+                    var tr = $(['<tr id="upload-'+ index +'">'
+                        ,'<td>'+ file.name +'</td>'
+                        ,'<td>'+ (file.size/1024).toFixed(1) +'kb</td>'
+                        ,'<td>等待上传</td>'
+                        ,'<td>'
+                        ,'<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
+                        ,'<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
+                        ,'</td>'
+                        ,'</tr>'].join(''));
+
+                    //单个重传
+                    tr.find('.demo-reload').on('click', function(){
+                        obj.upload(index, file);
+                    });
+                    //删除
+                    tr.find('.demo-delete').on('click', function(){
+                        delete files[index]; //删除对应的文件
+                        tr.remove();
+                        uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+                    });
+                    demoListView.html(tr);
+                });
+            }
+            ,done: function(res, index, upload){
+                if(res.code == 0){ //上传成功
+
+                    if (res.data['type'] == 0) {
+                        // 解析成功
+                        check_type = true;
+                        excel_path = res.data['file'];
+                        original_path = res.data['original'];
+                        $('.import_excel_check_type').removeClass('red');
+                        $('.import_excel_check_type').addClass('green');
+                        $('.import_excel_check_type').html('校验成功')
+                    } else {
+                        // 解析失败
+                        check_type = false;
+                        excel_path = res.data['file'];
+                        original_path = res.data['original'];
+                        $('.import_excel_check_type').removeClass('green');
+                        $('.import_excel_check_type').addClass('red');
+                        $('.import_excel_check_type').html('校验失败');
+                    }
+
+                    var tr = demoListView.find('tr#upload-'+ index)
+                        ,tds = tr.children();
+                    // 超过上传数量限制
+                    if (res.data['type'] == 2) {
+                        tds.eq(2).html("<span style='color: #FF5722;'>" + res.msg + "</span>");
+                    } else {
+                        tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+                    }
+                    tds.eq(3).html(''); //清空操作
+                    delete this.files[index]; //删除文件队列已经上传成功的文件
+
+                } else {
+                    layer.msg(res.msg, {icon: 5, anim: 6});
+                    var tr = demoListView.find('tr#upload-'+ index)
+                        ,tds = tr.children();
+                    tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+                    tds.eq(3).html(''); //清空操作
+                }
+            }
+            ,error: function(index, upload){
+                var tr = demoListView.find('tr#upload-'+ index)
+                    ,tds = tr.children();
+                tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+                tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
+            }
+        });
+
+        // 执行批量内部充值操作
+        $(document).off('click', '#send_mass_pay').on('click', '#send_mass_pay', function () {
+
+            if (!check_type) {
+                layer.msg('Excel未上传或校验失败', { icon: 5, anim: 6 });
+                return;
+            }
+
+            let param = admin.getFormParam('.mass_pay_dialog');
+            param.excel_path = excel_path;
+            param.original_path = original_path;
+            admin.req({
+                url: admin.getUrl('/api/player/interiorPayMass'),
+                data: param,
+                type: 'post',
+                done: function (data) {
+                    if (data.code == 400) {
+                        layer.msg(data.msg, { icon: 5, anim: 6 });
+                    }
+                    if (data.code == 0) {
+                        layer.closeAll();
+                        voucher = data.data['voucher']; // 本次的操作凭证
+                        // 查看补单失败详情
+                        $.getReplenishState(voucher);
+                    }
+                }
+            });
+        })
+
+
+        $(document).off('click', '#channel_mass_pay').on('click', '#channel_mass_pay', function () {
+            layer.close(index);
+        })
+
+        // excel导出
+        $('#mass_pay_dialog #export').click(function () {
+            admin.download({
+            url: admin.getUrl('/api/pay/massExcelResultExport'),
+            data: {
+                param: {
+                    excel_path: excel_path
+                },
+                title: '校验结果'
+            },
+            method: 'post',
+            dataType: 'json',
+        });
+        })
+
+    })
+</script>

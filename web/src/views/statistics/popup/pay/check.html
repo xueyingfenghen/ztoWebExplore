@@ -1,0 +1,42 @@
+<table class="layui-hide" id="pop_pay-rank_check"></table>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    var $ = layui.jquery;
+    var admin = layui.admin;
+    layui.data.sendParams = function (params) {
+        params.show_detail = 1;
+        params.ranking_type = 3;
+        admin.getCols('statistics_pay-rank_table_check').then(function (data) {
+            layui.use('table',
+                function () {
+                    var table = layui.table //表格
+                    //执行一个 table 实例
+                    table.render({
+                        id: "pop_pay-rank_check",
+                        elem: '#pop_pay-rank_check',
+                        request: {
+                            pageName: 'page' //页码的参数名称，默认：page
+                            , limitName: 'page_size' //每页数据量的参数名，默认：limit
+                        },
+                        url: admin.getUrl('/api/recharge/ranking'),
+                        method: 'GET',
+                        where: params,//请求参数(额外)
+                        parseData: function (res) { //res 即为原始返回的数据
+                            return {
+                                "code": res.code, //解析接口状态
+                                "msg": res.msg, //解析提示文本
+                                "data": res.data.list, //解析数据列表
+                                "count":res.data.total,
+                            };
+                        },
+                        page: true,
+                        loading: true,
+                        cols: data.data,
+                    });
+                });
+        })
+    }
+
+</script>

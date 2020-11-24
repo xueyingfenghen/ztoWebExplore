@@ -1,0 +1,520 @@
+<style>
+    .email_form .layui-input-block {
+        width: 190px;
+    }
+
+    .layui-table-cell {
+        height: inherit;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+                <!--全服邮件-->
+                <div class="layui-tab-item email_gm email_gm_full" id="search_gm-full" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form email_gm_full_form">
+                        <div class="layui-form-item" id="email_gm_full_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_email">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset_email">重置</button>
+                        </div>
+                    </form>
+                </div>
+                <!--玩家邮件-->
+                <div class="layui-tab-item" id="search_gm-player" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form email_player_send_form">
+                        <div class="layui-form-item" id="email_player_send_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_player_send">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset_player_send">重置</button>
+                        </div>
+                    </form>
+                </div>
+                <!--范围邮件-->
+                <div class="layui-tab-item" id="search_gm-range" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form email_range_send_form">
+                        <div class="layui-form-item" id="email_range_send_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_range_send">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset_range_send">重置</button>
+                        </div>
+                    </form>
+                </div>
+                <!--群发邮件-->
+                <div class="layui-tab-item" id="search_gm-mass" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form email_mass_send_form">
+                        <div class="layui-form-item" id="email_mass_send_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_mass_send">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset_mass_send">重置</button>
+                        </div>
+                    </form>
+                </div>
+                <!--渠道邮件-->
+                <div class="layui-tab-item" id="search_gm-channel" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form email_channel_send_form">
+                        <div class="layui-form-item" id="email_channel_send_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_channel_send">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset_channel_send">重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!--邮件审核-->
+                <div class="layui-tab-item email_gm email_audit" id="search_gm-audit" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form email_audit_form">
+                        <div class="layui-form-item" id="email_audit_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="audit_search_bth">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="audit_reset_bth">重置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" style="display: none;" id="list_gm-full">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme insert_email" style="margin-bottom: 10px;" data-type="1">
+            新增邮件
+        </button>
+        <table id="email_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" style="display: none;" id="list_gm-player">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme insert_email" style="margin-bottom: 10px;" data-type="2">新增邮件</button>
+        <table id="player_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" style="display: none;" id="list_gm-range">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme insert_email" style="margin-bottom: 10px;" data-type="3">
+            新增邮件
+        </button>
+        <table id="range_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" style="display: none;" id="list_gm-mass">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme insert_email" style="margin-bottom: 10px;" data-type="4">
+            新增邮件
+        </button>
+        <table id="mass_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" style="display: none;" id="list_gm-channel">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme insert_email" style="margin-bottom: 10px;" data-type="5">
+            新增邮件
+        </button>
+        <table id="channel_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" style="display: none;" id="list_gm-audit">
+    <div class="layui-card-body">
+        <table id="audit_list"></table>
+    </div>
+</div>
+
+<script>
+
+  var jsArr = {
+    'gm-full': 'email/email_all_server',    // 全服邮件
+    'gm-player': 'email/email_player_send', // 玩家邮件
+    'gm-mass': 'email/email_mass_send',     // 群发邮件
+    'gm-audit': 'email/email_audit',        // gm邮件审核
+
+    'gm-range': 'email/email_range_send', // 范围邮件
+    'gm-channel': 'email/email_channel_send', // 渠道邮件
+  };
+  layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+  elementTabs(jsArr);
+
+  var email_type = {1: '全服邮件', 2: '玩家邮件', 3: '范围邮件', 4: '群发邮件', 5: '渠道邮件'};
+  var show_state = {0: '待审核', 1: '被驳回', 2: '已拒绝', 3: '未推送', 4: '推送成功', 5: '推送失败'};
+
+  var reloadArr = [];
+  // 全服邮件
+  reloadArr[1] = {
+    'sel': '.email_gm_full_form',
+    'tableId': 'email_list'
+  };
+  // 玩家邮件
+  reloadArr[2] = {
+    'sel': '.email_player_send_form',
+    'tableId': 'player_list'
+  };
+  // 范围邮件
+  reloadArr[3] = {
+    'sel': '.email_range_send_form',
+    'tableId': 'range_list'
+  };
+  // 群发邮件
+  reloadArr[4] = {
+    'sel': '.email_search_mass_send_form',
+    'tableId': 'mass_list'
+  };
+  // 渠道邮件
+  reloadArr[5] = {
+    'sel': '.email_channel_send_form',
+    'tableId': 'channel_list'
+  };
+
+  initForm = function (name, sel) {
+    return new Promise(function (resolve, reject) {
+      layui.admin.req({
+        url: layui.admin.getUrl('/api/base/getFormList'),
+        data: {
+          name: name,
+        },
+        type: 'post',
+        done: function (data) {
+          layui.jquery(sel).html(data.data['form']);
+          // 渲染表单
+          layui.form.render();
+          resolve();
+        }
+      });
+    });
+  };
+  layui.use(['table', 'admin', 'form', 'view', 'laydate', 'element', 'common'], function () {
+    let admin = layui.admin;
+    let table = layui.table;
+    let form = layui.form;
+    let view = layui.view;
+    let laydate = layui.laydate;
+    let element = layui.element;
+    let $ = layui.jquery;
+
+
+    // 监听选项卡切换事件
+    // element.on('tab(docDemoTabBrief)', function (data) {
+    //     for (let i = 0; i < $('.tabs').length; i ++) {
+    //         $('.tabs').eq(i).removeClass("layui-show");
+    //     }
+    //     $('.tabs').eq(data.index).addClass("layui-show");
+    //     // 切换时候重载表格
+    //     switch (data.index) {
+    //         // case 0: {
+    //         //     admin.reload('.email_gm_full_form', 'email_list');
+    //         //     break;
+    //         // }
+    //         // case 1: {
+    //         //     admin.reload('.email_player_send_form', 'player_list');
+    //         //     break;
+    //         // }
+    //         // case 3: {
+    //         //     admin.reload('.email_mass_send_form', 'mass_list');
+    //         //     break;
+    //         // }
+    //         // case 5: {
+    //         //     admin.reload('.email_audit_form', 'audit_list');
+    //         //     break;
+    //         // }
+    //         // default: {
+    //         //     break;
+    //         // }
+    //         case 0: {
+    //             admin.reload('.email_gm_full_form', 'email_list');
+    //             break;
+    //         }
+    //         case 1: {
+    //             admin.reload('.email_player_send_form', 'player_list');
+    //             break;
+    //         }
+    //         case 2: {
+    //             admin.reload('.email_mass_send_form', 'mass_list');
+    //             break;
+    //         }
+    //         case 3: {
+    //             admin.reload('.email_audit_form', 'audit_list');
+    //             break;
+    //         }
+    //         default: {
+    //             break;
+    //         }
+    //     }
+    // })
+
+    // 新增邮件
+    $(document).off('click', '.insert_email').on('click', '.insert_email', function () {
+      let this_type = parseInt($(this).attr('data-type'));
+      let titleArr = {
+        1: '新增全服邮件',
+        2: '新增玩家邮件',
+        3: '新增范围邮件',
+        4: '新增群发邮件',
+        5: '新增渠道邮件',
+      };
+      admin.popup({
+        title: titleArr[this_type]
+        , area: ['80%', '80%']
+        , id: 'email_add_dialog'
+        // ,btn: ['确定', '取消']
+        , success: function (layero, index) {
+          view(this.id).render('email/popup/email_add_dialog', {type: this_type, is_traceless: 0}).done(function () {
+            // 输入框等完成渲染
+
+          });
+        }
+      });
+    });
+
+    // 修改邮件
+    $(document).off('click', '.email_do_edit').on('click', '.email_do_edit', function () {
+      let editId = parseInt($(this).attr('data-type'));
+      let type = parseInt($(this).attr('data-email-type'));
+      let titleArr = {
+        1: '修改全服邮件',
+        2: '修改玩家邮件',
+        3: '修改范围邮件',
+        4: '修改群发邮件',
+        5: '修改渠道邮件',
+      };
+      admin.popup({
+        title: titleArr[type]
+        , area: ['80%', '80%']
+        , id: 'email_add_dialog'
+        // ,btn: ['确定', '取消']
+        , success: function (layero, index) {
+          view(this.id).render('email/popup/email_add_dialog', {
+            type: type,
+            is_traceless: 0,
+            editId: editId
+          }).done(function () {
+            // 输入框等完成渲染
+
+          });
+        }
+      });
+    });
+
+
+    // 邮件详情
+    $(document).off('click', '.email_do_detail').on('click', '.email_do_detail', function () {
+      let id = $(this).attr('data-type');
+      admin.popup({
+        title: '邮件详情'
+        , area: ['80%', '80%']
+        , id: 'email_audit_dialog'
+        // ,btn: ['确定', '取消']
+        , success: function (layero, index) {
+          view(this.id).render('email/popup/email_audit_dialog', {
+            id: id,
+            is_traceless: 1,
+            toUrl: '',
+            showType: 'detail'
+          }).done(function () {
+
+          });
+        }
+      });
+    })
+
+
+    // 推送记录
+    $(document).off('click', '.email_do_push_log').on('click', '.email_do_push_log', function () {
+      let id = $(this).attr('data-type');
+      admin.popup({
+        title: '推送记录'
+        , area: ['80%', '80%']
+        , id: 'email_push_log_dialog'
+        // ,btn: ['确定', '取消']
+        , success: function (layero, index) {
+          view(this.id).render('email/popup/email_push_log_dialog', {id: id, is_traceless: 0}).done(function () {
+
+          });
+        }
+      });
+    })
+
+
+    // 异常操作
+    $(document).off('click', '.email_do_err').on('click', '.email_do_err', function () {
+      let editId = parseInt($(this).attr('data-type'));
+      let type = parseInt($(this).attr('data-email-type'));
+      admin.popup({
+        title: '异常操作'
+        , area: ['80%', '80%']
+        , id: 'err_do_dialog'
+        , success: function (layero, index) {
+          view(this.id).render('email/popup/err_do_dialog', {
+            type: type,
+            editId: editId,
+            is_traceless: 0
+          }).done(function () {
+            // 输入框等完成渲染
+
+          });
+        }
+      });
+    })
+
+    // 删除邮件
+    $(document).off('click', '.email_do_del').on('click', '.email_do_del', function () {
+      let id = $(this).attr('data-type');
+      let this_type = $(this).attr('data-email-type');
+      console.log(id);
+      layer.open({
+        btn: ['确定', '取消']
+        , title: '提示信息：'
+        , content: '确定删除该邮件？'
+        , yes: function (index, layero) {
+          admin.req({
+            url: admin.getUrl('/api/email/delEmail'),
+            data: {
+              id
+            },
+            type: 'post',
+            done: function (data) {
+              layer.close(index);
+              if (data.code == 0) {
+                // 重新加载表格
+                admin.reload(reloadArr[this_type]['sel'], reloadArr[this_type]['tableId']);
+                layer.msg('删除成功！', {icon: 6, anim: 0});
+              } else {
+                layer.msg(data.msg, {icon: 5, anim: 6});
+              }
+            }
+          });
+        }
+        , btn2: function (index, layero) {
+        }
+        , cancel: function () {
+        }
+      });
+    })
+
+
+  });
+</script>
+<!--序号-->
+<script type="text/html" id="index">
+    {{d.LAY_TABLE_INDEX+1}}
+</script>
+<!--发送对象信息-->
+<script type="text/html" id="sendObjMsg">
+    {{#
+    var fn = function(){
+    return email_type[d.type];
+    };
+    }}
+    发送类型：{{fn()}}
+    <br>
+    {{#  if(d.type == 1 || d.type == 3 || d.type == 5 ){ }}
+    排除对象：{{d.user_list}}
+    {{#  } else { }}
+    发送对象：{{d.user_list}}
+    {{#  } }}
+</script>
+<!--邮件信息-->
+<script type="text/html" id="emailMsg">
+    邮件标题：{{d.email_title}}
+    <br>
+    邮件内容：{{d.email_content}}
+</script>
+<!--时间信息-->
+<script type="text/html" id="timeMsg">
+    {{#  if(d.send_type ==0 &&d.state ==3  ){ }}
+    申请时间：{{d.operator_time}}
+    <!--    <br>-->
+    <!--    <a href="javascript:;" style="color: #1E9FFF;text-decoration:underline;" class="send_email_now" data-type={{d.id}} data-email-title={{d.email_title}}>立即发送</a>-->
+    <br>
+    过期时间：{{d.past_time}}
+    {{#  } else if(d.send_type ==0 &&d.state !=3) { }}
+    申请时间：{{d.operator_time}}
+    <br>
+    过期时间：{{d.past_time}}
+    {{#  } else { }}
+    申请时间：{{d.operator_time}}
+    <br>
+    定时时间：{{d.timing_time}}
+    <br>
+    过期时间：{{d.past_time}}
+    {{#  } }}
+</script>
+<!--操作人员-->
+<script type="text/html" id="operatorMsg">
+    操作人：{{d.operator_name}}
+    <br>
+    审核人：{{d.audit_name}}
+</script>
+<!--邮件状态-->
+<script type="text/html" id="stateMsg">
+    {{#  if(d.state ==0 ){ }}
+    <span style="color: #1E9FFF;">待审核</span>
+    {{#  } else if(d.state ==1 ) { }}
+    <span style="color: red;">被驳回</span>
+    {{#  } else if(d.state ==2 ) { }}
+    <span style="color: red;">已拒绝</span>
+    {{#  } else if(d.state ==3 ) { }}
+    <span>未推送</span>
+    {{#  } else if(d.state ==4 ) { }}
+    <span style="color: green;">推送成功</span>
+    {{#  } else if(d.state ==5 ) { }}
+    <span style="color: red">推送失败</span>
+    {{#  } else if(d.state ==6 ) { }}
+    <span style="color: red">已屏蔽</span>
+    {{#  } else if(d.state ==7 ) { }}
+    <span style="color: red">已清除</span>
+    {{#  } else if(d.state ==8 ) { }}
+    <span style="color: red">正在屏蔽</span>
+    {{#  } else if(d.state ==9 ) { }}
+    <span style="color: red">正在删除</span>
+    {{#  } else if(d.state ==10 ) { }}
+    <span style="color: green">正在恢复</span>
+    {{#  } else { }}
+    {{#  } }}
+</script>
+<!--操作-->
+<script type="text/html" id="emailEdit">
+    <button class="layui-btn layui-btn-theme layui-btn-xs email_do_detail" data-type={{d.id}}>详情</button>
+    {{#  if(d.state ==0 ){ }}
+    <a href="javascript:;" style="color: green;text-decoration:underline;" class="email_do_detail"
+       data-type={{d.id}}></a>
+    {{#  } else if(d.state ==1 ) { }}
+    <button class="layui-btn layui-btn-warm layui-btn-xs email_do_edit" data-type={{d.id}}
+       data-email-type={{d.type}}>修改</button>
+    {{#  } else if(d.state ==2 ) { }}
+    <button class="layui-btn layui-btn-danger layui-btn-xs email_do_del" data-type={{d.id}}
+       data-email-type={{d.type}}>删除</button>
+    {{#  } else if(d.state ==3 ||d.state ==4||d.state ==6||d.state ==7 ) { }}
+    <button class="layui-btn layui-btn-danger layui-btn-xs email_do_err" data-type={{d.id}}
+       data-email-type={{d.type}}>异常操作</button>
+    {{#  } else if(d.state ==5 ) { }}
+    <button class="layui-btn layui-btn-xs email_do_push_log"
+       data-type={{d.id}}>推送记录</button>
+    {{#  } else { }}
+    {{#  } }}
+</script>
+<!--审核操作-->
+<script type="text/html" id="auditEdit">
+    <button class="layui-btn layui-btn-theme layui-btn-xs audit_do" data-type={{d.id}}>审核</button>
+</script>

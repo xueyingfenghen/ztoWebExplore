@@ -1,0 +1,240 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+
+                <div class="layui-tab-item" id="search_player-player" style="display: none;">
+                    <form class="layui-form layui-form-pane playerSearch">
+                        <div class="layui-form-item" id="playerSearch">
+                            <!--                    内容需要渲染-->
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reseat">重置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="layui-card tabs">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote" style="margin-top: 0">当前区服总创建角色数：<span id="allCount"></span></blockquote>
+        <table id="user_list"></table>
+    </div>
+</div>
+
+
+<script>
+    var templet = [];
+    var role_id;
+    layui.use( ['table', 'admin', 'form', 'view', 'element', 'common'], function(){
+        let admin = layui.admin;
+        let table = layui.table;
+        let form = layui.form;
+        let view = layui.view;
+        let $ = layui.jquery;
+        let element = layui.element;
+
+        let reseatParam;
+        let id;
+
+        // 武学系统		martial_arts
+        // 装备系统		equipment
+        // 经脉系统		regulating_bodily_functions
+        // 神兵系统		immortals
+        // 炼体系统		body
+        // 丹药系统		elixir
+        // 缘分系统		luck
+        // 背包道具		knapsack
+
+        $.userList = function(cols) {
+            let param = admin.getFormParam('.playerSearch');
+            reseatParam = param;
+            // 玩家列表
+            table.render({
+                id: 'user_list',
+                elem: '#user_list',
+                url: admin.getUrl('/api/player/getPlayerList'),
+                method: 'GET',
+                where: param,//请求参数(额外)
+                request: {
+                    pageName: 'page' //页码的参数名称，默认：page
+                    ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                },
+                response: { //定义后端 json 格式，详细参见官方文档
+                    statusName: 'code', //状态字段名称
+                    statusCode: '0', //状态字段成功值
+                    msgName: 'msg', //消息字段
+                    countName: 'countAll', //总页数字段
+                    dataName: 'data', //数据字段
+                },
+                page: true,
+                loading: true,
+                cols: cols,
+                done: function (res) {
+                    $('#allCount').html("<span style='color: green;'>" + res.total + "</span>");
+                }
+            });
+        }
+
+        // 渲染搜索框
+        $.initSearchForm = function () {
+            return new Promise(function (resolve, reject) {
+                admin.req({
+                    url: admin.getUrl('/api/base/getFormList'),
+                    data: {
+                        name: 'player_player_user_list_search_form',
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        $('#playerSearch').html(data.data['form']);
+                        form.render();
+                        resolve();
+                    }
+                });
+            });
+        };
+
+        /*********************************方法调用************************************/
+
+        // 搜索框渲染完才能继续请求（不然取不到数据）
+        $.initSearchForm().then(function () {
+            // 渲染表格
+            admin.req({
+                url: admin.getUrl('/api/base/getTableCols'),
+                data: {
+                    name: 'player_player_user_list',
+                },
+                type: 'post',
+                done: function (data) {
+                    let cols = data.data;
+                    $.userList(cols);
+                    // 获取templet对应的字段名，用于模版引擎绑定数据
+                    templet = admin.getTemplet(cols);
+                }
+            });
+        });
+
+        // 查询按钮
+        $(document).off('click', '#search').on('click', '#search', function () {
+            let param = admin.getFormParam('.playerSearch');
+            table.reload('user_list', {
+                where: param,
+                page: {
+                    curr: 1
+                }
+            });
+        });
+
+        // 重置
+        $(document).off('click', '#reseat').on('click', '#reseat', function () {
+            admin.resetForm('.playerSearch');
+            table.reload('user_list', {
+                where: reseatParam,
+                page: {
+                    curr: 1
+                }
+            });
+        });
+
+        // 查看详情
+        $(document).off('click', '.detail').on('click', '.detail', function () {
+            id = $(this).attr('data-type');
+            admin.popup({
+                title: '玩家详情'
+                ,area: ['80%', '80%']
+                ,id: 'content-alert'
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/userInfo', {id: id}).done(function(){
+
+                    });
+                }
+            });
+        })
+
+        // 点击查看充值记录
+        $(document).off('click', '.amount').on('click', '.amount', function () {
+            role_id = $(this).attr('data-type');
+            admin.popup({
+                title: '玩家充值记录'
+                ,area: ['80%', '80%']
+                ,id: 'pay_detail_dialog'
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/pay_detail_dialog').done(function(){
+
+                    });
+                }
+                ,yes: function(index, layero){
+
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                },
+            });
+
+        })
+
+
+        /*******************修改角色昵称*******************/
+        $(document).off('click', '.rename_dialog').on('click', '.rename_dialog', function () {
+            let id = $(this).attr('data-type');
+            let name = $(this).attr('data-name');
+            admin.popup({
+                title: '角色昵称修改'
+                ,area: ['80%', '80%']
+                ,id: 'player_rename_dialog'
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/player/rename_dialog', {id: id, name: name}).done(function(){
+
+                    });
+                }
+            });
+        })
+
+    });
+</script>
+<script type="text/html" id="edit">
+    {{#
+    var fn = function(){
+    return d[templet[2]];
+    };
+    }}
+    <button type="button" class="layui-btn layui-btn-theme layui-btn-xs detail" data-type={{ fn() }}>详情</button>
+</script>
+<script type="text/html" id="amount">
+    {{#
+    var fn = function(){
+    return d[templet[2]];
+    };
+    }}
+    {{#
+    var fn2 = function(){
+    return d[templet[1]];
+    };
+    }}
+    <a href="javascript:;" style="color: #1E9FFF;text-decoration:underline;" class="amount" data-type={{ fn() }}>{{ fn2() }}</a>
+</script>
+<script type="text/html" id="nickname">
+    {{#
+    var fn2 = function(){
+    return d[templet[0]];
+    };
+    }}
+    {{#
+    var fn = function(){
+    return d[templet[2]];
+    };
+    }}
+    <a href="javascript:;" style="color: #1E9FFF;text-decoration:underline;" class="rename_dialog" data-type={{ fn() }} data-name={{ fn2() }}>{{ fn2() }}</a>
+</script>

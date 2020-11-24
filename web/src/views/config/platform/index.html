@@ -1,0 +1,210 @@
+<style>
+    .layui-inline {
+        margin-bottom: 10px !important;
+        margin-right: 20px !important;
+    }
+
+    .layui-input-block {
+        width: 190px;
+    }
+</style>
+<title>游戏管理</title>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb">
+        <a lay-href="">配置管理</a>
+        <a><cite>平台管理</cite></a>
+    </div>
+</div>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" style="width: 116px">游戏中文名称</label>
+                        <div class="layui-input-block" style="margin-left: 116px">
+                            <input type="text" name="cn" class="layui-input" >
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label" style="width: 116px">平台名称</label>
+                        <div class="layui-input-block" style="margin-left: 116px">
+                            <input type="text" name="name" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">币种</label>
+                        <div class="layui-input-block">
+                            <select lay-filter="main_currency" name="main_currency">
+                                <option value="CNY">CNY(人民币)</option>
+                                <option value="HKD">HKD(港币)</option>
+                                <option value="MOP">MOP(澳门元)</option>
+                                <option value="TWD">TWD(新台币)</option>
+                                <option value="JPY">JPY(日元)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <button type="button" class="layui-btn layui-btn-theme" lay-submit lay-filter="game_search">查询</button>
+                    <button type="reset" class="layui-btn layui-btn-primary" lay-submit lay-filter="reset">重置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="layui-card">
+<!--        <button type="button" class="layui-btn layui-btn-theme" style="margin-bottom: 10px;margin-left: 15px" id="add_game">新增</button>-->
+        <table id="game_list" lay-filter="game_list"></table>
+    </div>
+</div>
+
+
+<script>
+    //定义表头
+    var cols = [ //表头
+        {field: 'cn', title: '游戏中文名称',align: 'center'}
+        ,{field: 'platform', title: '平台中文名称',align: 'center'}
+        ,{field: 'platform_key', title: '平台英文名称',align: 'center'}
+        ,{field: 'region', title: '区域',align: 'center'}
+        ,{field: 'main_currency', title: '主要币种',align: 'center'}
+        ,{field: 'whale_recharge', title: '鲸鱼最低标准',align: 'center'}
+        ,{title: '操作',align: 'center',fixed: 'right', toolbar: '#op'}
+    ];
+    var where = {};
+    //渲染、监听 表格属性、数据
+    layui.use(['table','form'], function(){
+        var table = layui.table;
+        var form = layui.form;
+        var $ = layui.jquery;
+        form.render();
+        table.render({
+            elem: '#game_list'
+            ,url: layui.admin.getUrl('/api/config/game/index') //模拟接口
+            ,where: where
+            ,cols: [cols]
+            ,method:'get'
+            ,parseData: function(res){
+                return {
+                    "code":res.code, //解析接口状态
+                    "msg": '', //解析提示文本
+                    "count": res.data.count, //解析数据长度
+                    "data": res.data.list//解析数据列表
+                };
+            }
+            ,page: true,limit: 10,limits: [10, 15, 20, 25, 30]
+        });
+
+        //监听搜索
+        form.on('submit(game_search)', function(data){
+            var field = data.field;
+
+            //执行重载
+            table.reload('game_list', {
+                where: field
+            });
+        });
+        //重置
+        form.on('submit(reset)', function(data){
+            var field = {
+                cn:null
+                ,english:null
+                ,remark:null
+                ,page:1
+                ,limit:10
+            };
+            //执行重载
+            table.reload('game_list', {
+                where: field
+            });
+        });
+
+        //新增游戏
+        $("#add_game").on('click',function () {
+            popup('新增游戏',{});
+        })
+
+        //监听修改
+        table.on('tool(game_list)', function(obj) {
+            switch (obj.event) {
+                case "edit":
+                    popup('编辑游戏',obj.data);
+                    break;
+                case "del":
+                    layer.confirm('确定要删除吗', function (index) {
+                        if(obj.data.id > 0){
+                            layui.admin.req({
+                                url:layui.admin.getUrl('/api/config/game/del'),
+                                method: 'post',
+                                data: {id:obj.data.id},
+                                dataType: 'json',
+                                done: function (res) {
+                                    if(res.code == 0){
+                                        table.reload('game_list');
+                                        layer.close(index);
+                                    }else{
+                                        layer.msg(res.msg,{icon:5});
+                                    }
+                                }
+                            })
+                        }else {
+                            return layer.msg('删除失败,id有误',{icon:5});
+                        }
+                    })
+                    break;
+            }
+        })
+
+        //弹窗
+        function popup(title,obj){
+            layui.admin.popup({
+                title: title
+                , area: ['500px', '500px']
+                , id: 'add_game_info'
+                , btn: ['确定', '取消']
+                , success: function (layero, index) {
+                    layui.view(this.id).render('config/platform/add_platform',obj).done(function () {
+                    });
+                }
+                , yes: function (index, v) {
+                    var english = $("#english").val();
+                    var cn = $("#cn").val();
+                    var data = {
+                        english:english
+                        ,cn:cn
+                        ,remark:$("#remark").val()
+                    };
+
+                    if (!cn) {
+                        layer.msg('游戏中文名称不能为空', {icon: 5});
+                        return false;
+                    }
+                    if (!english) {
+                        layer.msg('游戏英文名称不能为空', {icon: 5});
+                        return false;
+                    }
+                    if(obj.id > 0) data.id = obj.id
+
+                    layui.admin.req({
+                        url:layui.admin.getUrl('/api/config/game/modify'),
+                        method: 'post',
+                        data: data,
+                        dataType: 'json',
+                        done: function (res) {
+                            if(res.code == 0){
+                                table.reload('game_list');
+                                layer.closeAll();
+                            }else{
+                                layer.msg(res.msg,{icon:5});
+                            }
+                        }
+                    })
+                }
+            });
+        }
+
+    });
+</script>
+<script type="text/html" id="op">
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+</script>

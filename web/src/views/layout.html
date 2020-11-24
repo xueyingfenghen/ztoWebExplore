@@ -1,0 +1,390 @@
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header layui-form">
+        <!-- 头部区域 -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item layadmin-flexible" lay-unselect>
+                <a href="javascript:;" layadmin-event="flexible" title="侧边伸缩">
+                    <i class="layui-icon layui-icon-shrink-right" id="LAY_app_flexible"></i>
+                </a>
+            </li>
+            <li class="layui-nav-item" lay-unselect>
+                <a href="javascript:;" layadmin-event="refresh" title="刷新">
+                    <i class="layui-icon layui-icon-refresh-3"></i>
+                </a>
+            </li>
+            <li class="layui-nav-item layui-hide layui-show-sm-inline">
+                <div class="layui-input-inline">
+                    <select name="label" id="selectGameId">
+                        <option value="0" disabled>请选择游戏</option>
+                    </select>
+                </div>
+            </li>
+            <li class="layui-nav-item layui-hide layui-show-md-inline">
+                <div class="layui-input-inline">
+                    <select class="layui-select" name="label">
+                        <option value="" disabled>请选择合作商</option>
+                    </select>
+                </div>
+            </li>
+            <li class="layui-nav-item layui-hide layui-show-lg-inline">
+                <div class="layui-input-inline">
+                    <select name="label" id="selectPlatformId">
+                        <option value="0" disabled>请选择线路</option>
+                    </select>
+                </div>
+            </li>
+        </ul>
+
+        <ul class="layui-nav layui-layout-right">
+            <!--<li class="layui-nav-item">
+                <a lay-href="app/message/" layadmin-event="message">
+                    <i class="layui-icon layui-icon-notice"></i>
+
+                    &lt;!&ndash; 如果有新消息，则显示小圆点 &ndash;&gt;
+                    <script type="text/html" template lay-url="./json/message/new.js">
+                        {{# if(d.data.newmsg){ }}
+                        <span class="layui-badge-dot"></span>
+                        {{# } }}
+                    </script>
+
+                </a>
+            </li>-->
+
+            <!--<li class="layui-nav-item layui-hide-xs" lay-unselect>
+                <a href="javascript:;" layadmin-event="note">
+                    <i class="layui-icon layui-icon-note"></i>
+                </a>
+            </li>
+            <li class="layui-nav-item layui-hide-xs" lay-unselect>
+                <a href="javascript:;" layadmin-event="fullscreen">
+                    <i class="layui-icon layui-icon-screen-full"></i>
+                </a>
+            </li>-->
+            <li class="layui-nav-item layui-hide layui-show-sm-inline">
+                <div class="layui-input-inline" style="line-height: 24px;">
+                    <div style="text-align: right">
+                        <span>服务器时间：</span>
+                        <span id="LAY-time-Service"></span>
+                    </div>
+                    <div style="text-align: right">
+                        <span>北京时间：</span>
+                        <span id="LAY-time-Beijing"></span>
+                    </div>
+                </div>
+            </li>
+            <li class="layui-nav-item layui-hide-xs" lay-unselect>
+                <a href="javascript:;" layadmin-event="theme">
+                    <i class="layui-icon layui-icon-theme"></i>
+                </a>
+            </li>
+            <li class="layui-nav-item" lay-unselect>
+                    <a href="javascript:;">
+                        <img class="layui-nav-img" id="userAvatar" onerror="this.src= '/src/style/img/avatar.jpg'"/>
+                        <script type="text/html" template>
+                            <cite>{{layui.data(layui.setter.tableName)['nick_name'] || '' }}</cite>
+                        </script>
+                    </a>
+                <dl class="layui-nav-child">
+                    <dd><a lay-href="set/user/info">个人中心</a></dd>
+                    <dd><a href="javascript:;" id="switch-platform">切换平台</a></dd>
+                    <dd><a layadmin-event="logout">退出登录</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+
+    <!--侧边菜单-->
+    <div class="layui-side layui-side-menu">
+        <div class="layui-logo">
+            <script type="text/html" template>
+                <span>{{ layui.setter.name || 'layuiAdmin' }}</span>
+            </script>
+        </div>
+        <div class="layui-side-scroll" lay-filter="game-side" id="game-side">
+
+            <ul class="layui-nav layui-nav-tree" lay-shrink="all" id="lay-system-side-platform"
+                lay-filter="layadmin-system-side-platform" style="margin-top: 49px">
+                <li data-name="home" data-jump="" class="layui-nav-item layui-nav-itemed"
+                    lay-filter="layadmin-system-side-game" id="lay-system-side-game">
+                    <!--游戏选择-->
+                    <a href="javascript:;" lay-tips="游戏管理" lay-direction="2">
+                        <i class="layui-icon layui-icon-app"></i>
+                        <cite>游戏管理</cite>
+                    </a>
+                    <dl class="layui-nav-child" id="LAY-layout-nav-child">
+
+                    </dl>
+                </li>
+                <!--权限管理-->
+                <li data-name="permission_user" data-jump="" class="layui-nav-item">
+                    <a href="javascript:;" lay-tips="权限管理" lay-direction="3">
+                        <i class="layui-icon layui-icon-component"></i>
+                        <cite>权限管理</cite>
+                    </a>
+                    <dl class="layui-nav-child" id="permission-nav-child">
+                        <dd data-name="user-manage" data-jump="permission/users">
+                            <i class="layui-icon layui-icon-user "></i>
+                            <a href="javascript:;" lay-href="permission/users">用户管理</a>
+
+                        </dd>
+
+                      <dd data-name="group-manage" data-jump="permission/groups" class="">
+                          <i class="layui-icon layui-icon-group"></i>
+                          <a href="javascript:;" lay-href="permission/groups">组别管理</a>
+                      </dd>
+                  </dl>
+              </li>
+                <!--配置管理-->
+                <script type="text/html" template>
+                    {{#  if(layui.data(layui.setter.tableName)['user_id'] == 1){ }}
+                    <li class="layui-nav-item">
+                        <a href="javascript:;" lay-tips="配置管理" lay-direction="4">
+                            <i class="layui-icon layui-icon-component"></i>
+                            <cite>配置管理</cite>
+                        </a>
+                        <dl class="layui-nav-child">
+                            <!--                      <dd>-->
+                            <!--                          <i class="layui-icon layui-icon-theme"></i>-->
+                            <!--                          <a href="javascript:;" lay-href="config/game/index">游戏管理</a>-->
+                            <!--                      </dd>-->
+                            <!--                      <dd>-->
+                            <!--                          <i class="layui-icon layui-icon-windows"></i>-->
+                            <!--                          <a href="javascript:;" lay-href="config/platform/index">平台管理</a>-->
+                            <!--                      </dd>-->
+                            <!--                        <dd>-->
+                            <!--                            <i class="layui-icon layui-icon-app"></i>-->
+                            <!--                            <a href="javascript:;" lay-href="config/service/index">服务管理</a>-->
+                            <!--                        </dd>-->
+                            <dd>
+                                <i class="layui-icon layui-icon-component"></i>
+                                <a href="javascript:;" lay-href="config/service_channel/index">区服与渠道</a>
+                            </dd>
+                        </dl>
+                    </li>
+                    {{#  } }}
+                </script>
+          </ul>
+      </div>
+        <div class="layui-side-scroll" lay-filter="admin-side" id="admin-side" style="display:none">
+        </div>
+    </div>
+
+
+    <!-- 页面标签 -->
+    <script type="text/html" template lay-done="layui.element.render('nav', 'layadmin-pagetabs-nav')">
+        {{# if(layui.setter.pageTabs){ }}
+        <div class="layadmin-pagetabs" id="LAY_app_tabs">
+            <div class="layui-icon layadmin-tabs-control layui-icon-prev" layadmin-event="leftPage"></div>
+            <div class="layui-icon layadmin-tabs-control layui-icon-next" layadmin-event="rightPage"></div>
+            <div class="layui-icon layadmin-tabs-control layui-icon-down">
+                <ul class="layui-nav layadmin-tabs-select" lay-filter="layadmin-pagetabs-nav">
+                    <li class="layui-nav-item" lay-unselect>
+                        <a href="javascript:;"></a>
+                        <dl class="layui-nav-child layui-anim-fadein">
+                            <dd layadmin-event="closeThisTabs"><a href="javascript:;">关闭当前标签页</a></dd>
+                            <dd layadmin-event="closeOtherTabs"><a href="javascript:;">关闭其它标签页</a></dd>
+                            <dd layadmin-event="closeAllTabs"><a href="javascript:;">关闭全部标签页</a></dd>
+                        </dl>
+                    </li>
+                </ul>
+            </div>
+            <div class="layui-tab" lay-unauto lay-allowClose="true" lay-filter="layadmin-layout-tabs">
+                <ul class="layui-tab-title" id="LAY_app_tabsheader">
+                    <li lay-id="/"><i class="layui-icon layui-icon-home"></i></li>
+                </ul>
+            </div>
+        </div>
+        {{# } }}
+    </script>
+
+
+    <!-- 主体内容 -->
+    <div class="layui-body" id="LAY_app_body">
+        <div class="layadmin-tabsbody-item layui-show"></div>
+    </div>
+
+    <!-- 辅助元素，一般用于移动设备下遮罩 -->
+    <div class="layadmin-body-shade" layadmin-event="shade"></div>
+</div>
+
+<script>
+  layui.use(['form', 'navbar'], function () {
+    const $ = layui.$;
+    const TABLE_NAME = layui.setter.tableName; //本地数据缓存的表名
+    const DATA_NAME = layui.setter.response.dataName;
+
+    const $timeBeijing = $("#LAY-time-Beijing")
+    const $timeService = $("#LAY-time-Service")
+
+    //游戏和平台默认选中--顶部游戏select只做了展示功能
+    const gameList = layui.sessionData(TABLE_NAME)['gamelist'];
+    const gameSelect = layui.sessionData(TABLE_NAME)['gameselect'];
+    if (gameSelect !== undefined && gameList[gameSelect.id] !== undefined && gameList[gameSelect.id].platforms[gameSelect.platformId] !== undefined) {
+      var gameName = gameList[gameSelect.id].name;
+      var gamePlatform = gameList[gameSelect.id].platforms[gameSelect.platformId].name;
+      $("#selectGameId").append("<option value='value'>" + gameName + "</option>");
+      $("#selectGameId").val("value");
+
+      $("#selectPlatformId").append("<option value='value'>" + gamePlatform + "</option>");
+      $("#selectPlatformId").val("value");
+    }
+    layui.form.render("select");
+
+
+    //F5刷新事件
+    $(document).off('keydown').on('keydown', (event) => {
+      if (event.key === "F5") {
+        layui.admin.events.refresh();
+        event.preventDefault();
+      }
+    });
+
+    $("#userAvatar").attr('src', layui.data(TABLE_NAME)['avatar'])
+
+    //切换平台重定向
+    $('#switch-platform').on('click', function () {
+      parent.location.href = 'index.html#/user/access/mode=1';
+      parent.location.reload();
+    });
+
+    layui.admin.hashchange(function (type) {
+      console.log('重载菜单')
+      if (type === 'game') {
+        $('#admin-side').css('display', 'none')
+        $('#game-side').css('display', 'block')
+        getGameMenu()
+      }
+    })
+
+    //渲染菜单
+    if (layui.router().search.mode === '2' || layui.router().search.hasOwnProperty("id")) {
+      $('#admin-side').css('display', 'block')
+      $('#game-side').css('display', 'none')
+      const platformMenu = layui.navbar({
+        elem: '#admin-side',
+        url: "/api/permission/menu_list",
+        param: {id: "user"}, //后续用户鉴权传参
+        success: function (data) {
+          // 用于render结束后的回调函数
+          let permissions = {};
+          var generatePermissionMap = function (list, pid, breadcrumbs) {
+            for (var i = 0; i < list.length; i++) {
+              breadcrumbs.push(list[i].name)
+              permissions[list[i].id] = {
+                id: list[i].id,
+                name: list[i].name,
+                breadcrumbs: $.extend(true, [], breadcrumbs),
+                icon: list[i].icon,
+                route: list[i].route,
+                tip: list[i].tip ? list[i].tip : '',
+                childrens: []
+              };
+
+              if (permissions[pid] !== undefined) {
+                permissions[pid].childrens.push(list[i].id);
+              }
+
+              if (list[i].list !== undefined && list[i].list.length > 0) {
+                generatePermissionMap(list[i].list, list[i].id, breadcrumbs);
+              }
+              breadcrumbs.pop();
+            }
+          };
+          generatePermissionMap(data, 0, []);
+
+          layui.sessionData(TABLE_NAME, {
+            key: 'permissions',
+            value: permissions
+          });
+
+          const href = layui.router().href.slice(1);
+          //根据hash记录值打开上一个菜单
+          const elem = $('#admin-side').find(`a[lay-href="${href}"]`)
+          elem.trigger('click').parents('li.layui-nav-item').addClass('layui-nav-itemed')
+
+
+          //快捷菜单--
+          /**
+           * 快捷菜单渲染 可以重新写一个接口
+           * 使用layui.navbar() 请求获取数据并单独渲染
+           * */
+
+          //快捷菜单--
+
+
+        }
+      })
+      platformMenu.render()
+    } else {
+      getGameMenu()
+      //点击第一个导航页
+      $("#game-side a").each(function () {
+        var that = this;
+        if ($(that).parent().attr('class') === "layui-this") {
+          that.click()
+        }
+      });
+    }
+
+
+    function getGameMenu() {
+      const gameMenu = layui.navbar({
+        elem: "#LAY-layout-nav-child", //容器
+        url: layui.admin.getUrl('/api/game'),
+        param: {}, //游戏管理菜单鉴权传参
+        getHtml: getHtmlHandle,
+        success: function (data) {
+          let gamelist = {};
+          layui.each(data, function (index, item) {
+            gamelist[item.id] = {
+              id: item.id,
+              name: item.name,
+              platforms: {}
+            };
+          });
+          layui.sessionData(TABLE_NAME, {
+            key: 'gamelist',
+            value: gamelist
+          });
+          layui.element.render('nav');
+        }
+      });
+      gameMenu.render()
+    }
+
+    function getHtmlHandle(data) {
+      const hashId = +layui.router().search.game_id || 1;
+      let html = "";
+      layui.each(data, function (index, item) {
+        html += '<dd data-name="' + item.id + '" data-jump="" class="' + (+item.id === hashId ? 'layui-this' : '') + '">';
+        html += `<i class="layui-icon layui-icon-fire"></i><a href="javascript:;" lay-href="user/access/game_id=${item.id}">${item.name}</a></dd>`;
+      });
+      return html;
+    }
+
+    /**
+     * 北京、服务器时间
+     * */
+    layui.admin.req({
+      url: layui.admin.getUrl('/api/server/time'),
+      type: 'get',
+      done: function (res) {
+        if (res.code === 0) {
+          updateTime($timeBeijing, layui.admin.getLocalTime(8));
+          updateTime($timeService, res.data.time*1000);
+        }
+      }
+    });
+
+    function updateTime(dom, stamp){
+      const html = layui.util.toDateString(stamp);
+      dom.html(html);
+      setTimeout(function () {
+        updateTime(dom,stamp + 1000);
+      }, 1000);
+    }
+  });
+
+  //加载功能说明
+  layui.use(["tips"])
+</script>

@@ -1,0 +1,121 @@
+<div class="layui-fluid" style="padding: 0px 15px">
+    <div class="layui-card">
+        <div class="layui-card-body" style="padding: 0px">
+            <div class="layui-form-item" id="user-search" pane="" style="margin: 0px">
+                <form class="layui-form" lay-filter="filter-form" id="filter-form">
+                    <div class="layui-form-item" style="display: none" id="part-form">
+                        <span class="layui-red">当数量多于10000后，之后每10000划分一个部分</span>
+                        <select name="part" lay-filter="part" id="part">
+                        </select>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <div class="layui-inline">
+                                <input type="radio" name="receive_status" value="0" title="仅查看未兑换"
+                                       lay-filter="filter-form">
+                                <input type="radio" name="receive_status" value="1" title="仅查看已兑换"
+                                       lay-filter="filter-form">
+                            </div>
+                        </div>
+                        <div class="layui-inline" style="float: right">
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn-sm export" style="height: 38px;width: 64px">
+                                导出
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table id="code-list-tb" lay-filter="code-list-tb"></table>
+            <div id="code-list-paginate" lay-filter="code-list-paginate">
+            </div>
+        </div>
+    </div>
+
+    <script type="text/html" id="serverIdTpl">
+        {{#
+        if(d.receive_status == 0){
+        }}
+        -
+        {{#
+        } else {
+        }}
+        {{ d.receiver_server_id }}
+        {{#
+        }
+        }}
+    </script>
+
+    <script type="text/html" id="roleIdTpl">
+        {{#
+        if(d.receive_status == 0){
+        }}
+        -
+        {{#
+        } else {
+        }}
+        {{ d.receiver_role_id }}
+        {{#
+        }
+        }}
+    </script>
+
+    <script type="text/html" id="nickNameTpl">
+        {{#
+        if(d.receive_status == 0){
+        }}
+        -
+        {{#
+        } else {
+        }}
+        {{ d.receiver_nick_name }}
+        {{#
+        }
+        }}
+    </script>
+
+    <script type="text/html" id="vipTpl">
+        {{#
+        if(d.receive_status == 0){
+        }}
+        -
+        {{#
+        } else {
+        }}
+        {{ d.receiver_vip_level }}
+        {{#
+        }
+        }}
+    </script>
+
+    <script type="text/html" id="receiveTimeTpl">
+        {{#
+        if(d.receive_status == 0){
+        }}
+        -
+        {{#
+        } else {
+        }}
+        {{ d.receive_time }}
+        {{#
+        }
+        }}
+    </script>
+</div>
+
+<script>
+    layui.data.sendParams = function (params) {
+        layui.use('exchange_code/code_list', function () {
+            $.sendCodeParams(params);
+        });
+    };
+</script>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>

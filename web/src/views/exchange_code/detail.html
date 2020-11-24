@@ -1,0 +1,168 @@
+<form class="layui-form" lay-filter="user-form">
+    <div class="layui-form" lay-filter="layuiadmin-exchange-generate-detail" id="layuiadmin-exchange-generate-detail"
+         style="padding: 20px 30px 0 0;">
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">当前状态</label>
+            <div class="layui-input-inline">
+                <input type="text" name="status" value="" lay-filter="status-edit" id="status-edit" autocomplete="off"
+                       style="width: 400px;" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">兑换码ID</label>
+            <div class="layui-input-inline">
+                <input type="text" name="id" value="" lay-filter="id-edit" id="id-edit" autocomplete="off"
+                       style="width: 400px;" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">兑换码名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="name" value="" lay-filter="name-edit" id="name-edit" autocomplete="off"
+                       style="width: 400px;" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">道具内容</label>
+            <div class="layui-input-inline">
+                    <textarea name="props" lay-verify="props-edit" lay-filter="props-edit" id="props-edit"
+                              style="width: 400px; height: 100px;" autocomplete="off" class="layui-textarea" disabled>
+                    </textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">兑换码类型</label>
+            <div class="layui-input-inline">
+                <input type="text" name="type" value="" lay-filter="type-edit" id="type-edit" autocomplete="off"
+                       style="width: 400px;" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">领取类型</label>
+            <div class="layui-input-inline">
+                <input type="text" name="receive_type" value="" lay-filter="receive-type-edit"
+                       id="receive-type-edit" autocomplete="off" style="width: 400px;"
+                       class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">限制条件</label>
+            <div class="layui-input-inline">
+                <input type="text" name="limitation" value="" lay-filter="limitation-edit" id="limitation-edit"
+                       autocomplete="off" style="width: 400px;"
+                       class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">生成数量</label>
+            <div class="layui-input-inline">
+                <input type="text" name="amount" value="" lay-filter="amount-edit" id="amount-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">剩余数量</label>
+            <div class="layui-input-inline">
+                <input type="text" name="remainder_amount" value="" lay-filter="remainder-amount-edit"
+                       id="remainder-amount-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">生效时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="start_time" value="" lay-filter="start-time-edit" id="start-time-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">失效时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="end_time" value="" lay-filter="end-time-edit" id="end-time-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">申请时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="generate_time" value="" lay-filter="apply-time-edit" id="apply-time-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">修改时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="modify_time" value="" lay-filter="modify-time-edit" id="modify-time-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">申 请 人</label>
+            <div class="layui-input-inline">
+                <input type="text" name="apply_user" value="" lay-filter="apply-user-edit" id="apply-user-edit"
+                       autocomplete="off" style="width: 400px;"
+                       class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">申请理由</label>
+            <div class="layui-input-inline">
+                <input type="text" name="apply_reason" value="" lay-filter="apply-reason-edit" id="apply-reason-edit"
+                       autocomplete="off" style="width: 400px;"
+                       class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核人</label>
+            <div class="layui-input-inline">
+                <input type="text" name="judge_user" value="" lay-filter="judge-user-edit" id="judge-user-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核理由</label>
+            <div class="layui-input-inline">
+                <input type="text" name="judge_reason" value="" lay-filter="judge-reason-edit" id="judge-reason-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="judge_time" value="" lay-filter="judge-time-edit" id="judge-time-edit"
+                       style="width: 400px;" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.data.sendParams = function (params) {
+        layui.use('exchange_code/detail', function () {
+            $.sendDetailParams(params);
+        });
+    };
+</script>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>

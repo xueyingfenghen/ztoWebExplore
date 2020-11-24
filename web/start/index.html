@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>游戏客服运营后台</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="layui/css/layui.css" media="all">
+  <link rel="stylesheet" href="layui/css/formSelects.css" />
+  <link rel="stylesheet" href="layui/css/soulTable.css" />
+  <script>
+  /^http(s*):\/\//.test(location.href) || alert('请先部署到 localhost 下再访问');
+  </script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+</head>
+<body>
+  <div id="LAY_app"></div>
+  <script src="layui/layui.js"></script>
+  <script>
+  layui.config({
+    base: '../dist/'
+    ,version: true //true不缓存 false缓存
+  }).use('index');
+  // $.ajax({
+  //     url: '/api/foo',
+  //     success: function(res){
+  //         console.log(res)
+  //     }
+  // })
+  </script>
+</body>
+</html>
+
+

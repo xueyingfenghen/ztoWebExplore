@@ -1,0 +1,292 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+
+                <!--兑换码生成-->
+                <div class="layui-tab-item" id="search_generate-code" style="display: none;">
+                    <form class="layui-form layui-form-pane form_generate-code">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">兑换码ID</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="id" class="layui-input" id="id-input" placeholder="请输入兑换码ID">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">兑换码名称</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="name" class="layui-input" id="name-input" placeholder="请输入兑换码名称">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">兑换码类型</label>
+                                <div class="layui-input-block">
+                                    <select name="type">
+                                        <option value="0">全部</option>
+                                        <option value="1">动态兑换码</option>
+                                        <option value="2">通用兑换码</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">申 请 人</label>
+                                <div class="layui-input-block">
+                                    <select id="0-apply-user-input" class="apply-user-input" lay-filter="apply-user-input" name="apply_user_id">
+                                        <option value="0">全部</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">申请时间</label>
+                                <div class="layui-input-inline date-time-input" style="width: 500px">
+                                    <input type="text" class="layui-input" id="generate-apply-time-input" name="date_time" data-laydate='{"elem": "#generate-apply-time-input","type": "datetime" , "range": true}'
+                                           placeholder="请选择开始时间-请选择结束时间">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_generate-code","tableId": "table_generate-code"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_generate-code","tableId": "table_generate-code"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+
+
+                <!--兑换码审核-->
+                <div class="layui-tab-item" id="search_judge-code" style="display: none;">
+                    <form class="layui-form layui-form-pane form_judge-code">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">兑换码ID</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="id" class="layui-input" placeholder="请输入兑换码ID">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">兑换码名称</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="name" class="layui-input" placeholder="请输入兑换码名称">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">兑换码类型</label>
+                                <div class="layui-input-block">
+                                    <select name="type">
+                                        <option value="0">全部</option>
+                                        <option value="1">动态兑换码</option>
+                                        <option value="2">通用兑换码</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">申 请 人</label>
+                                <div class="layui-input-block" style="width: 210px">
+                                    <select id="apply-user-input" class="apply-user-input" lay-filter="apply-user-input" name="apply_user_id">
+                                        <option value="0">全部</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">申请时间</label>
+                                <div class="layui-input-inline date-time-input" style="width: 500px">
+                                    <input type="text" class="layui-input" name="date_time" data-laydate='{"elem": "#judge-apply-time-input","type": "datetime" , "range": true}' id="judge-apply-time-input"
+                                           placeholder="请选择开始时间 - 请选择结束时间">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_judge-code","tableId": "table_judge-code"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_judge-code","tableId": "table_judge-code"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--兑换码查询-->
+                <div class="layui-tab-item" id="search_inquire-code" style="display: none;">
+                    <form class="layui-form layui-form-pane form_inquire-code">
+                        <div class="layui-form-item" id="cdkey-inquire-form">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">兑换码</label>
+                                <div class="layui-input-block" style="width: 260px">
+                                    <input type="text" name="code" class="layui-input" id="code-input" placeholder="请输入兑换码">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">角色ID</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="role_id" class="layui-input" id="role-id-input"
+                                           placeholder="请输入角色ID">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">兑换时间</label>
+                                <div class="layui-input-inline date-time-input" style="width: 500px">
+                                    <input type="text" class="layui-input"  name="date_time" id="inquire-receive-time-input" data-laydate='{"elem": "#inquire-receive-time-input","type": "datetime" , "range": true}'
+                                           placeholder="请选择开始时间 - 请选择结束时间">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_inquire-code","tableId": "table_inquire-code"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_inquire-code","tableId": "table_inquire-code"}'>重置</button>
+                            <button type="button" class="layui-btn" data-obj='{"event": "exort","formClass": ".form_inquire-code","tableId": "table_inquire-code","route":"/exchange_code/code_list"}'>导出</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs" data-id="generate-code" id="list_generate-code" style="display: none;">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme btn-add" style="margin-bottom: 10px;" data-obj='{"event": "add", "tableId": "table_generate-code"}'>新增兑换码</button>
+        <table id="table_generate-code">
+        </table>
+    </div>
+</div>
+
+<div class="layui-card tabs" data-id="judge-code" id="list_judge-code" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_judge-code"></table>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" data-id="inquire-code" id="list_inquire-code" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_inquire-code"></table>
+    </div>
+</div>
+
+<script type="text/html" id="typeTpl">
+    {{#
+    if(d.type == 2){
+    }}
+    通用兑换码：{{d.code}}
+    {{#
+    } else {
+    }}
+    动态兑换码
+    {{#
+    }
+    }}
+</script>
+
+<script type="text/html" id="receiveTpl">
+    {{#
+    if(d.receive_count > 1){
+    }}
+    多次领取：{{d.receive_count}}
+    {{#
+    } else {
+    }}
+    单次领取
+    {{#
+    }
+    }}
+</script>
+
+<script type="text/html" id="judgeReasonTpl">
+    {{#
+    if(d.judge_status == 0){
+    }}
+    -
+    {{#
+    } else {
+    }}
+    {{d.judge_reason}}
+    {{#
+    }
+    }}
+</script>
+
+<script type="text/html" id="judgeTimeTpl">
+    {{#
+    if(d.judge_status == 0){
+    }}
+    -
+    {{#
+    } else {
+    }}
+    {{d.judge_time}}
+    {{#
+    }
+    }}
+</script>
+
+<script type="text/html" id="judgeStatusTpl">
+    {{#
+    if (d.judge_status == 0) {
+    }}
+    <div style="color: #1E9FFF">待审核</div>
+    {{#
+    } else if(d.judge_status == 10) {
+    }}
+    <div style="color: red">已拒绝</div>
+    {{#
+    } else {
+    }}
+    <div style="color: green">已通过</div>
+    {{#
+    }
+    }}
+</script>
+<script type="text/html" id="bar">
+    <a class="layui-btn layui-btn-xs layui-btn-primary" data-obj='{"event": "copy","id": "{{d.id}}"}' lay-event="copy">复制</a>
+    <a class="layui-btn layui-btn-xs layui-btn-theme" data-obj='{"event": "detail","id": "{{d.id}}"}' lay-event="detail">详情</a>
+    {{#
+    if(d.judge_status == 10){
+    }}
+    <a class="layui-btn layui-btn-xs layui-btn-danger" data-obj='{"event": "delete","id": "{{d.id}}"}' lay-event="delete">删除</a>
+    {{#
+    }else if (d.judge_status == 20) {
+    }}
+
+    {{#
+    if (d.type == 2) {
+    }}
+    <a class="layui-btn layui-btn-xs layui-btn-warm" data-obj='{"event": "code_list","id": "{{d.id}}","all_count": "{{d.generate_count - d.remain_count}}"}' lay-event="code">查看</a>
+    {{#
+    } else {
+    }}
+    <a class="layui-btn layui-btn-xs layui-btn-warm" data-obj='{"event": "code_list","id": "{{d.id}}","all_count": "{{d.generate_count}}"}' lay-event="code">查看</a>
+    {{#
+    }
+    }}
+    <a class="layui-btn layui-btn-xs" data-obj='{"event": "append","id": "{{d.id}}"}' lay-event="append">追加</a>
+
+    {{#
+    if (d.status == 0) {
+    }}
+    <a class="layui-btn layui-btn-xs layui-btn-warm" data-obj='{"event": "edit","id": "{{d.id}}"}' lay-event="edit">编辑</a>
+    {{#
+    }
+    }}
+    {{#
+    }
+    }}
+</script>
+
+<script type="text/html" id="switchStatus">
+    {{#
+    if (d.judge_status == 20) {
+    }}
+    <input type="checkbox" name="status" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用" lay-filter="status" {{ d.status ? 'checked' : '' }} >
+    {{#
+    }
+    }}
+</script>
+
+<script type="text/html" id="judgeBar">
+    <a class="layui-btn layui-btn-xs layui-btn-theme" data-obj='{"event": "judge","id": "{{d.id}}"}' lay-event="judge">审核</a>
+</script>
+
+<script>
+    layui.use('exchange_code/list', layui.factory('exchange_code/list'));
+</script>

@@ -1,0 +1,47 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab-content">
+            <div class="layui-card">
+                <form class="layui-card-body layui-form form_search">
+                    <div class="layui-input-inline">
+                        <input type="text" name="prop_name" value="" autocomplete="off" id="prop-name"
+                               placeholder="请输入道具名称关键字"
+                               lay-filter="prop-name" class="layui-input">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input type="button" lay-submit lay-filter="props-search-form-submit"
+                               value="查询" id="props-search-form-submit"
+                               data-obj='{"event": "search","formClass": ".form_search","tableId": "props-list"}'
+                               class="layui-btn layui-btn-theme">
+                    </div>
+                    <div class="layui-input-inline" style="float: right">
+                        <input type="button" data-obj='{"event": "multi_set"}'
+                               value="一键操作" id="props-multi-set"
+                               class="layui-btn layui-btn-theme">
+                    </div>
+                </form>
+            </div>
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <table id="props-list" lay-filter="props-list">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    layui.data.sendParams = function (params) {
+        var groupId = params.group_id;
+        var type = params.type;
+        var platformId = params.platform_id;
+        let $ = layui.jquery;
+
+        layui.use(['permission/group_props'], function () {
+            $.loadPropsLimitTable(groupId, platformId, type);
+        });
+    };
+</script>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+</script>

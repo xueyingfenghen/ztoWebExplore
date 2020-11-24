@@ -1,0 +1,350 @@
+<style>
+    .layui-hidden {
+        display: none;
+    }
+</style>
+<div id="half" style="width: 48%"></div>
+<div id="full" style="width: 100%"></div>
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+                <!--充值量-->
+                <div class="layui-tab-item" id="search_pay-amount" style="display: none;">
+                    <form class="layui-form layui-form-pane form_pay-amount">
+                        <div class="layui-form-item" id="form_pay-amount">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_pay-amount","tableId": "table_pay-amount"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_pay-amount","tableId": "table_pay-amount"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_pay-amount","url": "/api/stats_export/recharge/amount"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!--充值情况-->
+                <div class="layui-tab-item" id="search_pay-situation" style="display: none;">
+                    <form class="layui-form layui-form-pane form_pay-situation">
+                        <div class="layui-form-item" id="form_pay-situation">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_pay-situation","tableId": "table_pay-situation"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_pay-situation","tableId": "table_pay-situation"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_pay-situation","url": "/api/stats_export/recharge/situation"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!--充值转化-->
+                <div class="layui-tab-item" id="search_pay-exchange" style="display: none;">
+                    <form class="layui-form layui-form-pane form_pay-exchange">
+                        <div class="layui-form-item" id="form_pay-exchange">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn button_exchange"
+                                    data-obj='{"event": "search4","form_class": ".form_pay-exchange","tableId": "table_pay-situation"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary button_exchange"
+                                    data-obj='{"event": "reset4","form_class": ".form_pay-exchange","tableId": "table_pay-situation"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn button_exchange"
+                                    data-obj='{"event": "export_excel4","form_class": ".form_pay-exchange","url": "/api/stats_export/recharge/situation"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!--新增充值-->
+                <div class="layui-tab-item" id="search_pay-increased" style="display: none;">
+                    <form class="layui-form layui-form-pane form_pay-increased">
+                        <div class="layui-form-item" id="form_pay-increased">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_pay-increased","tableId": "table_pay-increased"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_pay-increased","tableId": "table_pay-increased"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_pay-increased","url": "/api/stats_export/recharge/new_recharge"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!--充值排行-->
+                <div class="layui-tab-item" id="search_pay-rank" style="display: none;">
+                    <form class="layui-form layui-form-pane form_pay-rank">
+                        <div class="layui-form-item" id="form_pay-rank">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_pay-rank","tableId": "table_pay-rank"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_pay-rank","tableId": "table_pay-rank"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_pay-rank","url": "/api/stats_export/recharge/ranking"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!--充值流水-->
+                <div class="layui-tab-item" id="search_pay-running-water" style="display: none;">
+                    <form class="layui-form layui-form-pane form_pay_running_water">
+                        <div class="layui-form-item" id="form_pay_running_water">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_pay_running_water","tableId": "table_pay_running_water_list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_pay_running_water","tableId": "table_pay_running_water_list"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_pay_running_water","url": "/api/stats_export/recharge/flow"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--充值项分布-->
+                <div class="layui-tab-item" id="search_pay-item" style="display: none;">
+                    <form class="layui-form layui-form-pane form_pay-item">
+                        <div class="layui-form-item" id="form_pay-item">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_pay-item","tableId": "table_pay-item"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_pay-item","tableId": "table_pay-item"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_pay-item","url": "/api/stats_export/recharge/props"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--充值区间分布-->
+                <div class="layui-tab-item" id="search_pay-area" style="display: none;">
+                    <form class="layui-form layui-form-pane form_pay-area">
+                        <div class="layui-form-item" id="aform_pay-area_area">
+                            <label class="layui-form-label">输入充值区间：</label>
+                            <div class="layui-input-block" style="width: 92%">
+                                <input id="selectArea" type="text" name="range_money" lay-verify="area" autocomplete="off"
+                                       placeholder="请输入充值区间" class="layui-input" readonly="">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item" id="form_pay-area">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_pay-area","tableId": "table_pay-area"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_pay-area","tableId": "table_pay-area"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_pay-area","url": "/api/stats_export/recharge/range"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_pay-amount" style="display: none;">
+    <div class="layui-card-body">
+        <div style="text-align:center">
+        <label  class="layui-btn layui-btn-danger " >总充值金额:
+            <span class=" total_money">0</span></label>
+        </div>
+        <div id="echarts_pay-amount" style="width: 100%;height: 500px;"></div>
+        <label>详细数据</label>
+        <table id="table_pay-amount">
+        </table>
+    </div>
+</div>
+<div class="layui-card tabs" id="list_pay-situation" style="display: none;">
+    <div class="layui-card-body">
+
+        <div id="echarts_pay-situation" style="width: 100%;height: 500px;"></div>
+        <label>详细数据</label>
+        <table id="table_pay-situation">
+        </table>
+    </div>
+</div>
+<div class="layui-card tabs layui-col-md12" id="list_pay-exchange" style="display: none;">
+    <div class="layui-card-body ">
+        <div class="layui-btn-group" style="margin-bottom: 10px;">
+            <button type="button" class="layui-btn button-statis exchange_avg" value="exchange_avg">充值转化分析</button>
+            <button type="button" class="layui-btn layui-btn-primary button-statis exchange_detail"
+                    value="start_detail">
+                充值转化明细
+            </button>
+        </div>
+
+        <div id="tab_exchange_total" class="layui-show">
+            <div class="layui-card layui-col-sm6">
+                <div class="layui-card-body">
+                    <label>充值转化时长</label>
+                    <div id="echarts_pay-exchange_avg" style="width: 100%;height: 400px;"></div>
+                </div>
+            </div>
+
+            <div class="layui-col-sm6 layui-card">
+                <div class="layui-card-body">
+                    <label>详细数据</label>
+                    <table id="table_pay-exchange_avg"></table>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="tab_exchange_detail" class="layui-hidden">
+
+            <div id="echarts_pay-exchange_detail" style="width: 100%;height: 500px;"></div>
+            <label>详细数据</label>
+            <table id="table_pay-exchange_detail"></table>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_pay-increased" style="display: none;">
+    <div class="layui-card-body">
+        <div id="echarts_pay-increased" style="width: 100%;height: 500px;"></div>
+        <label>详细数据</label>
+        <table id="table_pay-increased">
+        </table>
+    </div>
+</div>
+<div class="layui-card tabs" id="list_pay-rank" style="display: none;">
+    <div class="layui-card-body">
+
+        <table id="table_pay-rank">
+        </table>
+    </div>
+</div>
+<div class="layui-card tabs layui-col-md12" id="list_pay-running-water" style="display: none;">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">充值流水（充值金额小计：<span class="pay_running_water_money"
+                                                               style="color: red;">元</span>）
+        </blockquote>
+        <table id="table_pay_running_water_list">
+        </table>
+    </div>
+</div>
+<div class=" tabs" id="list_pay-item" style="display: none;">
+    <div class="layui-card layui-col-md6">
+        <div class="layui-card-body">
+            <label>充值角色数占比</label>
+
+            <div id="echarts_pay-item_role" style="width: 100%;height: 400px;"></div>
+        </div>
+    </div>
+    <div class="layui-card layui-col-md6">
+        <div class="layui-card-body">
+            <label>总金额占比</label>
+
+            <div id="echarts_pay-item_money" style="width: 100%;height: 400px;"></div>
+        </div>
+    </div>
+    <div class="layui-card layui-col-md12">
+        <div class="layui-card-body">
+            <label>详细数据</label>
+            <table id="table_pay-item"></table>
+        </div>
+    </div>
+</div>
+<div class="layui-card tabs layui-col-md12" id="list_pay-area" style="display: none;">
+    <div class="layui-card-body">
+        <div class="layui-card layui-col-sm6">
+            <div class="layui-card-body">
+                <label>日均玩家数</label>
+                <div id="echarts_pay-area" style="width: 100%;height: 400px;"></div>
+            </div>
+        </div>
+
+        <div class="layui-col-sm6 layui-card">
+            <div class="layui-card-body">
+
+                <table id="table_pay-area"></table>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script type="text/html" id="check">
+    <a class="layui-btn  layui-btn-xs check_role"
+       data-obj='{"event": "check", "formClass":".form_pay-rank", "tableId": "table_pay-rank", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"查看充值角色"}'>查看充值角色</a>
+</script>
+
+<script>
+
+    var jsArr = {
+        'pay-amount': 'statistics/pay_analyze/pay_amount',
+        'pay-situation': 'statistics/pay_analyze/pay_situation',
+        'pay-exchange': 'statistics/pay_analyze/pay_exchange',
+        'pay-increased': 'statistics/pay_analyze/pay_increased',
+        'pay-rank': 'statistics/pay_analyze/pay_rank',
+        'pay-running-water': 'statistics/pay_analyze/pay_running_water',
+        'pay-item': 'statistics/pay_analyze/pay_item',
+        'pay-area': 'statistics/pay_analyze/pay_area',
+    };
+
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+</script>

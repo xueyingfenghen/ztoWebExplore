@@ -1,0 +1,775 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+                <!--禁言查询-->
+                <div class="layui-tab-item" id="search_player-chat-banned" style="display: none;">
+                    <form class="layui-form layui-form-pane bannedSearch">
+                        <div class="layui-form-item" id="bannedSearch">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_banned">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset_banned">重置</button>
+                        </div>
+                    </form>
+                </div>
+                <!--聊天举报-->
+                <div class="layui-tab-item" id="search_player-chat-report" style="display: none;">
+                    <form class="layui-form layui-form-pane jubaoSearch">
+                        <div class="layui-form-item" id="jubaoSearch">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_jubao">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset_jubao">重置</button>
+                        </div>
+                    </form>
+                </div>
+                <!--聊天监控-->
+                <div class="layui-tab-item" id="search_player-chat-monitoring" style="display: none;">
+                    <form class="layui-form layui-form-pane jkSearch">
+                        <div class="layui-form-item" id="jkSearch">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_jk">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset_jk">重置</button>
+                            <button type="button" class="layui-btn" id="export_jk">导出</button>
+                        </div>
+                    </form>
+                </div>
+                <!--自动定时设置-->
+                <div class="layui-tab-item" id="search_player-chat-auto-timing" style="display: none;">
+                    <form class="layui-form layui-form-pane form_player-chat-auto-timing">
+                        <div class="layui-form-item" id="form_player-chat-auto-timing">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_player-chat-auto-timing","tableId": "table_auto-timing"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_player-chat-auto-timing","tableId": "table_auto-timing"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_player-chat-banned" style="display: none;">
+<!--    <div class="layui-card-header">禁言查询</div>-->
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-danger" id="one_key_relieve_banned" style="margin-bottom: 10px;">一键解禁</button>
+        <table id="banned_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_player-chat-report" style="display: none;">
+<!--    <div class="layui-card-header">聊天举报</div>-->
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-warm" id="one_key_banned" style="margin-bottom: 10px;">一键禁言</button>
+        <table id="jubao_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_player-chat-monitoring" style="display: none;">
+<!--    <div class="layui-card-header">聊天监控</div>-->
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme" id="add_banned_speak" style="margin-bottom: 10px;">添加禁言</button>
+        <button type="button" class="layui-btn layui-btn-warm" id="one_key_banned_speak" style="margin-bottom: 10px;">一键禁言</button>
+        <table id="jk_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_player-chat-auto-timing" style="display: none;">
+<!--    <div class="layui-card-header">自动定时设置</div>-->
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme" style="margin-bottom: 10px;" data-obj='{"event": "auto_timing","tableId": "table_auto-timing","formClass": ".form_player-chat-auto-timing"}'>添加配置</button>
+        <table id="table_auto-timing"></table>
+    </div>
+</div>
+
+<script>
+    var templet = [];
+    var templet2 = [];
+    var templet3 = [];
+    var idArr = [];
+    var check_type = false;
+    var checkedRoleArr = '';
+    layui.use( ['table', 'admin', 'form', 'view', 'laydate', 'element'], function(){
+        let admin = layui.admin;
+        let table = layui.table;
+        let form = layui.form;
+        let view = layui.view;
+        let laydate = layui.laydate;
+        let element = layui.element;
+        let $ = layui.jquery;
+
+
+        // 监听选项卡切换事件
+        // element.on('tab(docDemoTabBrief)', function (data) {
+        //     for (let i = 0; i < $('.tabs').length; i ++) {
+        //         $('.tabs').eq(i).removeClass("layui-show");
+        //     }
+        //     $('.tabs').eq(data.index).addClass("layui-show");
+        //
+        //     switch (data.index) {
+        //         case 0: {
+        //             admin.reload('.bannedSearch', 'banned_list');
+        //             break;
+        //         }
+        //         case 1: {
+        //             admin.reload('.jubaoSearch', 'jubao_list');
+        //             break;
+        //         }
+        //         case 2: {
+        //             admin.reload('.jkSearch', 'jk_list');
+        //             break;
+        //         }
+        //         default: {
+        //             break;
+        //         }
+        //     }
+        //
+        // })
+
+
+        /**
+         * 校验角色
+         * */
+        $.checkUserDialog = function () {
+            return new Promise(function (resolve, reject) {
+                admin.popup({
+                    title: '角色校验结果'
+                    ,area: ['800px', '600px']
+                    ,id: 'chat_check_result'
+                    ,btn: ['下一步', '取消']
+                    ,success: function(layero, index){
+                        view(this.id).render('player/popup/chat_check_result').done(function(){
+                            // 输入框等完成渲染
+                            admin.getCols('player_chat_role_check_result').then(function (data) {
+                                table.render({
+                                    id: 'chat_check_list',
+                                    elem: '#chat_check_list',
+                                    url: admin.getUrl('/api/public/getUserBaseInfoList'),
+                                    method: 'GET',
+                                    where: {idArr: idArr},//请求参数(额外)
+                                    request: {
+                                        pageName: 'page' //页码的参数名称，默认：page
+                                        ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                                    },
+                                    response: { //定义后端 json 格式，详细参见官方文档
+                                        statusName: 'code', //状态字段名称
+                                        statusCode: '0', //状态字段成功值
+                                        msgName: 'msg', //消息字段
+                                        countName: 'countAll', //总页数字段
+                                        dataName: 'data', //数据字段
+                                    },
+                                    page: true,
+                                    loading: true,
+                                    cols: data.data,
+                                    done: function (d) {
+                                        $('#chat_check_result .player_num').html(d.countAll);
+                                    }
+                                });
+                            })
+                        });
+                    }
+                    ,yes: function(index, layero){
+                        resolve()
+                    }
+                    ,btn2: function(index, layero){
+                        //按钮【按钮二】的回调
+                    }
+                    ,cancel: function(){
+                        //右上角关闭回调
+                    },
+                });
+            })
+        }
+
+        // 渲染搜索框（禁言查询）
+        $.initSearchForm = function () {
+            return new Promise(function (resolve, reject) {
+                admin.req({
+                    url: admin.getUrl('/api/base/getFormList'),
+                    data: {
+                        name: 'player_chat_banned_search_form',
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        $('#bannedSearch').html(data.data['form']);
+                        // 此方法用于渲染时间选择器
+                        admin.laydateInit('#bannedSearch', laydate);
+                        // 渲染表单
+                        form.render();
+                        resolve();
+                    }
+                });
+            });
+        };
+
+        // 渲染解禁理由的搜索框
+        $.initRelieveBannedReason = function () {
+            return new Promise(function (resolve, reject) {
+                admin.req({
+                    url: admin.getUrl('/api/base/getFormList'),
+                    data: {
+                        name: 'player_chat_relieve_banned_reason',
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        $('#relieve_banned_dialog .layui-form-item').html(data.data['form']);
+                        // 渲染表单
+                        form.render();
+                        resolve();
+                    }
+                });
+            });
+        };
+
+        // 角色校验结果
+        $.roleCheckTable = function (voucher) {
+            admin.popup({
+                title: '角色校验结果'
+                ,area: ['800px', '600px']
+                ,id: 'chat_check_result'
+                ,btn: ['确定', '取消']
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/chat_check_result').done(function(){
+                        // 输入框等完成渲染
+                        admin.req({
+                            url: admin.getUrl('/api/base/getTableCols'),
+                            data: {
+                                name: 'player_chat_role_check_result',
+                            },
+                            type: 'post',
+                            done: function (data) {
+                                let cols = data.data;
+                                $.roleCheckResultForm(cols, voucher);
+                            }
+                        });
+                    });
+                }
+                ,yes: function(index, layero){
+                    layer.close(index);
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                },
+            });
+
+        };
+
+        // 禁言查询列表
+        $.bannedList = function (cols) {
+            let param = admin.getFormParam('.bannedSearch');
+            // 玩家列表
+            table.render({
+                id: 'banned_list',
+                elem: '#banned_list',
+                url: admin.getUrl('/api/player/bannedList'),
+                method: 'GET',
+                where: param,//请求参数(额外)
+                request: {
+                    pageName: 'page' //页码的参数名称，默认：page
+                    ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                },
+                response: { //定义后端 json 格式，详细参见官方文档
+                    statusName: 'code', //状态字段名称
+                    statusCode: '0', //状态字段成功值
+                    msgName: 'msg', //消息字段
+                    countName: 'countAll', //总页数字段
+                    dataName: 'data', //数据字段
+                },
+                page: true,
+                loading: true,
+                cols: cols,
+                done: function (data) {
+                    console.log(data)
+                }
+            });
+        };
+
+        // 检查
+        $.roleCheckResultForm = function (cols, voucher) {
+            // 玩家列表
+            table.render({
+                id: 'chat_check_list',
+                elem: '#chat_check_list',
+                url: layui.admin.getUrl('/api/player/roleCheckResultList'),
+                method: 'GET',
+                where: {
+                    voucher: voucher
+                },//请求参数(额外)
+                request: {
+                    pageName: 'page' //页码的参数名称，默认：page
+                    ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                },
+                response: { //定义后端 json 格式，详细参见官方文档
+                    statusName: 'code', //状态字段名称
+                    statusCode: '0', //状态字段成功值
+                    msgName: 'msg', //消息字段
+                    countName: 'countAll', //总页数字段
+                    dataName: 'data', //数据字段
+                },
+                page: true,
+                loading: true,
+                cols: cols,
+                done: function (data) {
+                    $('#chat_check_result .layui-elem-quote span').html(data.countAll);
+                    $.reload('.bannedSearch', 'banned_list');
+                }
+            });
+        };
+
+
+        // 解禁/一键解禁dialog
+        $.relieveBannedDialog = function (title) {
+            admin.popup({
+                title: title
+                ,area: ['600px', '400px']
+                ,id: 'relieve_banned_dialog'
+                ,btn: ['确定', '取消']
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/chat_relieve_banned').done(function(){
+                        // 输入框等完成渲染
+                        $.initRelieveBannedReason().then(function () {
+                            $('#relieve_banned_dialog select[name="relieve_banned_reason"]').attr('lay-filter', 'relieve_banned_reason');
+                            $('#relieve_banned_dialog .layui-inline').eq(1).hide();
+                            // 监听下拉框改变
+                            form.on('select(relieve_banned_reason)', function(data){
+                                if (data.value === '0') {
+                                    $('#relieve_banned_dialog .layui-inline').eq(1).show();
+                                } else {
+                                    $('#relieve_banned_dialog .layui-inline').eq(1).hide();
+                                }
+                            });
+
+                        })
+
+                    });
+                }
+                ,yes: function(index, layero){
+                    let param = admin.getFormParam('.relieve_banned_dialog');
+                    param.idArr = idArr;
+                    console.log(param)
+                    let loading = layer.msg('正在执行。。。', {icon: 16, shade: 0.2, time:0});
+                    admin.req({
+                        url: admin.getUrl('/api/player/relieveBanned'),
+                        data: param,
+                        type: 'post',
+                        done: function (data) {
+                            layer.close(loading);
+                            if (data.code == 0) {
+                                layer.closeAll();
+                                admin.reload('.bannedSearch', 'banned_list')
+                                // let voucher = data.data['voucher'];
+                                // $.roleCheckTable(voucher);
+                            }
+                            if (data.code == 400) {
+                                layer.msg(data.msg, {icon: 5, anim: 6});
+                            }
+                        }
+                    });
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                },
+            });
+        }
+
+        // 渲染表头
+        $.initSearchForm().then(function () {
+            $('#banned_time').parent().css('width', '500px');
+            admin.req({
+                url: admin.getUrl('/api/base/getTableCols'),
+                data: {
+                    name: 'player_chat_banned_list',
+                },
+                type: 'post',
+                done: function (data) {
+                    let cols = data.data;
+                    $.bannedList(cols);
+                    // 获取templet对应的字段名，用于模版引擎绑定数据
+                    templet = admin.getTemplet(cols);
+                }
+            });
+        });
+
+        // 重载表格
+        $.reload = function (sel, tableId) {
+            let param = admin.getFormParam(sel);
+            table.reload(tableId, {
+                where: param,
+                page: {
+                    curr: 1
+                }
+            });
+        }
+
+        // 查询
+        $(document).off('click', '#search_banned').on('click', '#search_banned', function () {
+            $.reload('.bannedSearch', 'banned_list');
+        })
+
+        // 重置
+        $(document).off('click', '#reset_banned').on('click', '#reset_banned', function () {
+            admin.resetForm('.bannedSearch');
+            $.reload('.bannedSearch', 'banned_list');
+        });
+
+        // 解禁
+        $(document).off('click', '.relieve_banned').on('click', '.relieve_banned', function () {
+            let id = $(this).attr('data-type');
+            idArr = [id];
+
+            $.checkUserDialog().then(function () {
+                $.relieveBannedDialog('解禁');
+            })
+
+        });
+
+
+
+        // 一键解除禁言
+        $(document).off('click', '#one_key_relieve_banned').on('click', '#one_key_relieve_banned', function () {
+            let checkStatus = table.checkStatus('banned_list').data;
+            if (checkStatus.length < 1) {
+                layer.msg('请选择解禁对象', {icon: 5, anim: 6});
+            } else {
+                idArr = [];
+                for (let i = 0; i < checkStatus.length; i ++) {
+                    idArr.push(checkStatus[i][templet[0]]);
+                }
+                $.relieveBannedDialog('一键解禁');
+            }
+        })
+
+        /******************************* 聊天举报 **************************************/
+
+        // 渲染搜索框（禁言查询）
+        $.initJubaoForm = function () {
+            return new Promise(function (resolve, reject) {
+                admin.req({
+                    url: admin.getUrl('/api/base/getFormList'),
+                    data: {
+                        name: 'player_chat_jubao_search_form',
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        $('#jubaoSearch').html(data.data['form']);
+                        // 此方法用于渲染时间选择器
+                        admin.laydateInit('#jubaoSearch', laydate);
+                        // 渲染表单
+                        form.render();
+                        resolve();
+                    }
+                });
+            });
+        };
+
+        $.jubaoList = function (cols) {
+            let param = admin.getFormParam('.jubaoSearch');
+            // 玩家列表
+            table.render({
+                id: 'jubao_list',
+                elem: '#jubao_list',
+                url: admin.getUrl('/api/player/jubaoList'),
+                method: 'GET',
+                where: param,//请求参数(额外)
+                request: {
+                    pageName: 'page' //页码的参数名称，默认：page
+                    ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                },
+                response: { //定义后端 json 格式，详细参见官方文档
+                    statusName: 'code', //状态字段名称
+                    statusCode: '0', //状态字段成功值
+                    msgName: 'msg', //消息字段
+                    countName: 'countAll', //总页数字段
+                    dataName: 'data', //数据字段
+                },
+                page: true,
+                loading: true,
+                cols: cols
+            });
+        }
+
+        // 举报内容搜索框
+        $.initJubaoForm().then(function () {
+            admin.req({
+                url: admin.getUrl('/api/base/getTableCols'),
+                data: {
+                    name: 'player_chat_jubao_list',
+                },
+                type: 'post',
+                done: function (data) {
+                    let cols = data.data;
+                    templet2 = admin.getTemplet(cols);
+                    $.jubaoList(cols)
+                }
+            });
+        });
+
+
+        // 渲染禁言理由的搜索框
+        $.initBannedReason = function (type = false) {
+            return new Promise(function (resolve, reject) {
+                admin.req({
+                    url: admin.getUrl('/api/base/getFormList'),
+                    data: {
+                        name: 'player_chat_banned_reason',
+                    },
+                    type: 'post',
+                    done: function (data) {
+
+                        if (type) {
+                            $('#check_user_div').show();
+                        }
+
+                        $('#banned_dialog .banned_set').html(data.data['form']);
+                        // 默认为自动禁言
+                        $('#banned_dialog .banned_set .layui-inline').eq(0).hide();
+                        $('#banned_dialog .banned_set .layui-inline').eq(2).hide();
+                        // 渲染表单
+                        form.render();
+
+                        $('#banned_dialog .banned_set .layui-inline').eq(1).find('select').attr('lay-filter', 'banned_reason');
+                        // 监听下拉框改变
+                        form.on('select(banned_reason)', function(data){
+                            if (data.value === '0') {
+                                $('#banned_dialog .banned_set .layui-inline').eq(2).show();
+                            } else {
+                                $('#banned_dialog .banned_set .layui-inline').eq(2).hide();
+                            }
+                        });
+
+                        let placeholder = $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').attr('placeholder');
+                        form.on('radio(banns)', function (data) {
+                            if (data.value == 0) {
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).hide();
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').val('');
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').attr('disabled', false)
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').attr('placeholder', placeholder)
+                            }
+                            if (data.value == 1) {
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).show();
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').val('');
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').attr('disabled', true)
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').attr('placeholder', 999999999)
+                            }
+                            if (data.value == 2) {
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).show();
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').val('');
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').attr('disabled', false)
+                                $('#banned_dialog .banned_set .layui-inline').eq(0).find('input').attr('placeholder', placeholder)
+                            }
+                        });
+
+                        resolve();
+                    }
+                });
+            });
+        };
+
+        $.roleCheckTableByBanned = function (voucher) {
+            admin.popup({
+                title: '角色校验结果'
+                ,area: ['800px', '600px']
+                ,id: 'chat_check_result'
+                ,btn: ['下一步', '取消']
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/chat_check_result').done(function(){
+                        // 输入框等完成渲染
+                        admin.req({
+                            url: admin.getUrl('/api/base/getTableCols'),
+                            data: {
+                                name: 'player_chat_role_check_result',
+                            },
+                            type: 'post',
+                            done: function (data) {
+                                let cols = data.data;
+                                table.render({
+                                    id: 'chat_check_list',
+                                    elem: '#chat_check_list',
+                                    page: false,
+                                    loading: true,
+                                    cols: cols,
+                                    data: []
+                                });
+                            }
+                        });
+                    });
+                }
+                ,yes: function(index, layero){
+
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                },
+            });
+
+        };
+
+        // 解禁/一键解禁dialog
+        $.bannedDialog = function (title) {
+            admin.popup({
+                title: title
+                ,area: ['800px', '600px']
+                ,id: 'banned_dialog'
+                ,btn: ['确定', '取消']
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/chat_banned').done(function(){
+                        $.initBannedReason()
+                    });
+                }
+                ,yes: function(index, layero){
+
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                },
+            });
+        }
+
+        // 查询
+        $(document).off('click', '#search_jubao').on('click', '#search_jubao', function () {
+            $.reload('.jubaoSearch', 'jubao_list');
+        })
+
+        // 重置
+        $(document).off('click', '#reset_jubao').on('click', '#reset_jubao', function () {
+            admin.resetForm('.jubaoSearch');
+            $.reload('.jubaoSearch', 'jubao_list');
+        });
+
+        // 禁言
+        $(document).off('click', '.do_banned').on('click', '.do_banned', function () {
+
+            $.bannedDialog('禁言');
+            // $.roleCheckTableByBanned()
+        })
+
+
+        /**********************************聊天监控***********************************/
+
+        // 添加禁言
+        $(document).off('click', '#add_banned_speak').on('click', '#add_banned_speak', function () {
+            admin.popup({
+                title: '添加禁言'
+                ,area: ['950px', '600px']
+                ,id: 'banned_dialog'
+                ,btn: ['确定', '取消']
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/chat_banned').done(function(){
+                        $.initBannedReason(true)
+                    });
+                }
+                ,yes: function(index, layero){
+                    // 执行禁言操作
+                    if (!check_type) {
+                        layer.msg('未校验或校验失败，请重新校验', {icon: 5, anim: 6});
+                        return ;
+                    }
+
+                    if (checkedRoleArr !== $("textarea[name='user_list']").val()) {
+                        layer.msg('未校验或校验失败，请重新校验', {icon: 5, anim: 6});
+                        check_type = false;
+                        checkedRoleArr = '';
+                        $('.user_check_type').removeClass('green');
+                        $('.user_check_type').addClass('red');
+                        $('.user_check_type').html('校验失败');
+                        return ;
+                    }
+
+                    let param = admin.getFormParam('.banned_dialog');
+                    param.banned_from = 2; // 默认为聊天监控禁言
+                    let loading = layer.msg('正在执行。。。', {icon: 16, shade: 0.2, time:0});
+                    admin.req({
+                        url: admin.getUrl('/api/banned/bannedChat'),
+                        data: param,
+                        type: 'post',
+                        done: function (data) {
+                            layer.close(loading);
+                            if (data.code == 0) {
+                                layer.msg('禁言成功', {icon: 6, anim: 0});
+                                layer.closeAll();
+                                admin.reload('.jkSearch', 'jk_list');
+                            } else {
+                                layer.msg(data.msg, {icon: 5, anim: 6});
+                            }
+                        }
+                    });
+
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                },
+            });
+
+            /*****************自动定时设置********************/
+
+
+
+        });
+
+        // 聊天监控
+        layui.use('banned/chat_jk', layui.factory('banned/chat_jk'));
+        // 自动定时设置
+        layui.use('banned/auto_time', layui.factory('banned/auto_time'));
+
+    });
+</script>
+<script type="text/html" id="banned_edit">
+    {{#
+    var fn = function(){
+    return d[templet[0]];
+    };
+    }}
+    <button type="button" class="layui-btn layui-btn-xs layui-btn-theme relieve_banned" data-type={{ fn() }}>解禁</button>
+</script>
+<script type="text/html" id="jubao">
+    {{#
+    var fn = function(){
+    return d[templet2[0]];
+    };
+    }}
+    <button type="button" class="layui-btn layui-btn-warm layui-btn-xs do_banned" data-type={{ fn() }}>禁言</button>
+</script>
+<script type="text/html" id="monitoring">
+    {{#
+    var fn = function(){
+    return d[templet3[0]];
+    };
+    }}
+
+    {{#  if(d[templet3[1]] ==0 ){ }}
+    <button type="button" class="layui-btn layui-btn-warm layui-btn-xs do_banned_jk" data-type={{ fn() }}>禁言</button>
+    {{#  } else { }}
+    <button type="button" class="layui-btn layui-btn-xs layui-btn-warm layui-btn-disabled" data-type={{ fn() }}>禁言</button>
+    {{#  } }}
+</script>
+<script type="text/html" id="auto_op">
+    <a class="layui-btn layui-btn-xs layui-btn-warm" data-obj='{"event": "auto_timing_edit","tableId": "table_auto-timing","formClass": ".form_auto-timing","id": "{{d.id}}"}'>编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" data-obj='{"event": "auto_timing_del","tableId": "table_auto-timing","formClass": ".form_auto-timing","id": "{{d.id}}"}'>删除</a>
+</script>
+

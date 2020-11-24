@@ -1,0 +1,97 @@
+<form class="layui-form" lay-filter="user-form">
+    <div class="layui-form" lay-filter="layuiadmin-user-group-form-list" id="layuiadmin-user-group-form-list"
+         style="padding: 20px 30px 0 0;">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">已选用户</label>
+            <div class="layui-input-inline">
+                    <textarea name="users" lay-verify="" lay-filter="users-edit"
+                              style="width: 400px; height: 100px;" autocomplete="off" class="layui-textarea" disabled>
+                    </textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item ">
+            <label class="layui-form-label">变更组别</label>
+            <div class="layui-input-inline" id="group-id-edit" style="width: 300px;">
+                <select name="group_id" xm-select="pid-drop" xm-select-radio="" lay-verify="required">
+                </select>
+            </div>
+        </div>
+
+        <script type="text/html" template>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-inline">
+                    <input type="button" lay-submit lay-filter="layuiadmin-user-group-form-submit" value="提交"
+                           id="commit"
+                           class="layui-btn layui-btn-theme">
+                </div>
+            </div>
+        </script>
+    </div>
+</form>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+
+<script>
+    var $ = layui.jquery;
+    $(function () {
+        layui.data.sendParams = function (params) {
+            var user = '';
+            $.each(params.select_data, function (idx, item) {
+                user += (item.nick_name + ';');
+            });
+            console.log(params.drops);
+            $('textarea[name="users"]').html(user);
+
+            //数组转树形结构
+            var array2tree = function (array, pid) {
+                var result = [];
+                $.each(array, function (i, item) {
+                    if (item.pid == pid) {
+                        item.value = item.id;
+                        item.children = array2tree(array, item.id);
+
+                        //无子节点，删除children
+                        if (item.children.length <= 0) {
+                            delete item.children;
+                        }
+
+                        delete item.disabled;
+                        delete item.selected;
+                        result.push(item);
+                    }
+                });
+                return result;
+            };
+
+            var renderPidDrop = function () {
+                //树形组别建立
+                var parentMap = {};
+                for (j = 0; j < params.drops.length; j++) {
+                    parentMap[params.drops[j]['id']] = params.drops[j]['pid'];
+                }
+
+                var rootId = 0;
+                $.each(parentMap, function (id, pid) {
+                    if (typeof parentMap[pid] === 'undefined') {
+                        rootId = id;
+                    }
+                });
+
+                //渲染下菜单
+                var treeMap = array2tree(params.drops, rootId);
+                layui.use(['formSelects'], function () {
+                    layui.formSelects.data('pid-drop', 'local', {
+                        arr: treeMap
+                    });
+                });
+            };
+
+            renderPidDrop();
+        };
+    });
+</script>

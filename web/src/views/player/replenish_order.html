@@ -1,0 +1,480 @@
+<style>
+    #playerSearch .layui-inline {
+        margin-bottom: 10px!important;
+        margin-right: 20px!important;
+    }
+    .layui-input-block {
+        width: 190px;
+    }
+    .layui-input a {
+        color: #1E9FFF;
+        line-height: 38px;
+        text-decoration: underline;
+    }
+    .layui-input span {
+        line-height: 38px;
+    }
+    #content-alert .layui-inline {
+        width: 300px;
+    }
+    .layui-hidden {
+        display: none;
+    }
+    .red {
+        color: red;
+    }
+    .green {
+        color: green;
+    }
+</style>
+
+<title>玩家信息查询</title>
+
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb">
+        <a lay-href="">玩家管理</a>
+        <a><cite>玩家补单</cite></a>
+    </div>
+</div>
+
+<div class="layui-fluid">
+
+    <div class="layui-card">
+        <div class="layui-card-header">玩家补单</div>
+        <div class="layui-card-body">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">个人补单</li>
+                    <li>批量补单</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <!--禁言查询-->
+                    <div class="layui-tab-item layui-show">
+                        <form class="layui-form layui-form-pane replenishForm">
+                            <div class="layui-form-item" id="replenishForm">
+
+                            </div>
+                            <div class="layui-form-item">
+                                <button type="button" class="layui-btn layui-btn-theme" id="search">查询</button>
+                                <button type="button" class="layui-btn layui-btn-primary" id="resets">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!--聊天举报-->
+                    <div class="layui-tab-item">
+                        批量补单（非一期需求）
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="layui-card tabs">
+        <div class="layui-card-header">个人补单</div>
+        <div class="layui-card-body">
+            <button type="button" class="layui-btn layui-btn-theme" id="add_person_replenish" style="margin-bottom: 10px;">新增个人补单</button>
+            <table id="replenish_person_list"></table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    var templet = [];
+    var idArr = [];
+    var voucher = '';
+    layui.use( ['table', 'admin', 'form', 'view', 'laydate', 'element'], function(){
+        let admin = layui.admin;
+        let table = layui.table;
+        let form = layui.form;
+        let view = layui.view;
+        let laydate = layui.laydate;
+        let element = layui.element;
+        let $ = layui.jquery;
+
+
+        // 渲染搜索框（个人补单）
+        $.initSearchForm = function () {
+            return new Promise(function (resolve, reject) {
+                admin.req({
+                    url: admin.getUrl('/api/base/getFormList'),
+                    data: {
+                        name: 'player_replenish_person_form',
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        $('#replenishForm').html(data.data['form']);
+                        // 此方法用于渲染时间选择器
+                        admin.laydateInit('#replenishForm', laydate);
+                        // 渲染表单
+                        form.render();
+                        resolve();
+                    }
+                });
+            });
+        };
+
+        $.replenishPersonList = function (cols) {
+            let param = admin.getFormParam('.replenishForm');
+            // 个人补单List
+            table.render({
+                id: 'replenish_person_list',
+                elem: '#replenish_person_list',
+                url: admin.getUrl('/api/player/getPersonReplenishList'),
+                method: 'GET',
+                where: param,//请求参数(额外)
+                request: {
+                    pageName: 'page' //页码的参数名称，默认：page
+                    ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                },
+                response: { //定义后端 json 格式，详细参见官方文档
+                    statusName: 'code', //状态字段名称
+                    statusCode: '0', //状态字段成功值
+                    msgName: 'msg', //消息字段
+                    countName: 'countAll', //总页数字段
+                    dataName: 'data', //数据字段
+                },
+                page: true,
+                loading: true,
+                cols: cols,
+            });
+        };
+
+        $.initSearchForm().then(function () {
+
+            $("input[name='operator_time']").parent().css('width', '500px');
+
+            admin.req({
+                url: admin.getUrl('/api/base/getTableCols'),
+                data: {
+                    name: 'player_replenish_person_list',
+                },
+                type: 'post',
+                done: function (data) {
+                    let cols = data.data;
+                    $.replenishPersonList(cols);
+                    // 获取templet对应的字段名，用于模版引擎绑定数据
+                    templet = admin.getTemplet(cols);
+                }
+            });
+        });
+
+        // 重载表格
+        $.reload = function (sel, tableId) {
+            let param = admin.getFormParam(sel);
+            table.reload(tableId, {
+                where: param,
+                page: {
+                    curr: 1
+                }
+            });
+        }
+
+        // 查询
+        $(document).off('click', '#search').on('click', '#search', function () {
+            $.reload('.replenishForm', 'replenish_person_list');
+        })
+
+        // 搜索
+        $(document).off('click', '#resets').on('click', '#resets', function () {
+            admin.resetForm('.replenishForm');
+            $.reload('.replenishForm', 'replenish_person_list');
+        })
+
+        /****************补单失败列表dialog***************/
+
+        $.failDialog = function (data, name, type) {
+            admin.popup({
+                title: '补单失败详情'
+                ,area: ['800px', '600px']
+                ,id: 'replenish_fail_detail'
+                ,btn: ['确定', '取消']
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/replenish_fail_detail').done(function(){
+                        if (type == 1) {
+                            $('#re_more_replenish').show()
+                        }
+                        if (type == 2) {
+                            $('#re_more_replenish').hide()
+                        }
+
+                        admin.req({
+                            url: admin.getUrl('/api/base/getTableCols'),
+                            data: {
+                                name: name,
+                            },
+                            type: 'post',
+                            done: function (res) {
+                                let cols = res.data;
+                                table.render({
+                                    id: 'replenish_fail_list',
+                                    elem: '#replenish_fail_list',
+                                    loading: true,
+                                    cols: cols,
+                                    data: data
+                                });
+                            }
+                        });
+
+
+                    });
+                }
+                ,yes: function(index, layero){
+
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                    layer.close(index);
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                    layer.close(index);
+                },
+            });
+        }
+
+        // 获取补单状态， 若全部成功则弹框提示全部补单成功，有失败则列出所有失败的，方便一键补单
+        $.getReplenishState = function (voucher) {
+            admin.req({
+                url: admin.getUrl('/api/player/getReplenishFailTable'),
+                data: {
+                    voucher: voucher
+                },
+                type: 'post',
+                done: function (data) {
+                    $.reload('.replenishForm', 'replenish_person_list');
+                    if (data.code == 400) {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                    }
+                    if (data.code == 0) {
+                        if (data.data.length < 1) {
+                            // 补单全部成功
+                            layer.msg('补单成功！', {icon: 6, anim: 0});
+
+                        } else {
+                            // 存在补单失败的情况，用表格将补单失败的情况全部列出来
+                            $.failDialog(data.data, 'player_replenish_fail_detail_table', 1);
+                        }
+                    }
+                }
+            });
+        };
+
+        // 重新补单后重载表格
+        $.reloadReplenishTable = function (voucher) {
+            admin.req({
+                url: admin.getUrl('/api/player/getReplenishFailTable'),
+                data: {
+                    voucher: voucher
+                },
+                type: 'post',
+                done: function (data) {
+                    $.reload('.replenishForm', 'replenish_person_list');
+                    if (data.code == 400) {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                    }
+                    if (data.code == 0) {
+                        if (data.data.length < 1) {
+                            table.reload(
+                                'replenish_fail_list',{
+                                    data: data.data
+                                }
+                            );
+                            // 补单全部成功
+                            layer.msg('补单成功！', {icon: 6, anim: 0});
+                            // 关闭弹框
+                            layer.closeAll();
+                        } else {
+                            // layer.msg('补单失败', {icon: 5, anim: 6});
+                            table.reload(
+                                'replenish_fail_list',{
+                                    data: data.data
+                                }
+                            );
+                        }
+                    }
+                }
+            });
+        }
+
+        // 补单失败界面 重新补单（checkbox多选）
+        $(document).off('click', '#re_more_replenish').on('click', '#re_more_replenish', function () {
+            let checkData = table.checkStatus('replenish_fail_list').data;
+            idArr = [];
+            for (let k in checkData) {
+                idArr.push(checkData[k]['id']);
+            }
+            if (idArr.length < 1) {
+                layer.msg('请勾选重新补单的数据', {icon: 5, anim: 6});
+            } else {
+                // 重新补单请求
+                admin.req({
+                    url: admin.getUrl('/api/player/reReplenish'),
+                    data: {
+                        idArr: idArr,
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        if (data.code == 400) {
+                            layer.msg(data.msg, {icon: 5, anim: 6});
+                        }
+                        if (data.code == 0) {
+                            $.reloadReplenishTable(voucher);
+                        }
+                    }
+                });
+            }
+        });
+
+        // 单个补单操作
+        $(document).off('click', '.replenish_id').on('click', '.replenish_id', function () {
+            let id = $(this).attr('data-type');
+            idArr = [id];
+            admin.req({
+                url: admin.getUrl('/api/player/reReplenish'),
+                data: {
+                    idArr: idArr,
+                },
+                type: 'post',
+                done: function (data) {
+                    if (data.code == 400) {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                    }
+                    if (data.code == 0) {
+                        admin.req({
+                            url: admin.getUrl('/api/player/getReplenishDataById'),
+                            data: {
+                                id: id
+                            },
+                            type: 'post',
+                            done: function (data) {
+                                if (data.data[0]['state'] == 0) {
+                                    layer.msg('补单成功', {icon: 6, anim: 0});
+                                    layer.closeAll();
+                                    $.reload('.replenishForm', 'replenish_person_list');
+                                } else {
+                                    layer.msg('补单失败', {icon: 5, anim: 6});
+                                    table.reload(
+                                        'replenish_fail_list',{
+                                            data: data.data
+                                        }
+                                    );
+                                }
+                            }
+                        });
+
+                    }
+                }
+            });
+        })
+
+        // 单个补单
+        $(document).off('click', '.look').on('click', '.look', function () {
+            // idArr = [$(this).attr('data-type')];
+            // console.log(idArr)
+            let id = $(this).attr('data-type');
+            admin.req({
+                url: admin.getUrl('/api/player/getReplenishDataById'),
+                data: {
+                    id: id
+                },
+                type: 'post',
+                done: function (data) {
+                    $.failDialog(data.data, 'player_replenish_fail_detail_table2', 2);
+                }
+            });
+        })
+
+        /****************补单失败列表dialog***************/
+
+
+        /****************新增个人补单dialog***************/
+
+        //
+        $.initReplenishPersonAddForm = function () {
+            return new Promise(function (resolve, reject) {
+                admin.req({
+                    url: admin.getUrl('/api/base/getFormList'),
+                    data: {
+                        name: 'player_chat_relieve_banned_reason',
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        $('#relieve_banned_dialog .layui-form-item').html(data.data['form']);
+                        // 渲染表单
+                        form.render();
+                        resolve();
+                    }
+                });
+            });
+        };
+
+
+        // 新增个人补单
+        $(document).off('click', '#add_person_replenish').on('click', '#add_person_replenish', function () {
+            admin.popup({
+                title: '新增个人补单'
+                ,area: ['80%', '80%']
+                ,id: 'relieve_banned_dialog'
+                ,btn: ['确定', '取消']
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/replenish_person_add').done(function(){
+                        // dialog渲染后的逻辑在dialog页面上
+                        // 关掉dialog再开按钮请求都会触发多次？？？
+                        voucher = '';
+
+                    });
+                }
+                ,yes: function(index, layero){
+                    let param = admin.getFormParam('.replenish_person_add_dialog');
+                    param.recharge = table.cache.pay_content;
+                    console.log(param)
+                    admin.req({
+                        url: admin.getUrl('/api/player/ReplenishOrderPerson'),
+                        data: param,
+                        type: 'post',
+                        done: function (data) {
+                            if (data.code == 400) {
+                                layer.msg(data.msg, {icon: 5, anim: 6});
+                            }
+                            if (data.code == 0) {
+                                layer.close(index);
+                                voucher = data.data['voucher']; // 本次的操作凭证
+                                // 查看补单失败详情
+                                $.getReplenishState(voucher);
+                            }
+                        }
+                    });
+                }
+                ,btn2: function(index, layero){
+                    //按钮【按钮二】的回调
+                    layer.close(index);
+                }
+                ,cancel: function(){
+                    //右上角关闭回调
+                    layer.close(index);
+                },
+            });
+        })
+        /****************新增个人补单dialog***************/
+
+
+    });
+</script>
+<script type="text/html" id="replenish_state">
+    {{#  if(d.state == 0 ){ }}
+    <span class="green">补单成功</span>
+    {{#  } else { }}
+    <span class="red">补单失败</span>
+    {{#  } }}
+</script>
+<script type="text/html" id="edit">
+    {{#  if(d.state == 0 ){ }}
+    {{#  } else { }}
+    <button type="button" class="layui-btn layui-btn-sm look" data-type={{ d.id }}>查看详情</button>
+    {{#  } }}
+</script>
+<script type="text/html" id="replenish_id">
+    <button type="button" class="layui-btn layui-btn-sm replenish_id" data-type={{ d.id }}>重新补单</button>
+</script>

@@ -1,0 +1,50 @@
+<title>失败详情</title>
+
+<div class="layui-fluid">
+
+    <div class="layui-card tabs  layui-show" id="list_fail-detail" style="display: none;">
+        <div class="layui-card-body">
+            <table class="layui-hide" id="table_fail-detail"></table>
+            <script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+          </script>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    var $ = layui.jquery;
+    var table = layui.table;
+    var admin = layui.admin;
+    // 渲染表格
+    $(function () {
+        layui.data.sendParams = function (params) {
+            var tableId = 'table_fail-detail';
+            table.render({
+                id: tableId,
+                elem: '#' + tableId,
+                url: admin.getUrl('/api/activity/error_detail'),
+                method: 'GET',
+                where: params,//请求参数(额外)
+                limit: Number.MAX_VALUE, // 数据表格默认全部显示-->
+                parseData: function (res) {
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": '', //解析提示文本
+                        "data": res.data
+                    };
+                },
+                page: false,
+                loading: true,
+                cols: [[ //表头
+                    {field: 'server_id', title: '区服', align: 'center', unresize: true}
+                    , {field: 'state', title: '导入状态', align: 'center', unresize: true,style: "color: red;"}
+                    , {field: 'error_msg', title: '失败原因', align: 'center', unresize: true,style: "color: red;"}
+                ]
+                ]
+            });
+        }
+    })
+
+</script>

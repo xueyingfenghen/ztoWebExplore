@@ -1,0 +1,122 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+
+                <!--新增留存-->
+                <div class="layui-tab-item" id="search_time-limit-activity" style="display: none;">
+                    <form class="layui-form layui-form-pane form_time-limit-activity">
+                        <div class="layui-form-item" id="form_time-limit-activity">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_time-limit-activity","tableId": "table_time-limit-activity"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_time-limit-activity","tableId": "table_time-limit-activity"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_time-limit-activity","url":"/api/stats_export/user_loss/loss_time"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+
+                <div class="layui-tab-item" id="search_rush-list-activity" style="display: none;">
+                    <form class="layui-form layui-form-pane form_rush-list-activity">
+                        <div class="layui-form-item" id="form_rush-list-activity">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_rush-list-activity","tableId": "table_rush-list-activity"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_rush-list-activity","tableId": "table_rush-list-activity"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_rush-list-activity","url":"/api/stats_export/user_loss/loss_time"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="layui-tab-item" id="search_normal-list" style="display: none;">
+                    <form class="layui-form layui-form-pane form_normal-list">
+                        <div class="layui-form-item" id="form_normal-list">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_normal-list","tableId": "table_normal-list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_normal-list","tableId": "table_normal-list"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_normal-list","url":"/api/stats_export/user_loss/loss_monitor"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_time-limit-activity" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_time-limit-activity">
+        </table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_rush-list-activity" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_rush-list-activity">
+        </table>
+
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_normal-list" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_normal-list">
+        </table>
+    </div>
+</div>
+<script>
+
+    var jsArr = {
+        'time-limit-activity': 'statistics/user_analyze/time_limit_activity',
+        'rush-list-activity': 'statistics/user_analyze/rush_list_activity',
+        'normal-list': 'statistics/user_analyze/normal_list',
+    }
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+</script>
+<script type="text/html" id="level_spread">
+    <a class="layui-btn  layui-btn-xs level_discover"
+       data-obj='{"event": "level_spread", "formClass":".form_time-limit-activity", "tableId": "table_time-limit-activity", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"查看档位分布"}'>查看档位分布</a>
+</script>
+<script type="text/html" id="detail">
+    <a class="layui-btn  layui-btn-xs detail"
+       data-obj='{"event": "detail", "formClass":"form_time-limit-activity", "tableId": "table_time-limit-activity", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"查看详情"}'>查看详情</a>
+</script>

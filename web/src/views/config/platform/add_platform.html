@@ -1,0 +1,47 @@
+<style>
+    .layui-input {
+     width: 100%;
+    }
+    .layui-form-label.layui-required:after{
+        content:"*";
+        color:red;
+        position: absolute;
+        top:12px;
+        left:6px;
+    }
+</style>
+<form class="layui-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-required" style="width: 84px">游戏中文名称</label>
+        <div class="layui-input-block" style="margin-left: 114px">
+            <input type="text" id="cn" name="cn"  autocomplete="off" placeholder="请输入游戏中文名称" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-required" style="width: 84px">游戏英文名称</label>
+        <div class="layui-input-block" style="margin-left: 114px">
+            <input type="text" id="english" name="english"  autocomplete="off" placeholder="请输入游戏英文名称" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label" style="width: 84px">备注</label>
+        <div class="layui-input-block" style="margin-left: 114px">
+            <input type="text"  id="remark" name="remark"  autocomplete="off" placeholder="请输入备注内容" class="layui-input">
+        </div>
+    </div>
+
+</form>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    var $ =layui.$;
+    $(function () {
+        layui.data.sendParams = function (params) {
+            $("#cn").val(params.cn);
+            $("#english").val(params.english);
+            $("#remark").val(params.remark);
+        };
+    })
+</script>

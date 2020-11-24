@@ -1,0 +1,47 @@
+<blockquote class="layui-elem-quote">
+    <span id="count">角色数量：</span>
+</blockquote>
+<table class="layui-hide" id="lift_a_ban"></table>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+
+<script>
+    //定义表头
+    var COLS = [ //表头
+        {field:'no', width:100, title: '序号'}
+        ,{field:'server_id', width:100, title: '区服'}
+        ,{field:'role_id', width:100, title: '角色ID'}
+        ,{field:'nickname', width:100, title: '角色昵称'}
+        ,{field:'vip', width:100, title: 'VIP等级'}
+    ];
+
+    var $ = layui.jquery;
+    layui.data.sendParams = function (params) {
+        console.log('账号封禁详情',params);
+        layui.use('table', function(){
+            var table = layui.table;
+            table.render({
+                elem: '#lift_a_ban'
+                ,url: layui.admin.getUrl('/api/relieve_info') //模拟接口
+                ,where: {relieve_info: params,banned_name:'user'}
+                ,cols: [COLS]
+                ,method:'post'
+                ,parseData: function(res){
+                    console.log(7878,res);
+                    $("#count").append(res.data.count);
+                    return {
+                        "code":res.code, //解析接口状态
+                        "msg": '', //解析提示文本
+                        "count": res.data.count, //解析数据长度
+                        "data": res.data.list//解析数据列表
+                    };
+                }
+                ,page: true,limit: 10,limits: [10, 15, 20, 25, 30]
+            });
+        });
+    }
+</script>
+<script type="text/html" id="prop_edit">
+
+</script>

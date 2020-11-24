@@ -1,0 +1,50 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+
+                <!--登录前公告-->
+                <div class="layui-tab-item" id="search_error-list" style="display: none;">
+                    <form class="layui-form layui-form-pane form_error-list">
+                        <div class="layui-form-item" id="activity_error-list_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_error-list","tableId": "table_error-list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_error-list","tableId": "table_error-list"}'>
+                                重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs " id="list_error-list" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_error-list" lay-filter="test">
+        </table>
+    </div>
+</div>
+
+<script>
+    layui.use('activity/errorList', layui.factory('activity/errorList'));
+</script>
+
+<script type="text/html" id="op">
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "detail",  "tableId": "table_error-list", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"查看失败详情"}'>失败详情</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs"
+       data-obj='{"event": "del",  "tableId": "table_error-list", "index":"{{ d.LAY_TABLE_INDEX }}"}'>删除</a>
+</script>
+
+

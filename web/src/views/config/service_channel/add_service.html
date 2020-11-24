@@ -1,0 +1,86 @@
+<style>
+    .layui-input {
+     width: 100%;
+    }
+    .layui-form-label.layui-required:after{
+        content:"*";
+        color:red;
+        position: absolute;
+        top:12px;
+        left:35px;
+    }
+    .layui-form-label.layui-required-swell:after{
+        content:"*";
+        color:red;
+        position: absolute;
+        top:12px;
+        left:17px;
+    }
+    .layui-form-label.layui-required-two:after{
+        content:"*";
+        color:red;
+        position: absolute;
+        top:12px;
+        left:45px;
+    }
+</style>
+<form class="layui-form">
+    <div class="layui-inline">
+        <label class="layui-form-label layui-required-two" style="width: 69px">平台</label>
+        <div class="layui-input-block" style="margin-left: 114px;margin-bottom: 12px">
+            <select id="platform_id" name="platform_id"  lay-filter="platform_id">
+                <option value="">请选择</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+                <label class="layui-form-label layui-required-swell" style="width: 69px" id="server_channel">区服名称</label>
+                <div class="layui-input-block" style="margin-left: 114px">
+                    <input type="text" id="name" name="name"  autocomplete="off" placeholder="请输入区服名称" class="layui-input">
+                </div>
+   </div>
+   <div class="layui-form-item server_div">
+        <label class="layui-form-label layui-required" style="width: 69px">区服id</label>
+        <div class="layui-input-block" style="margin-left: 114px">
+            <input type="text"  id="server_id" name="server_id"  autocomplete="off" placeholder=请输入区服id  class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item channel_div" style="display: none">
+        <label class="layui-form-label layui-required" style="width: 69px">渠道id</label>
+        <div class="layui-input-block" style="margin-left: 114px">
+            <input type="text"  id="channel_id" name="channel_id"  autocomplete="off" placeholder=请输入渠道id  class="layui-input">
+        </div>
+    </div>
+    <div class="btn-wrapper">
+        <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="server_channel_submit">确定</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="server_channel_close">取消</button>
+    </div>
+</form>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    var $ =layui.$;
+    var admin =layui.admin;
+    var form =layui.form;
+    $(function () {
+        layui.data.sendParams = function (params) {
+            console.log(params)
+            $("#platform_id").append(params.option);
+            if(params.id > 0){
+                $("#name").val(params.name);
+                $("#server_id").val(params.server_id);
+                $("#channel_id").val(params.channel_id);
+                $("#platform_id").val(params.platform_id);
+            }
+
+            if(params.type == "channel"){
+                $("#server_channel").text('渠道名称');
+                $("#name").attr('placeholder','请输入渠道名称');
+                $(".channel_div").css('display','block');
+                $(".server_div").css('display','none');
+            }
+            form.render();
+        };
+    })
+</script>

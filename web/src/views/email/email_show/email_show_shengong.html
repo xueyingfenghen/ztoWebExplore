@@ -1,0 +1,313 @@
+<style>
+    @font-face{
+        font-family:myFont;
+        src:url(../src/style/img/shengong/kt.ttf);
+    }
+    #show_gm_content {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 375px;
+        height: 482px;
+        background: rgba(0, 0, 0, 1);
+        background-size: 375px;
+        z-index: 99999;
+        margin: auto;
+    }
+    #show_gm_content .bg_letter {
+        position: relative;
+        width: 375px;
+        height: 482px;
+        background: url(../src/style/img/shengong/bg_letter_1.png) no-repeat;
+        background-size: 375px 482px;
+    }
+    #show_gm_content .bg_letter .btn-close {
+        position: absolute;
+        width: 33px;
+        height: 33px;
+        top: 25px;
+        right: 25px;
+        cursor: pointer;
+    }
+    #show_gm_content .email_title {
+        float: left;
+        width: 291px;
+        height: 40px;
+        text-align: center;
+        line-height: 40px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 18px;
+        font-weight: 700;
+        font-family: myFont;
+        color: #333;
+        margin-left: 42px;
+        margin-top: 50px;
+    }
+    .email_time {
+        float: left;
+        width: 288px;
+        height: 20px;
+        line-height: 20px;
+        text-align: right;
+        font-family: myFont;
+        color: #5C7E4B;
+        margin-left: 36px;
+    }
+    #show_gm_content .email_content {
+        float: left;
+        width: 254px;
+        height: 210px;
+        background: rgba(0,0,0,0);
+        font-size: 14px;
+        font-family: myFont;
+        margin-left: 62px;
+        margin-top: 10px;
+        padding: 0px;border: 0px;list-style: none;outline:none;resize:none;
+        overflow:auto;
+    }
+    #show_gm_content .email_content::-webkit-scrollbar {
+        display: none;
+    }
+    #show_gm_content .props_cont {
+        position: absolute;
+        bottom: 110px;
+        left: 55px;
+        width: 263px;
+        height: 56px;
+        border: 1px solid #9E9889;
+        background: #BCB4A6;
+        overflow-x: auto;
+        overflow-y: hidden;
+        cursor: move;
+    }
+    .prop_box_show {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 50px;
+        margin-top: 3px;
+    }
+    .props_cont::-webkit-scrollbar-thumb {
+        background: #424344;
+        height: 2px;
+        border-radius: 10px;
+    }
+    .props_cont::-webkit-scrollbar {
+        display: none; /* Chrome Safari */
+        /*height: 2px;*/
+        /*background: #babbbc;*/
+        /*border-radius: 10px;*/
+    }
+    #show_gm_content .prop_box {
+        position: relative;
+        float: left;
+        width: 50px;
+        height: 50px;
+        background: url(../src/style/img/shengong/box_bg_6.png) no-repeat;
+        background-size: 50px;
+        margin-left: 2px;
+    }
+    .num-box {
+        position: absolute;
+        bottom: 4px;
+        left: 0;
+        width: 50px;
+        height: 12px;
+        text-align: center;
+        line-height: 12px;
+        font-size: 12px;
+        font-family: myFont;
+        color: #F2E9B9;
+        background: url(../src/style/img/shengong/box_jewel_3.png) no-repeat -10px 0;
+        background-size: 69px 12px;
+    }
+    #show_gm_content .lingqu {
+        position: absolute;
+        bottom: 60px;
+        left: 130px;
+        width: 114px;
+        height: 40px;
+        background: url(../src/style/img/shengong/btn_yellow.png) no-repeat;
+        background-size: 114px 40px;
+        text-align: center;
+        line-height: 40px;
+        font-family: myFont;
+        font-size: 16px;
+        color: #F2E9B9;
+        cursor: pointer;
+    }
+</style>
+
+<div class="bg_letter">
+    <!--close按钮-->
+    <div class="btn-close">
+        <img src="../src/style/img/shengong/btn_close_3.png" alt="" width="31px">
+    </div>
+    <div class="email_title"></div>
+    <div class="email_time"></div>
+    <textarea class="email_content" readonly></textarea>
+    <div class="props_cont">
+        <div class="prop_box_show">
+<!--            <div class="prop_box">-->
+<!--                <img src="err" width="50" alt="">-->
+<!--                <div class="num-box">100</div>-->
+<!--            </div>-->
+        </div>
+    </div>
+    <div class="lingqu">领取奖励</div>
+</div>
+
+<script type="text/html" template lay-done="layui.data.done(d)">
+
+</script>
+<script>
+
+    layui.data.done = function (d) {
+        console.log(11111);
+
+        let propData = d.params.propData;
+
+        let email_content = $("#email_add_dialog textarea[name='email_content']").val();
+        let email_title = $("#email_add_dialog input[name='email_title']").val();
+        let email_time = $("#email_add_dialog input[name='past_time']").val();
+        let prop_choose_type = $("#email_add_dialog input[name='prop_choose_type']").val();
+
+        let msgTips;
+
+        var imgLength = 0;
+
+        // 道具选择为无时，不展示道具
+        if (parseInt(prop_choose_type) == 2) {
+            propData = [];
+        }
+
+        layui.use(['admin', 'common'], function () {
+            let admin = layui.admin;
+
+            /**
+             * 邮件展示
+             * @param email_title
+             * @param email_content
+             * @param email_time
+             * @param type 0 没有道具 1 有道具
+             */
+            admin.email_show = function (email_title, email_content, email_time, type = 0) {
+                type = parseInt(type)
+                $('#show_gm_content .email_title').html(email_title); // 邮件标题
+                $('#show_gm_content .email_content').html(email_content);         // 邮件内容
+                $('#show_gm_content .email_time').html('有效期：' + email_time);               // 邮件有效期
+
+                if (type) {
+                    // 有道具
+                    if (email_time == '' || email_time == undefined) {
+                        $('#show_gm_content .email_time').hide();
+                        $('#show_gm_content .email_content').css('height', '210px');
+                    } else {
+                        $('#show_gm_content .email_content').css('height', '190px');
+                    }
+                } else {
+                    // 无道具
+                    if (email_time == '' || email_time == undefined) {
+                        $('#show_gm_content .email_time').hide();
+                        $('#show_gm_content .email_content').css('height', '310px');
+                    } else {
+                        $('#show_gm_content .email_content').css('height', '290px');
+                    }
+                    $('#show_gm_content .props_cont').hide();
+                    $('#show_gm_content .lingqu').hide();
+                }
+            };
+
+            // " + props[i]['prop_name'] + '×' + props[i]['prop_num'] + "
+            admin.req({
+                url: admin.getUrl('/api/email/getItemImg'),
+                data: {
+                    propData
+                },
+                type: 'post',
+                done: function (data) {
+                    if (data.code == 0) {
+                        let props = data.data;
+                        if (props.length > 0) {
+                            let html = '';
+                            for (let i = 0; i < props.length; i ++) {
+                                html +=
+                                    "<div class='prop_box' onmouseenter=\"msgTips = layer.msg('" + props[i]['prop_name'] + '×' + props[i]['prop_num'] + "', {time: false});\" onmouseleave=\"layer.close(msgTips)\">" +
+                                    // "<div class='prop_box'>" +
+                                    "<img src='" + props[i]['prop_url'] + "' width='50' alt=''>" +
+                                    "<div class='num-box'>" + props[i]['prop_num'] + "</div>" +
+                                    "</div>";
+                            }
+                            $('.prop_box_show').html(html);
+                            admin.email_show(email_title, email_content, email_time, 1);
+
+                            imgLength = 53 * parseInt(props.length);
+                            if (props.length > 5) {
+                                $('.prop_box_show').css('width' ,53 * parseInt(props.length) + 'px')
+                            } else {
+                                $('.prop_box_show').css('width' ,'260px')
+                            }
+
+                        } else {
+                            admin.email_show(email_title, email_content, email_time, 0);
+                        }
+                    } else {
+                        admin.email_show(email_title, email_content, email_time, 0);
+                    }
+                }
+            });
+        });
+
+        var disX=0;
+
+        var oDiv = document.getElementsByClassName('prop_box_show')[0];
+
+        oDiv.onmousedown=fnDown;
+
+        function fnDown(ev) {
+            var oEvent=ev || event;
+            disX = oEvent.clientX - oDiv.offsetLeft;
+            document.onmousemove = fnMove;
+            document.onmouseup = fnUp;
+        }
+
+        function fnMove(ev) {
+            var oEvent=ev || event;
+            let left = oEvent.clientX - disX;
+            if (imgLength < 265) {
+                return ;
+            }
+            if (left < 265 - imgLength) {
+                left = 265 - imgLength;
+            }
+            if (left > 0) {
+                left = 0;
+            }
+            oDiv.style.left = left + 'px';
+        }
+
+        function fnUp()
+        {
+            document.onmousemove = null;
+            document.onmouseup = null;
+        }
+
+        $(document).off('mousedown', '.prop_box_show').on('mousedown', '.prop_box_show', function (e) {
+            e.preventDefault();
+        });
+
+        //关闭
+        $('.btn-close').click(function () {
+            $('#show_gm_content').html('');
+        })
+
+    }
+
+
+
+</script>

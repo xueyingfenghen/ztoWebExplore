@@ -1,0 +1,79 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs"></ul>
+            <div class="layui-tab-content">
+                <!--功能开关配置-->
+                <div class="layui-tab-item" id="search_toogle-config" style="display: none;">
+                    <form class="layui-form layui-form-pane form_feature-toggle">
+                        <div class="layui-form-item" id="form_feature-toggle">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">选择区服：</label>
+                                <div class="layui-input-block" style="width: 500px;">
+                                    <input type="text" name="area"  autocomplete="off" placeholder="请点击输入框进行区服勾选" class="layui-input" id="featureArea" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_feature-toggle","tableId": "table_feature-toggle"}'>查询</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--游戏开关配置-->
+                <div class="layui-tab-item" id="search_game-toggle" style="display: none;">
+                    <form class="layui-form layui-form-pane form_game-toggle">
+                        <div class="layui-form-item" id="form_game-toggle">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">选择区服：</label>
+                                <div class="layui-input-block" style="width: 500px">
+                                    <input type="text" name="area"  autocomplete="off" placeholder="请点击输入框进行区服勾选" class="layui-input" id="gameArea" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_game-toggle","tableId": "table_game-toggle"}'>查询</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" style="display:none;" id="list_toogle-config">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme" style="margin-bottom: 10px;" data-obj='{"event": "detail","formClass": ".form_feature-toggle","tableId": "table_feature-toggle","formNameConf":"form_feature-toggle","type":"feature"}'>查看区服明细</button>
+        <button type="button" class="layui-btn layui-btn-warm" style="margin-bottom: 10px;" data-obj='{"event": "push_switch","tableId": "table_feature-toggle","status":"1","formClass": ".form_feature-toggle"}'>一键开启</button>
+        <button type="button" class="layui-btn layui-btn-danger" style="margin-bottom: 10px;" data-obj='{"event": "push_switch","tableId": "table_feature-toggle","status":"2","formClass": ".form_feature-toggle"}'>一键关闭</button>
+        <table id="table_feature-toggle"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs"  style="display: none;" id="list_game-toggle">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme" style="margin-bottom: 10px;"
+                data-obj='{"event": "detail","formClass": ".form_game-toggle","tableId": "table_game-toggle","formNameConf":"form_game-toggle","type":"game"}'>查看区服明细</button>
+        <table id="table_game-toggle"></table>
+    </div>
+</div>
+<script>
+    layui.use('configuration/feature', layui.factory('configuration/feature'));
+</script>
+
+<script type="text/html" id="ftc-status">
+    {{#  if(d.status){ }}
+    <span class="layui-btn layadmin-btn-none"
+             data-obj='{"event": "closeStatus","status":"{{ d.status }}", "feature":"{{ d.feature }}","server_id":"{{ d.server_id }}","type":"{{ d.type }}","formClass":".form_feature-toggle","tableId": "table_feature-toggle"}'>
+        <input type="checkbox" lay-skin="switch" lay-text="开启|关闭" {{ d.status==1?'checked':''}} />
+    </span>
+    {{#  } }}
+</script>
+<script type="text/html" id="op">
+    <a class="layui-btn layui-btn-xs layui-btn-warm"
+       data-obj='{"event": "edit","status":"{{ d.status }}","params":"{{d.params}}","server_id":"{{ d.server_id }}","type":"{{ d.type }}","formClass":".form_game-toggle","tableId": "table_game-toggle"}'>修改</a>
+    <a class="layui-btn layui-btn-xs layui-btn-primary"
+       data-obj='{"event": "cancel","formClass":".form_game-toggle","tableId": "table_game-toggle"}'
+       style="display: none">取消</a>
+</script>

@@ -1,0 +1,85 @@
+<style>
+    #changeState{
+        width: 95%;
+    }
+    #selectedArea{
+        background-color: #e6e6e6;
+    }
+    .disabledColor {
+        background-color: #e6e6e6;
+    }
+    .cancel-protect{
+        padding-left: 110px;
+    }
+    .cancel-protect-info{
+        margin-top: 10px;
+    }
+    .minute-msg{
+        position: relative;
+        top: 5px;
+    }
+</style>
+<div id="changeState">
+    <form class="layui-form" id="changeStateForm">
+        <div class="layui-form-item">
+            <label class="layui-form-label">已选区服：</label>
+            <div class="layui-input-block" style="width: 86%">
+                <input id="selectedServer" type="text" name="serverId" autocomplete="off" placeholder="请选择区服" class="layui-input" readonly="" disabled>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">区服状态：</label>
+            <div class="layui-input-inline">
+                <select id="districtStateSelect" name="state" lay-filter="districtStateSelect">
+                    <option value="1">维护</option>
+                    <option value="2">火爆</option>
+                    <option value="3">推荐</option>
+                    <option value="-1">定时自动切换状态</option>
+                </select>
+            </div>
+        </div>
+
+         <div class="layui-form-item" id="protectItem" style="display: none;">
+            <label class="layui-form-label">维护方式：</label>
+            <input type="radio" lay-filter="radioProtect" name="protect_state" class="protectType" checked value="1" title="立即维护" />
+            <input type="radio" lay-filter="radioProtect" name="protect_state" class="protectType" value="2" title="定时维护" />
+         </div>
+         <div class="layui-form-item" id="timeOneItem" style="display: none;">
+            <div class="layui-inline" id="startTimeItem" style="display: none;">
+                <label class="layui-form-label">开始时间：</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="startTime" name="start_time" placeholder="请选择开始时间">
+                </div>
+            </div>
+            <div class="layui-inline" id="endTimeItem">
+                <label class="layui-form-label">结束时间：</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="endTime" name="end_time" placeholder="请选择结束时间">
+                </div>
+            </div>
+         </div>
+
+        <div class="layui-form-item" id="cancelItem" style="display: none;">
+            <div class="cancel-protect">
+                <input type="radio" name="cancel_protect" class="layui-input" value="1" lay-skin="primary" id="cancelProtect" title="取消定时维护" />
+                <div class="cancel-protect-info">*定时维护状态下无法更改区服状态，只允许使用取消定时维护</div>
+            </div>
+        </div>
+
+        <div class="layui-form-item" id="timeTwoItem" style="display: none;">
+            <label class="layui-form-label">间隔时间：</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="intervalTime" name="interval_time" placeholder="请输入间隔时间">
+            </div>
+            <span class="minute-msg">分钟</span>
+        </div>
+        <div class="btn-wrapper">
+            <button type="button" class="layui-btn layui-btn-normal" id="submitBtn">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="cancelBtn">取消</button>
+        </div>
+    </form>
+</div>
+<script>
+    layui.use('server/change_state', layui.factory('server/change_state'));
+</script>
+

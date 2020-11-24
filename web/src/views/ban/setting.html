@@ -1,0 +1,143 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs"></ul>
+            <div class="layui-tab-content">
+                <!--个人角色封禁-->
+                <div class="layui-tab-item" id="search_ban-roles" style="display: none;">
+                    <form class="layui-form layui-form-pane form_ban-roles">
+                        <div class="layui-form-item" id="form_ban-roles">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">选择区服：</label>
+                                <div class="layui-input-block" style="width: 500px">
+                                    <input type="text" name="area"  autocomplete="off" placeholder="请点击输入框进行区服勾选" class="layui-input" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_ban-roles","tableId": "table_ban-roles"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_ban-roles","tableId": "table_ban-roles"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--批量角色封禁-->
+                <div class="layui-tab-item" id="search_ban-batch-roles" style="display: none;">
+                    <form class="layui-form layui-form-pane form_ban-batch-roles">
+                        <div class="layui-form-item" id="form_ban-batch-roles"></div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_ban-batch-roles","tableId": "table_ban-batch-roles"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_ban-batch-roles","tableId": "table_ban-batch-roles"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--账号封禁-->
+                <div class="layui-tab-item" id="search_ban-account" style="display: none;">
+                    <form class="layui-form layui-form-pane form_ban-account">
+                        <div class="layui-form-item" id="form_ban-account"></div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_ban-account","tableId": "table_ban-account"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_ban-account","tableId": "table_ban-account"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--设备号封禁-->
+                <div class="layui-tab-item" id="search_ban-device" style="display: none;">
+                    <form class="layui-form layui-form-pane form_ban-device">
+                        <div class="layui-form-item" id="form_ban-device"></div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_ban-device","tableId": "table_ban-device"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_ban-device","tableId": "table_ban-device"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+                <!--自动定时设置-->
+                <div class="layui-tab-item" id="search_auto-timing" style="display: none;">
+                    <form class="layui-form layui-form-pane form_auto-timing">
+                        <div class="layui-form-item" id="form_auto-timing"></div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_auto-timing","tableId": "table_auto-timing"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_auto-timing","tableId": "table_auto-timing"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" style="display:none;" id="list_ban-roles">
+    <div class="layui-card-body">
+        <div class="layui-btn-container">
+            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "ban_roles","tableId": "table_ban-roles","formClass": ".form_ban-roles"}'>添加角色封禁</button>
+            <button type="button" class="layui-btn layui-btn-danger"  data-obj='{"event": "relieve","tableId": "table_ban-roles","formClass": ".form_ban-roles"}'>一键解禁</button>
+        </div>
+        <table id="table_ban-roles"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" style="display:none;" id="list_ban-batch-roles">
+    <div class="layui-card-body">
+        <div class="layui-btn-container">
+            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "ban_batch_roles","tableId": "table_ban-batch-roles","formClass": ".form_ban-batch-roles"}'>添加角色封禁</button>
+            <button type="button" class="layui-btn" data-obj='{"event": "download","tableId":"table_ban-batch-roles"}'>批量下载</button>
+        </div>
+
+        <table id="table_ban-batch-roles"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs"  style="display: none;" id="list_ban-account">
+    <div class="layui-card-body">
+        <div class="layui-btn-container">
+            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "ban_account","tableId": "table_ban-account","formClass": ".form_ban-account"}'>添加账号封禁</button>
+            <button type="button" class="layui-btn layui-btn-danger" data-obj='{"event": "relieve","tableId": "table_ban-account","formClass": ".form_ban-account"}'>一键解禁</button>
+        </div>
+
+        <table id="table_ban-account"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs"  style="display: none;" id="list_ban-device">
+    <div class="layui-card-body">
+        <div class="layui-btn-container">
+            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "ban_device","tableId": "table_ban-device","formClass": ".form_ban-device"}'>添加设备号封禁</button>
+            <button type="button" class="layui-btn layui-btn-danger" data-obj='{"event": "relieve","tableId": "table_ban-device","formClass": ".form_ban-device"}'>一键解禁</button>
+        </div>
+        <table id="table_ban-device"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs"  style="display: none;" id="list_auto-timing">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme" style="margin-bottom: 10px;" data-obj='{"event": "auto_timing","tableId": "table_auto-timing","formClass": ".form_auto-timing"}'>添加配置</button>
+        <table id="table_auto-timing"></table>
+    </div>
+</div>
+
+<script>
+    layui.use('banned/setting', layui.factory('banned/setting'));
+</script>
+<script type="text/html" id="op">
+    {{#  if(d.banned_name != 'batch-roles'){ }}
+    <a class="layui-btn layui-btn-xs"
+       data-obj='{"tableId":"{{d.banned_name == "roles" ? "table_ban-roles" : (d.banned_name == "account") ? "table_ban-account" : (d.banned_name == "device") ? "table_ban-device" : "" }}",
+       "formClass":"{{d.banned_name == "roles" ? ".form_ban-roles" : (d.banned_name == "account") ? ".form_ban-account" : (d.banned_name == "device") ? ".form_ban-device" : "" }}",
+       "event": "relieve","banned_list_id":"{{d.banned_list_id}}","banned_name":"{{d.banned_name}}","type":"{{d.type}}","id":"{{d.id}}","index":"{{ d.LAY_TABLE_INDEX }}"}'>解禁</a>
+    {{#  } }}
+    {{#  if(d.banned_name == 'account'){ }}
+    <a class="layui-btn layui-btn-xs layui-btn-normal" data-obj='{"event": "detail","banned_list_id":"{{d.banned_list_id}}","banned_name":"{{d.banned_name}}"}'>详情</a>
+    {{#  } }}
+    {{#  if(d.banned_name == 'batch-roles'){ }}
+    <a class="layui-btn layui-btn-xs" data-obj='{"event": "download","filename":"{{d.filename}}","index":"{{ d.LAY_TABLE_INDEX }}","originalname":"{{ d.originalname }}"}'>下载</a>
+    {{#  } }}
+</script>
+<script type="text/html" id="auto_op">
+    <a class="layui-btn layui-btn-xs" data-obj='{"event": "auto_timing_edit","tableId": "table_auto-timing","formClass": ".form_auto-timing","id": "{{d.id}}"}'>编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" data-obj='{"event": "auto_timing_del","tableId": "table_auto-timing","formClass": ".form_auto-timing","id": "{{d.id}}"}'>删除</a>
+</script>
+
+

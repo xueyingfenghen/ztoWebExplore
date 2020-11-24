@@ -1,0 +1,69 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+                <li class="layui-this" data-module="permission-config">权限配置</li>
+                <li class="" data-module="props-limit">道具上限配置</li>
+            </ul>
+
+            <div class="layui-tab-content">
+                <!--权限配置-->
+                <div class="layui-tab-item layui-show" id="permission-config-form">
+                    <form class="layui-form permission-form" lay-filter="permission-form">
+                        <div class="layui-form-item">
+                            <table id="permission_list" lay-filter="permission_list"></table>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-inline">
+                                <input type="button" lay-submit lay-filter="permission-form-submit" value="提交"
+                                       id="commit" class="layui-btn layui-btn-theme">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!--道具上限配置-->
+                <div class="layui-tab-item" id="props-limit-form" style="display: none;">
+                    <div class="layui-card">
+                        <div class="layui-card-body">
+                            <form class="layui-form" id="filter-form">
+                                <select id="platform-select" lay-filter="platform-select">
+                                    <option value="">请选择平台</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="layui-card">
+                        <div class="layui-card-body">
+                            <table id="props-type-list" lay-filter="props-type-list">
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="props">查看道具</a>
+</script>
+
+<script>
+    layui.data.sendParams = function (params) {
+        let $ = layui.jquery;
+        var groupId = params.data.id;    //变更组的id
+        var gameId = params.data.game_id;
+        layui.use(['permission/group_config'], function () {
+            //加载权限配置表
+            $.loadPermissionTable(groupId);
+
+            //加载平台列表
+            $.loadPlatformList(gameId, groupId);
+        });
+    };
+</script>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+</script>
+

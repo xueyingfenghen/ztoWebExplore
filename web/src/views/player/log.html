@@ -1,0 +1,303 @@
+<style>
+    #playerSearch .layui-inline {
+        margin-bottom: 10px!important;
+        margin-right: 20px!important;
+    }
+    .layui-input-block {
+        width: 190px;
+    }
+    .layui-input a {
+        color: #1E9FFF;
+        line-height: 38px;
+        text-decoration: underline;
+    }
+    .layui-input span {
+        line-height: 38px;
+    }
+    #content-alert .layui-inline {
+        width: 300px;
+    }
+    .layui-hidden {
+        display: none;
+    }
+</style>
+
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" lay-filter="tabs">
+            </ul>
+            <div class="layui-tab-content">
+                <!--玩家日志查询-->
+                <div class="layui-tab-item layui-show" id="search_player-log-tab1">
+                    <form class="layui-form layui-form-pane logSearch">
+                        <div class="layui-form-item" id="logSearch" style="margin: 0">
+
+                        </div>
+                        <div class="layui-form-item logSearch2" id="logSearch2">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset">重置</button>
+                            <button type="button" class="layui-btn" id="export">导出</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_player-log-tab1">
+    <!--<div class="layui-card-header" id="table_title"></div>-->
+    <div class="layui-card-body">
+        <table id="log_list"></table>
+    </div>
+</div>
+
+
+<script>
+    var templet = [];
+    var templet2 = [];
+    var idArr = [];
+    var selectVal = '';
+    var logCols;
+    layui.use( ['table', 'admin', 'form', 'view', 'laydate', 'element', 'common'], function(){
+        let admin = layui.admin;
+        let table = layui.table;
+        let form = layui.form;
+        let view = layui.view;
+        let laydate = layui.laydate;
+        let element = layui.element;
+        let $ = layui.jquery;
+
+        $.noneTab = function () {
+            table.render({
+                id: 'log_list',
+                elem: '#log_list',
+                page: false,
+                loading: true,
+            });
+        };
+
+        // 获取道具类型
+        $.getPropType = function () {
+            admin.req({
+                url: admin.getUrl('/api/email/getPropType'),
+                data: {},
+                type: 'post',
+                done: function (data) {
+                    let res = data.data;
+                    admin.initSelect(res, "#prop_type", '请选择道具类型');
+                    form.render();
+                }
+            });
+        };
+
+        admin.initForms('player_log_type', '#logSearch').then(function () {
+            $("#logSearch select[name='log_type']").attr('lay-filter', 'player_log_type');
+            $("#logSearch select[name='type']").attr('lay-filter', 'type');
+            // 日志分类切换
+            form.on('select(player_log_type)', function(data){
+                console.log(data.value);
+                admin.req({
+                    url: admin.getUrl('/api/player/getLogTypeByClassify'),
+                    data: {
+                        log_type: data.value
+                    },
+                    type: 'get',
+                    done: function (data) {
+                        admin.initSelect(data.data, "#logSearch select[name='type']", '请选择日志类型');
+                        $("#logSearch select[name='type']").val('');
+                        form.render();
+                    }
+                });
+            });
+        });
+
+        // 日志类型切换
+        form.on('select(type)', function(data){
+            let index = data.elem.selectedIndex;
+            selectVal = data.value;
+            if (data.value != '') {
+                // $('#table_title').html(data.elem[index]['innerText']);
+                admin.initForms('player_log_type_' + data.value, '#logSearch2', true).then(function () {
+
+                    let propCount = 0;
+                    for (let i = 0; i < $("#logSearch2 select").length; i ++) {
+                        console.log($("#logSearch2 select").eq(i).attr('id'));
+                        if ($("#logSearch2 select").eq(i).attr('id') == 'prop_type') {
+                            propCount ++;
+                        }
+                    }
+
+                    if (propCount > 0) {
+                        $('#prop_type').attr('lay-filter', 'prop_type');
+                        $.getPropType();
+                    }
+
+                    $('#time').parent().css('width', '500px');
+                    // 二级表格渲染完成时搜索功能才能用（否则数据取不到）
+                    $.initTable('player_log_type_' + data.value + '_table');
+                })
+            } else {
+                // $('#table_title').html('');
+                $('#logSearch2').html('');
+                $.noneTab()
+            }
+        });
+
+
+
+
+        // 道具类型切换
+        form.on('select(prop_type)', function (data) {
+            admin.req({
+                url: admin.getUrl('/api/email/getPropByType'),
+                data: {
+                    prop_type: data.value
+                },
+                type: 'post',
+                done: function (data) {
+                    admin.initSelect(data.data, "#prop_id", '请选择道具名称');
+                    $("#prop_id").val('');
+                    form.render();
+                }
+            });
+        });
+
+
+
+
+        // 渲染表头
+        $.initTable = function (name) {
+            admin.req({
+                url: admin.getUrl('/api/base/getTableCols'),
+                data: {
+                    name: name,
+                },
+                type: 'post',
+                done: function (data) {
+                    logCols = data.data;
+                    $.logList(logCols);
+                }
+            });
+        };
+
+        // 玩家消耗日志列表
+        $.logList = function (cols) {
+            let param = admin.getFormParam('.logSearch');
+            // 玩家列表
+            table.render({
+                id: 'log_list',
+                elem: '#log_list',
+                url: admin.getUrl('/api/player/getLogList'),
+                method: 'GET',
+                where: param,//请求参数(额外)
+                request: {
+                    pageName: 'page' //页码的参数名称，默认：page
+                    ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                },
+                response: { //定义后端 json 格式，详细参见官方文档
+                    statusName: 'code', //状态字段名称
+                    statusCode: '0', //状态字段成功值
+                    msgName: 'msg', //消息字段
+                    countName: 'countAll', //总页数字段
+                    dataName: 'data', //数据字段
+                },
+                page: true,
+                loading: true,
+                cols: cols,
+            });
+        };
+
+
+        // 搜素
+        $(document).off('click', '#search').on('click', '#search', function () {
+
+            if ($("#logSearch2 select[name='server_id']").val() == '') {
+                layer.msg('请先选择区服', {icon: 5, anim: 6});
+                return ;
+            }
+
+            if (selectVal != '') {
+                let param = admin.getFormParam('.logSearch');
+                table.reload('log_list', {
+                    where: param,
+                    page: {
+                        curr: 1
+                    }
+                });
+            }
+        })
+
+        // 重置
+        $(document).off('click', '#reset').on('click', '#reset', function () {
+            if (selectVal != '') {
+                for (let i = 0; i < $('.logSearch2').find('select').length; i ++) {
+                    $('.logSearch2').find('select').eq(i).val('');
+                }
+                for (let i = 0; i < $('.logSearch2').find('input').length; i ++) {
+                    $('.logSearch2').find('input').eq(i).val('');
+                }
+                let param = admin.getFormParam('.logSearch');
+                table.reload('log_list', {
+                    where: param,
+                    page: {
+                        curr: 1
+                    }
+                });
+            }
+        })
+
+        // 导出
+        $(document).off('click', '#export').on('click', '#export', function () {
+            // if ($("#logSearch2 select[name='server_id']").val() == '') {
+            //     layer.msg('请先选择区服', {icon: 5, anim: 6});
+            //     return ;
+            // }
+            //
+            // if ($("#logSearch2 input[name='time']").val() == '') {
+            //     layer.msg('请先选择时间范围', {icon: 5, anim: 6});
+            //     return ;
+            // }
+
+            let param = {
+                'cols': logCols,
+                'param': admin.getFormParam('.logSearch'),
+                'title': admin.selectText("select[name='type']")
+            };
+
+            admin.download({
+                url: admin.getUrl('/api/player/logExport'),
+                data: param,
+                method: 'post',
+                dataType: 'json',
+            });
+
+            // admin.req({
+            //     url: admin.getUrl('/api/player/checkNeedToExport'),
+            //     data: admin.getFormParam('.logSearch'),
+            //     type: 'post',
+            //     done: function (data) {
+            //         if (data.code == 0) {
+            //             // 导出excel
+            //             admin.download({
+            //                 url: admin.getUrl('/api/player/logExport'),
+            //                 data: param,
+            //                 method: 'post',
+            //                 dataType: 'json',
+            //             });
+            //         } else {
+            //             layer.msg(data.msg, {icon: 5, anim: 6});
+            //         }
+            //     }
+            // });
+
+
+        })
+
+    });
+</script>

@@ -1,0 +1,236 @@
+<div class="layui-form-item">
+    <label class="layui-form-label">礼包类型</label>
+    <div class="layui-input-inline">
+        <select name="gift_type" lay-filter="gift_type" class="gift_type">
+            <option value="">请选择礼包类型</option>
+            <option value=1 selected>周礼包</option>
+            <option value=2>月礼包</option>
+        </select>
+    </div>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">选择礼包</label>
+    <div class="layui-input-inline">
+        <select name="price_rank" lay-filter="price_rank_select"></select>
+    </div>
+    <div class="layui-input-inline">
+        <select name="gift_name"></select>
+    </div>
+    <div class="layui-input-inline">
+
+    </div>
+    <button class="layui-btn layui-btn-theme addProp" type="button" name="addProp">增加</button>
+</div>
+<div class="renderTable">
+    <table id="rmb_list"></table>
+</div>
+<script>
+    layui.use(['table', 'admin', 'form'], function () {
+        let table = layui.table;
+        let admin = layui.admin;
+        let form = layui.form;
+
+        let rmbGiftArr = [];
+
+        let rmbData = [];
+
+        let rmbCols = [
+            {
+                field: "recharge_id",
+                title: "礼包ID",
+                align: "center",
+                width: "10%",
+                fixed: "left"
+            },
+            {
+                field: "price_rank",
+                title: "价格档次",
+                align: "center",
+                width: "10%"
+            },
+            {
+                field: "gift_name",
+                title: "礼包名称",
+                align: "center",
+                width: "15%"
+            },
+            {
+                field: "gift_type_name",
+                title: "礼包类型",
+                align: "center",
+                width: "10%"
+            },
+            {
+                field: "gift_type",
+                title: "礼包类型",
+                align: "center",
+                hide: true
+            },
+            {
+                field: "limit_desc",
+                title: "次数内容",
+                align: "center",
+                width: "20%"
+            },
+            {
+                field: "discount",
+                title: "显示折扣",
+                align: "center",
+                width: "10%"
+            },
+            {
+                field: "prop_desc",
+                title: "道具内容",
+                align: "center",
+                width: "25%",
+                fixed: "right"
+            },
+            {
+                field: "gift_num",
+                title: "数量",
+                align: "center",
+                width: "10%",
+                fixed: "right"
+            },
+            {
+                field: "",
+                title: "操作",
+                align: "center",
+                templet: "#rmb_gift_edit",
+                width: "10%",
+                fixed: "right"
+            }
+        ];
+
+        admin.req({
+            url: admin.getUrl('/api/pay/rmb_gift/getAllGiftByLevel'),
+            data: {
+                type: 3
+            },
+            type: 'get',
+            done: function (data) {
+                rmbGiftArr = data.data;
+                delete rmbGiftArr[0];
+                console.log(rmbGiftArr);
+                $.initPriceRankSelect();
+            }
+        });
+
+        $.initPriceRankSelect = function (value = 1) {
+            let selArr = [];
+            if (value != '') {
+                $.each(rmbGiftArr, function (key, val) {
+                    selArr.push({key: key, val: key});
+                });
+            }
+            admin.initSelect(selArr, "select[name='price_rank']", '请选择价格档次')
+            form.render('select');
+        };
+
+        $.initGiftSelect = function (value) {
+            let gift_type = $(".gift_type").val();
+            let selArr = [];
+            if (value !== '') {
+                $.each(rmbGiftArr[value], function (key, val) {
+                    if (val['gift_type'] == gift_type) {
+                        selArr.push({key: val['gift_id'], val: val['gift_name']});
+                    }
+                })
+            }
+            admin.initSelect(selArr, "select[name='gift_name']", '请选择礼包名称')
+            form.render('select');
+        };
+
+        $.initRmbTable = function () {
+            table.render({
+                id: 'rmb_list',
+                elem: '#rmb_list',
+                page: false,
+                loading: true,
+                cols: [rmbCols],
+                data: rmbData,
+                limit: 1000
+            });
+        };
+
+        $.initRmbTable();
+
+        // 礼包类型切换
+        form.on('select(gift_type)', function (data) {
+            if (data.value == '') {
+                $.initPriceRankSelect('');
+            } else {
+                $.initPriceRankSelect();
+            }
+            $.initGiftSelect('');
+        });
+
+        //级联 price_rank 选择礼包
+        form.on('select(price_rank_select)', function (data) {
+            $.initGiftSelect(data.value)
+        });
+
+        // 添加RMB礼包
+        $(document).off('click', '.addProp').on('click', '.addProp', function () {
+            let price_rank = $("#show_rmb_gift_content select[name='price_rank']").val();
+            let gift_id = $("#show_rmb_gift_content select[name='gift_name']").val();
+            let gift_type = $('.gift_type').val();
+            if (null == gift_type || undefined == gift_type || gift_type == '') {
+                layer.msg('请选择礼包类型', {icon: 5, anim: 6});
+                return ;
+            }
+            if (null == price_rank || undefined == price_rank || price_rank == '') {
+                layer.msg('请选择价格档位', {icon: 5, anim: 6});
+                return ;
+            }
+            if (null == price_rank || undefined == price_rank || price_rank == '') {
+                layer.msg('请选择价格档位', {icon: 5, anim: 6});
+                return ;
+            }
+            if (null == gift_id || undefined == gift_id || gift_id == '') {
+                layer.msg('请选择礼包内容', {icon: 5, anim: 6});
+                return ;
+            }
+            let gift = rmbGiftArr[price_rank][gift_id];
+            $.addRmbGift(gift);
+            $.totalMoney(2);
+        });
+
+        $(document).off('click', '.del_rmb').on('click', '.del_rmb', function () {
+            let recharge_id = $(this).attr('data-type');
+            $.delRmbGift(recharge_id);
+            $.initRmbTable();
+            $.totalMoney(2);
+        });
+
+        $.addRmbGift = function (gift) {
+            let is_set = 0;
+            $.each(rmbData, function (key, val) {
+                if (rmbData[key]['recharge_id'] == gift['recharge_id']) {
+                    is_set ++;
+                    rmbData[key]['gift_num'] = parseInt(rmbData[key]['gift_num']) + 1;
+                    return ;
+                }
+            });
+            if (!is_set) {
+                gift['gift_num'] = 1;
+                rmbData.push(gift);
+            }
+            $.initRmbTable();
+        };
+
+        $.delRmbGift = function (recharge_id) {
+            // let recharge_id = $(this).attr('data-type');
+            for (let k in rmbData) {
+                if (rmbData[k]['recharge_id'] == recharge_id) {
+                    rmbData.splice(k, 1);
+                    return ;
+                }
+            }
+        }
+
+    })
+</script>
+<script type="text/html" id="rmb_gift_edit">
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger del_rmb" data-type={{ d.recharge_id }}>删除</button>
+</script>

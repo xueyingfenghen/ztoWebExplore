@@ -1,0 +1,54 @@
+<style>
+    .layui-hidden {
+        display: none;
+    }
+</style>
+<form class="layui-form" id="area_body">
+    <div>
+        <label class="layui-form-label">充值区间</label>
+        <div class="layui-input-inline section_area">
+            <input onkeyup="this.value=this.value.replace(/[^\d]/g,'')" type="text" name="start_area[]"
+                   placeholder="请输入充值金额"
+                   autocomplete="on" class="layui-input">
+        </div>
+        <div class="layui-input-inline section_area">
+            <input onkeyup="this.value=this.value.replace(/[^\d]/g,'')" type="text" name="end_area[]"
+                   placeholder="请输入充值金额"
+                   autocomplete="on" class="layui-input">
+        </div>
+        <div class="layui-input-inline section_area">
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="add-area">
+                <i class="layui-icon">&#xe654;</i>
+            </button>
+        </div>
+    </div>
+</form>
+<div style="display: none" id="area_template">
+    <div>
+        <label class="layui-form-label">充值区间</label>
+        <div class="layui-input-inline section_area">
+            <input onkeyup="this.value=this.value.replace(/[^\d]/g,'')" type="text" name="start_area[]"
+                   placeholder="请输入充值金额"
+                   autocomplete="on" class="layui-input">
+        </div>
+        <div class="layui-input-inline section_area">
+            <input onkeyup="this.value=this.value.replace(/[^\d]/g,'')" type="text" name="end_area[]"
+                   placeholder="请输入充值金额"
+                   autocomplete="on" class="layui-input">
+        </div>
+        <div class="layui-input-inline section_area">
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm sub_area">
+                <i class="layui-icon">&#xe67e;</i>
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    var $ = layui.jquery;
+    $(document).off('click', '#add-area').on('click', '#add-area', function () {
+        $('#area_body').append($('#area_template').html());
+    });
+    $(document).off('click', '.sub_area').on('click', '.sub_area', function () {
+        $(this).parent().parent().remove();
+    });
+</script>

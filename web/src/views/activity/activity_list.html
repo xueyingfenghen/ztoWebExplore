@@ -1,0 +1,67 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+
+                <!--登录前公告-->
+                <div class="layui-tab-item" id="search_activity-list" style="display: none;">
+                    <form class="layui-form layui-form-pane form_activity-list">
+                        <div class="layui-form-item" id="activity_activity-list_form">
+<!--                            <div class="layui-inline">-->
+<!--                                <label class="layui-form-label">选择区服：</label>-->
+<!--                                <div class="layui-input-block" style="width: 500px">-->
+<!--                                    <input id="selectArea" type="text" name="server_id" lay-verify="area" autocomplete="off" placeholder="请选择区服" class="layui-input" readonly="">-->
+<!--                                </div>-->
+<!--                            </div>-->
+                        </div>
+
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_activity-list","tableId": "table_activity-list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_activity-list","tableId": "table_activity-list"}'>
+                                重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs " id="list_activity-list" style="display: none;">
+    <div class="layui-card-body">
+        <div class="layui-card-header">活动列表
+            <div style="float: right;">
+                <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "batch_edit",  "tableId": "table_activity-list", "title":"一键修改"}'>一键修改</button>
+                <button type="button" class="layui-btn  layui-btn-danger " data-obj='{"event": "batch_del",  "tableId": "table_activity-list", "title":"一键删除"}'>一键删除</button>
+            </div>
+        </div>
+        <br/>
+        <table id="table_activity-list" lay-filter="table_activity-list">
+        </table>
+    </div>
+</div>
+
+<script>
+    layui.use('activity/activityList', layui.factory('activity/activityList'));
+</script>
+
+<script type="text/html" id="op">
+    {{# if(d.state>1){ }}
+    <a class="layui-btn  layui-btn-xs layui-btn-warm"
+       data-obj='{"event": "edit",  "tableId": "table_activity-list", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"编辑活动"}'>编辑</a>
+    {{#  } }}
+    {{# if(d.state>2){ }}
+    <a class="layui-btn layui-btn-danger layui-btn-xs"
+       data-obj='{"event": "del",  "tableId": "table_activity-list", "index":"{{ d.LAY_TABLE_INDEX }}"}'>删除</a>
+    {{#  } }}
+</script>
+
+

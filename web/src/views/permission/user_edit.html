@@ -1,0 +1,269 @@
+<form class="layui-form" lay-filter="user-form">
+    <div class="layui-form" lay-filter="layuiadmin-app-form-list" id="layuiadmin-permission-user-form-list"
+         style="padding: 20px 30px 0 0;">
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="nick_name" value="{{d.params.nick_name ||''}}" lay-verify="nick_name"
+                           placeholder="请输入姓名" lay-filter="nick_name" id="nick_name"
+                           autocomplete="off" class="layui-input" {{d.params.event== 'edit' ?  'disabled'  : ''}}>
+                </script>
+            </div>
+
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="user_name" value="{{d.params.user_name ||''}}" lay-verify="user_name"
+                           placeholder="请输入用户名" lay-filter="user_name"
+                           autocomplete="off" class="layui-input" {{d.params.event== 'edit' ?  'disabled'  : ''}}>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="email" value="{{d.params.email ||''}}" lay-verify="email"
+                           placeholder="请输入邮箱" lay-filter="email"
+                           autocomplete="off"
+                           class="layui-input">
+                </script>
+            </div>
+            <label class="layui-form-label">手机号</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="tel" value="{{d.params.tel ||''}}" lay-verify="phone_check|phone"
+                           placeholder="请输入手机号" autocomplete="off" lay-filter="tel"
+                           class="layui-input">
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择游戏</label>
+            <div class="layui-input-inline">
+                <select name="game_id" lay-filter="game-id-edit" id="game-id-edit">
+                </select>
+            </div>
+            <label class="layui-form-label">选择组别</label>
+            <div class="layui-input-inline">
+                <select name="group_id" lay-filter="group-id-edit" id="group-id-edit" lay-verify="groups">
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item" id="groups">
+            <div class="layui-show-lg-inline" id="groups-hidden" style="margin-left: 110px">
+                <script type="text/html" template>
+                {{#
+                    d.params.groups = d.params.groups || [];
+                    for(var i = 0;i < d.params.groups.length;i++) {
+                }}
+                        <input type="hidden" name="groups[]" class="groups-selected" value="{{ d.params.groups[i] }}" lay-verify="required" autocomplete="off">
+                {{#
+                    }
+                }}
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="password" name="password" value="" placeholder="请输入密码" autocomplete="new-password"
+                           lay-verify="{{d.params.event== 'edit' ?  'password'  : 'password'}}"
+                           class="layui-input">
+                </script>
+            </div>
+            <label class="layui-form-label">确定密码</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="password" name="confirm_password" value="" placeholder="请再次输入密码" autocomplete="new-password"
+                           lay-verify="{{d.params.event== 'edit' ?  'password'  : 'password'}}"
+                           class="layui-input">
+                </script>
+            </div>
+        </div>
+
+        <script type="text/html" template>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-inline">
+                    <input type="button" lay-submit lay-filter="layuiadmin-permission-user-form-submit" value="提交" id="commit"
+                           class="layui-btn layui-btn-theme">
+                </div>
+            </div>
+        </script>
+    </div>
+</form>
+
+<script>
+    //获取权限下的组别
+    layui.admin.req({
+        url: layui.admin.getUrl('/api/system/common/group_list'),
+        data: {},
+        method: 'get',
+        dataType: 'json',
+        done: function (res) {
+            if (res.code == 0) {
+                var groupPermissions = res.data.list;
+                layui.use(['form'], function () {
+                    var loadViews = function () {
+                        //已选的组别
+                        var selected = [];
+                        var selectedTagMap = {};
+                        $('.groups-show').remove();
+                        $('.groups-selected').each(function () {
+                            selected.push($(this).val());
+                        });
+                        $('.groups-selected').remove();
+
+                        //游戏下拉框选择
+                        var selectedGame = $("#game-id-edit").val() || 0;
+                        $("#group-id-edit,#game-id-edit").empty();
+                        for (i = 0; i < groupPermissions.length; i++) {
+                            var except = false;
+                            var gameId = groupPermissions[i]['id'];
+                            var gameName = groupPermissions[i]['name'];
+                            for (j = 0; j < groupPermissions[i]['groups'].length; j++) {
+                                var groupId = groupPermissions[i]['groups'][j]['id'];
+                                var groupName = groupPermissions[i]['groups'][j]['name'];
+
+                                if ($.inArray(groupId.toString(), selected) != -1) {
+                                    selectedTagMap[groupId.toString()] = {
+                                        gameName: gameName,
+                                        groupName: groupName,
+                                        gameId: gameId
+                                    };
+                                    except = true;
+                                    break;
+                                }
+                            }
+
+                            if (!except) {  //游戏未被候选，渲染游戏下拉菜单
+                                $("#game-id-edit").append("<option value='" + gameId + "'>" + gameName + "</option>");
+                            } else if (except && selectedGame == gameId) {
+                                selectedGame = 0;     //已选游戏已在候选区，自动设为未选择游戏
+                            }
+
+                            if (selectedGame == gameId) {    //渲染组别下拉框
+                                for (j = 0; j < groupPermissions[i]['groups'].length; j++) {
+                                    var groupId = groupPermissions[i]['groups'][j]['id'];
+                                    var groupName = groupPermissions[i]['groups'][j]['name'];
+                                    $("#group-id-edit").append("<option value='" + groupId + "'>" + groupName + "</option>");
+                                }
+                                $("#group-id-edit").prepend("<option value='0'>请选择组别</option>");
+                                $("#group-id-edit").val(0);
+                            }
+                        }
+                        $("#game-id-edit").prepend("<option value='0'>请选择游戏</option>");
+                        $("#game-id-edit").val(selectedGame);
+
+                        //渲染候选区
+                        for (i = 0; i < selected.length; i++) {
+                            if (typeof selectedTagMap[selected[i]] === 'undefined') {
+                                continue;
+                            }
+
+                            $('#groups-hidden').append('<input type="hidden" name="groups[]" class="groups-selected" value="' + selected[i] + '" lay-verify="required" autocomplete="off">');
+                            $('#groups-hidden').append('<a class="layui-btn layui-btn-xs layui-btn-primary groups-show" data-id="' + selected[i] + '">' + selectedTagMap[selected[i]]['gameName'] + '-' + selectedTagMap[selected[i]]['groupName'] + '<i class="layui-icon"></i></a>');
+                        }
+
+                        //绑定取消选择组别事件
+                        $('.groups-show').click(function () {
+                            var id = $(this).data('id');
+                            $('.groups-selected[value="'+id+'"]').remove();
+                            $(this).remove();
+
+                            loadViews();
+                        });
+
+                        form.render();
+                    };
+
+                    var form = layui.form;
+                    var $ = layui.jquery;
+                    loadViews();
+
+                    form.on('select(game-id-edit)', function (data) {
+                        loadViews();
+                        // form.render();
+                    });
+
+                    form.on('select(group-id-edit)', function (data) {
+                        if (data.value != 0 )
+                            $('#groups-hidden').append('<input type="hidden" name="groups[]" class="groups-selected" value="' + data.value + '" lay-verify="required" autocomplete="off">');
+
+                        loadViews();
+                        // form.render();
+                    });
+                });
+            }
+        }
+    });
+
+    //表单验证
+    layui.form.verify({
+        user_name: function (value, item) { //value：表单的值、item：表单的DOM对象
+            if (value.length <= 0) {
+                return '请输入用户名';
+            }
+            if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                return '用户名不能有特殊字符';
+            }
+            if (/(^\_)|(\__)|(\_+$)/.test(value)) {
+                return '用户名首尾不能出现下划线\'_\'';
+            }
+            if (/^\d+\d+\d$/.test(value)) {
+                return '用户名不能全数字';
+            }
+
+            if (value.length < 5) {
+                return '用户名长度必须要5个字符及以上';
+            }
+        },
+
+        nick_name: function (value, item) { //value：表单的值、item：表单的DOM对象
+            if (value.length <= 0) {
+                return '请输入姓名';
+            }
+        }
+
+        //我们既支持上述函数式的方式，也支持下述数组的形式
+        //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+        , password: function (value, item) {
+            if (value.length <= 0) {
+                return '请输入密码';
+            }
+            if (!/^[\S]{6,18}$/.test(value)) {
+                return '密码必须6到18位，且不能出现空格';
+            }
+        },
+
+        email: function (value, item) { //value：表单的值、item：表单的DOM对象
+            if (value.length <= 0) {
+                return '请输入邮件';
+            }
+
+            if (!/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value)) {
+                return '非法邮箱格式';
+            }
+        },
+        phone_check: function (value, item) { //value：表单的值、item：表单的DOM对象
+            if (value.length <= 0) {
+                return '请输入手机号';
+            }
+        }
+        , groups: function (value, item) {
+            var groupCount = layui.jquery('.groups-selected[type=hidden]').length;
+            console.log(groupCount);
+            if (groupCount <= 0) {
+                return '请选择组别';
+            }
+        }
+    });
+
+</script>

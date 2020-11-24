@@ -1,0 +1,453 @@
+<style>
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0
+    }
+</style>
+<canvas id="LAY-welcome-bgCanvas"></canvas>
+<div id="LAY-welcome-afterCanvas"></div>
+<script>
+  !function () {
+    (function () {
+      var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
+        window.setTimeout(callback, 1000 / 60);
+      };
+      window.requestAnimationFrame = requestAnimationFrame;
+    })();
+
+    // Terrain stuff.
+    var background = document.getElementById("LAY-welcome-bgCanvas"),
+      afterCanvas = document.getElementById("LAY-welcome-afterCanvas"),
+      bgCtx = background.getContext("2d"),
+      width = background.parentElement.offsetWidth,
+      height = background.parentElement.offsetHeight;
+
+    (height < 400) ? height = 400 : height;
+
+    background.width = width;
+    background.height = height;
+
+    function Terrain(options) {
+      options = options || {};
+      this.terrain = document.createElement("canvas");
+      this.terCtx = this.terrain.getContext("2d");
+      this.scrollDelay = options.scrollDelay || 90;
+      this.lastScroll = new Date().getTime();
+
+      this.terrain.width = width;
+      this.terrain.height = height;
+      this.fillStyle = options.fillStyle || "#191D4C";
+      this.mHeight = options.mHeight || height;
+
+      // generate
+      this.points = [];
+
+      var displacement = options.displacement || 140,
+        power = Math.pow(2, Math.ceil(Math.log(width) / (Math.log(2))));
+
+      // set the start height and end height for the terrain
+      this.points[0] = this.mHeight;//(this.mHeight - (Math.random() * this.mHeight / 2)) - displacement;
+      this.points[power] = this.points[0];
+
+      // create the rest of the points
+      for (var i = 1; i < power; i *= 2) {
+        for (var j = (power / i) / 2; j < power; j += power / i) {
+          this.points[j] = ((this.points[j - (power / i) / 2] + this.points[j + (power / i) / 2]) / 2) + Math.floor(Math.random() * -displacement + displacement);
+        }
+        displacement *= 0.6;
+      }
+
+      afterCanvas.appendChild(this.terrain);
+    }
+
+    Terrain.prototype.update = function () {
+      // draw the terrain
+      this.terCtx.clearRect(0, 0, width, height);
+      this.terCtx.fillStyle = this.fillStyle;
+
+      if (new Date().getTime() > this.lastScroll + this.scrollDelay) {
+        this.lastScroll = new Date().getTime();
+        this.points.push(this.points.shift());
+      }
+
+      this.terCtx.beginPath();
+      for (var i = 0; i <= width; i++) {
+        if (i === 0) {
+          this.terCtx.moveTo(0, this.points[0]);
+        } else if (this.points[i] !== undefined) {
+          this.terCtx.lineTo(i, this.points[i]);
+        }
+      }
+
+      this.terCtx.lineTo(width, this.terrain.height);
+      this.terCtx.lineTo(0, this.terrain.height);
+      this.terCtx.lineTo(0, this.points[0]);
+      this.terCtx.fill();
+    }
+
+
+    // Second canvas used for the stars
+    bgCtx.fillStyle = '#05004c';
+    bgCtx.fillRect(0, 0, width, height);
+
+    // stars
+    function Star(options) {
+      this.size = Math.random() * 2;
+      this.speed = Math.random() * .05;
+      this.x = options.x;
+      this.y = options.y;
+    }
+
+    Star.prototype.reset = function () {
+      this.size = Math.random() * 2;
+      this.speed = Math.random() * .05;
+      this.x = width;
+      this.y = Math.random() * height;
+    }
+
+    Star.prototype.update = function () {
+      this.x -= this.speed;
+      if (this.x < 0) {
+        this.reset();
+      } else {
+        bgCtx.fillRect(this.x, this.y, this.size, this.size);
+      }
+    }
+
+    function ShootingStar() {
+      this.reset();
+    }
+
+    ShootingStar.prototype.reset = function () {
+      this.x = Math.random() * width;
+      this.y = 0;
+      this.len = (Math.random() * 80) + 10;
+      this.speed = (Math.random() * 10) + 6;
+      this.size = (Math.random() * 1) + 0.1;
+      // this is used so the shooting stars arent constant
+      this.waitTime = new Date().getTime() + (Math.random() * 3000) + 500;
+      this.active = false;
+    }
+
+    ShootingStar.prototype.update = function () {
+      if (this.active) {
+        this.x -= this.speed;
+        this.y += this.speed;
+        if (this.x < 0 || this.y >= height) {
+          this.reset();
+        } else {
+          bgCtx.lineWidth = this.size;
+          bgCtx.beginPath();
+          bgCtx.moveTo(this.x, this.y);
+          bgCtx.lineTo(this.x + this.len, this.y - this.len);
+          bgCtx.stroke();
+        }
+      } else {
+        if (this.waitTime < new Date().getTime()) {
+          this.active = true;
+        }
+      }
+    }
+
+    var entities = [];
+
+    // init the stars
+    for (var i = 0; i < height; i++) {
+      entities.push(new Star({
+        x: Math.random() * width,
+        y: Math.random() * height
+      }));
+    }
+
+    // Add 2 shooting stars that just cycle.
+    entities.push(new ShootingStar());
+    entities.push(new ShootingStar());
+    entities.push(new Terrain({mHeight: (height / 1.5) - 120}));
+    entities.push(new Terrain({
+      displacement: 120,
+      scrollDelay: 50,
+      fillStyle: "rgb(17,20,40)",
+      mHeight: (height / 1.5) - 60
+    }));
+    entities.push(new Terrain({displacement: 100, scrollDelay: 20, fillStyle: "rgb(10,10,5)", mHeight: height / 1.5}));
+
+    //animate background
+    function animate() {
+      bgCtx.fillStyle = '#110E19';
+      bgCtx.fillRect(0, 0, width, height);
+      bgCtx.fillStyle = '#ffffff';
+      bgCtx.strokeStyle = '#ffffff';
+
+      var entLen = entities.length;
+
+      while (entLen--) {
+        entities[entLen].update();
+      }
+      return requestAnimationFrame(animate);
+    }
+
+    const animateFrameId = animate();
+
+    function destroy(id) {
+      window.cancelAnimationFrame(id)
+    }
+
+    layui.admin._stack({
+      id: animateFrameId,
+      destroy() {
+        window.cancelAnimationFrame(this.id)
+      }
+    });
+
+  }()
+</script>
+
+
+<style>
+    /*clock*/
+    .wrapper-clock {
+        text-align: center;
+        margin-top: 160px;
+    }
+
+    .wrapper-clock h1 {
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #ccc;
+    }
+
+    .wrapper-clock .clock {
+        position: relative;
+        font-family: "Helvetica Neue", Helvetica, sans-serif;
+        font-size: 24px;
+        line-height: 48px;
+        font-weight: bold;
+    }
+
+    .wrapper-clock .clock:before,
+    .wrapper-clock .clock:after {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        content: ':';
+        z-index: 2;
+        line-height: 24px;
+        color: #999;
+    }
+
+    .wrapper-clock .clock:before {
+        left: 90px;
+    }
+
+    .wrapper-clock .clock:after {
+        right: 90px;
+    }
+
+    .wrapper-clock .clock span {
+        position: relative;
+        display: inline-block;
+        padding: 0 15px;
+        margin: 0 2px;
+        z-index: 1;
+
+        -webkit-transform-style: preserve-3d;
+        -moz-transform-style: preserve-3d;
+        -ms-transform-style: preserve-3d;
+        transform-style: preserve-3d;
+    }
+
+    .wrapper-clock .clock span:first-child {
+        margin-left: 0;
+    }
+
+    .wrapper-clock .clock span:last-child {
+        margin-right: 0;
+    }
+
+    .wrapper-clock .clock span:nth-child(2),
+    .wrapper-clock .clock span:nth-child(4) {
+        margin-right: 16px;
+    }
+
+    .wrapper-clock .clock span:nth-child(3),
+    .wrapper-clock .clock span:nth-child(5) {
+        margin-left: 16px;
+    }
+
+    .wrapper-clock .clock span:before,
+    .wrapper-clock .clock span:after {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        color: #eee;
+        text-shadow: 0 1px 0 #fff;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 6px;
+        outline: 1px solid transparent; /* fix jagged edges in ff */
+
+        -webkit-backface-visibility: hidden;
+        -moz-backface-visibility: hidden;
+        -ms-backface-visibility: hidden;
+        backface-visibility: hidden;
+
+        -webkit-transition: -webkit-transform .75s, opacity .75s;
+        -moz-transition: -moz-transform .75s, opacity .75s;
+        -ms-transition: -ms-transform .75s, opacity .75s;
+        transition: transform .75s, opacity .75s;
+    }
+
+    .wrapper-clock .clock span:before {
+        opacity: 1;
+        z-index: 1;
+        content: attr(data-old);
+
+        -webkit-transform-origin: 0 0;
+        -moz-transform-origin: 0 0;
+        -ms-transform-origin: 0 0;
+        transform-origin: 0 0;
+
+        -webkit-transform: translate3d(0, 0, 0) rotateX(0);
+        -moz-transform: translate3d(0, 0, 0) rotateX(0);
+        -ms-transform: translate3d(0, 0, 0) rotateX(0);
+        transform: translate3d(0, 0, 0) rotateX(0);
+    }
+
+    .wrapper-clock .clock span:after {
+        opacity: 0;
+        z-index: 2;
+        content: attr(data-now);
+
+        -webkit-transform-origin: 0 100%;
+        -moz-transform-origin: 0 100%;
+        -ms-transform-origin: 0 100%;
+        transform-origin: 0 100%;
+
+        -webkit-transform: translate3d(0, -102.5%, 0) rotateX(90deg);
+        -moz-transform: translate3d(0, -102.5%, 0) rotateX(90deg);
+        -ms-transform: translate3d(0, -102.5%, 0) rotateX(90deg);
+        transform: translate3d(0, -102.5%, 0) rotateX(90deg);
+    }
+
+    .wrapper-clock .clock .flip:before {
+        opacity: 0;
+        -webkit-transform: translate3d(0, 102.5%, 0) rotateX(-90deg);
+        -moz-transform: translate3d(0, 102.5%, 0) rotateX(-90deg);
+        -ms-transform: translate3d(0, 102.5%, 0) rotateX(-90deg);
+        transform: translate3d(0, 102.5%, 0) rotateX(-90deg);
+    }
+
+    .wrapper-clock .clock .flip:after {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateX(0);
+        -moz-transform: translate3d(0, 0, 0) rotateX(0);
+        -ms-transform: translate3d(0, 0, 0) rotateX(0);
+        transform: translate3d(0, 0, 0) rotateX(0);
+    }
+</style>
+<div class="layui-row">
+    <div class=" layui-col-md12">
+        <div class="wrapper-clock">
+            <h1>北京时间</h1>
+            <span class="clock"></span>
+        </div>
+    </div>
+    <!--<div class="layui-col-lg6 layui-col-md12">
+        <div class="wrapper-clock">
+            <h1>服务器时间</h1>
+            <span class="clock"></span>
+        </div>
+    </div>-->
+</div>
+
+<script>
+  !function () {
+    const Clock = (function () {
+
+      var exports = function (element, stamp) {
+        this._element = element;
+        var html = '';
+        for (var i = 0; i < 6; i++) {
+          html += '<span>&nbsp;</span>';
+        }
+        this._element.innerHTML = html;
+        this._slots = this._element.getElementsByTagName('span');
+        this._tick(stamp);
+      };
+
+      exports.prototype = {
+
+        _tick: function (stamp) {
+          var myTime = new Date(stamp);
+          this._update(this._pad(myTime.getHours()) + this._pad(myTime.getMinutes()) + this._pad(myTime.getSeconds()));
+          var self = this;
+          setTimeout(function () {
+            self._tick(stamp + 1000);
+          }, 1000);
+        },
+
+        _pad: function (value) {
+          return ('0' + value).slice(-2);
+        },
+
+        _update: function (timeString) {
+
+          var i = 0, l = this._slots.length, value, slot, now;
+          for (; i < l; i++) {
+
+            value = timeString.charAt(i);
+            slot = this._slots[i];
+            now = slot.dataset.now;
+
+            if (!now) {
+              slot.dataset.now = value;
+              slot.dataset.old = value;
+              continue;
+            }
+
+            if (now !== value) {
+              this._flip(slot, value);
+            }
+          }
+        },
+
+        _flip: function (slot, value) {
+
+          // setup new state
+          slot.classList.remove('flip');
+          slot.dataset.old = slot.dataset.now;
+          slot.dataset.now = value;
+
+          // force dom reflow
+          slot.offsetLeft;
+
+          // start flippin
+          slot.classList.add('flip');
+
+        }
+
+      };
+
+      return exports;
+    }());
+    const clocks = document.querySelectorAll('.clock');
+    new Clock(clocks[0], layui.admin.getLocalTime(8)) //北京东八区时间
+
+    /*layui.admin.req({
+      url: layui.admin.getUrl('/api/server/time'),
+      type: 'get',
+      done: function (res) {
+        if (res.code===0){
+          new Clock(clocks[1], new Date(res.data.time*1000))
+        }
+      }
+    });*/
+
+  }()
+
+  //echarts模块在外网加载时间较长, 进入内层平台预加载
+  layui.use('echarts')
+
+</script>

@@ -1,0 +1,430 @@
+<style>
+    #email_audit_dialog {
+        padding: 20px;
+    }
+    #email_audit_dialog .layui-input-block span {
+        display: block;
+        line-height: 38px;
+        height: auto;
+        overflow: hidden;
+    }
+    #email_audit_dialog .layui-form-label {
+        width: 85px;
+    }
+    #email_audit_dialog textarea {
+        outline:none;
+        border-width: 0;
+        color: #666;
+        padding: 6px 0;
+        height: 38px;
+        min-height: 38px;
+        line-height: 26px;
+        margin-left: 5px;
+    }
+</style>
+<!--解禁/一键解禁-->
+<form class="layui-form email_audit_dialog" id="email_audit_dialog">
+
+    <div class="layui-form-item now_state_show" style="display: none;">
+        <label class="layui-form-label">当前状态：</label>
+        <div class="layui-input-block">
+            <span name="state"></span>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label fslx">发送类型：</label>
+        <div class="layui-input-block">
+            <span name="type"></span>
+        </div>
+    </div>
+
+    <div class="mass_no_use_div">
+        <div class="layui-form-item">
+            <label class="layui-form-label">区服：</label>
+            <div class="layui-input-block">
+                <span name="server_list"></span>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label label_tips fsdx">发送对象：</label>
+            <div class="layui-input-block">
+                <textarea name="user_list" autoHeight="true" class="layui-textarea" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- 范围邮件 内容渲染 -->
+    <div id="range_content_show">
+
+    </div>
+
+    <div class="layui-form-item" style="display: none;">
+        <label class="layui-form-label label_tips czlx">操作类型：</label>
+        <div class="layui-input-block">
+            <span name="operator_type_show"></span>
+        </div>
+    </div>
+
+    <div class="layui-form-item get_type" style="display: none;">
+        <label class="layui-form-label">新用户可领：</label>
+        <div class="layui-input-block">
+            <span name="get_type"></span>
+        </div>
+    </div>
+
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">邮件标题：</label>
+        <div class="layui-input-block">
+            <span name="email_title"></span>
+        </div>
+    </div>
+
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">邮件内容：</label>
+        <div class="layui-input-block">
+            <textarea name="email_content" autoHeight="true" class="layui-textarea" readonly></textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item mass_no_use_div">
+        <label class="layui-form-label yjdj">邮件道具：</label>
+        <div class="layui-input-block">
+<!--            <span name="prop_content_show"></span>-->
+            <textarea name="prop_content_show" autoHeight="true" class="layui-textarea" readonly></textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">申请时间：</label>
+        <div class="layui-input-block">
+            <span name="operator_time"></span>
+        </div>
+    </div>
+
+    <div class="wuhen_no_use_div">
+        <div class="layui-form-item timing_time_div">
+            <label class="layui-form-label">定时时间：</label>
+            <div class="layui-input-block">
+                <span name="timing_time"></span>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">过期时间：</label>
+            <div class="layui-input-block">
+                <span name="past_time"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">申请人：</label>
+        <div class="layui-input-block">
+            <span name="operator_name"></span>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">申请原因：</label>
+        <div class="layui-input-block">
+            <span name="apply_reason"></span>
+        </div>
+    </div>
+
+    <div class="layui-form-item mass_use_div" style="display: none;">
+        <label class="layui-form-label">上传情况：</label>
+        <div class="layui-input-block">
+            <table id="prop_excel_content"></table>
+            <button type="button" class="layui-btn" id="uploadExport">导出</button>
+        </div>
+    </div>
+
+    <div class="layui-form-item" style="margin-bottom: 0;">
+        <label class="layui-form-label">审核记录：</label>
+    </div>
+    <div style="padding-left: 28px;">
+        <table id="audit_log_list"></table>
+    </div>
+
+
+    <div class="detail_no_show" style="display: none">
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核结果：</label>
+            <div class="layui-input-block">
+                <input type="radio" name="audit_result" value="0" title="通过" checked="">
+                <input type="radio" name="audit_result" value="1" title="驳回">
+                <input type="radio" name="audit_result" value="2" title="拒绝">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核理由：</label>
+            <div class="layui-input-inline" style="width: 300px;">
+                <input type="text" name="audit_reason" class="layui-input" placeholder="请输入审核理由">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码：</label>
+            <div class="layui-input-inline" style="width: 300px;">
+                <input type="password" name="pwd" class="layui-input" placeholder="请输入密码" autocomplete="new-password">
+            </div>
+        </div>
+
+        <div class="layui-form-item" style="padding-left: 30px;">
+            <button type="button" class="layui-btn layui-btn-theme" id="audit_ok">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="audit_channel">取消</button>
+        </div>
+    </div>
+
+</form>
+<script type="text/html" template lay-url="" lay-done="layui.data.done(d);">
+
+</script>
+<script>
+    layui.use(['table', 'admin', 'form', 'view', 'laydate', 'element'], function(){
+        let admin = layui.admin;
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        form.render();
+
+        // 获取审核邮件的id，渲染数据
+        layui.data.done = function (d) {
+            var id = d.params.id;
+            var toUrl = d.params.toUrl;
+            var showType = d.params.showType;
+
+            let excelPath = '';
+            let type;
+            var is_traceless = parseInt(d.params.is_traceless);
+            let pages = 1;
+
+            if (showType == 'detail') {
+                $('.detail_no_show').hide();
+                $('.now_state_show').show();
+            } else {
+                $('.detail_no_show').show();
+            }
+
+            $.fn.autoHeight = function(){
+                function autoHeight(elem){
+                    elem.style.height = 'auto';
+                    elem.scrollTop = 0; //防抖动
+                    elem.style.height = elem.scrollHeight + 'px';
+                }
+                this.each(function(){
+                    autoHeight(this);
+                    $(this).on('keyup', function(){
+                        autoHeight(this);
+                    });
+                });
+            }
+
+            let detailUrl = '/api/email/getEmailDetailById';
+            if (is_traceless) {
+                detailUrl = '/api/traceless/getEmailDetailById'
+            }
+
+            admin.req({
+                url: admin.getUrl(detailUrl),
+                data: {
+                    id: id
+                },
+                type: 'post',
+                done: function (data) {
+
+                    type = parseInt(data.data.type);
+                    is_traceless = parseInt(data.data.is_traceless);
+
+                    excelPath = data.data.excel_path;
+
+                    // 立即发送不显示定时时间div
+                    if (parseInt(data.data['send_type']) == 0) {
+                        $('.timing_time_div').hide();
+                    } else {
+                        $('.timing_time_div').show();
+                    }
+                    // 根据邮件发送类型显示
+                    switch (type) {
+                        case 1: {
+                            // 全服邮件
+                            $('.label_tips').html('排除对象：');
+                            $('#email_audit_dialog .get_type').show();
+                            break;
+                        }
+                        case 2: {
+                            // 玩家邮件
+                            break;
+                        }
+                        case 3: {
+                            // 范围邮件
+                            $('.label_tips').html('排除对象：');
+                            layui.view('range_content_show').render('email/popup/range_content_show', {editId: id, showData: data.data}).done(function(){
+                                // alert(1);
+                            });
+                            break;
+                        }
+                        case 4: {
+                            for (let i = 0; i < $('.mass_no_use_div').length; i ++) {
+                                $('.mass_no_use_div').eq(i).hide();
+                            }
+                            $('.mass_use_div').show();
+
+                            table.render({
+                                id: 'prop_excel_content',
+                                elem: '#prop_excel_content',
+                                height: '400',
+                                page: false,
+                                loading: true,
+                                cols: [[
+                                    {field:'server_id', title: '区服', width: '20%', align: 'center'},
+                                    {field:'user_id', title: '角色ID', width: '20%', align: 'center'},
+                                    {field:'prop_content', title: '道具内容', width: '60%', align: 'center'},
+                                ]],
+                                data: data.data['prop_excel_content'],
+                                limit: data.data['prop_excel_content'].length
+                            });
+
+                            break;
+                        }
+                        case 5: {
+                            $('.label_tips').html('排除对象：');
+                            break;
+                        }
+                    }
+
+                    // 无痕邮件
+                    if (is_traceless) {
+                        for (let i = 0; i < $('.wuhen_no_use_div').length; i ++) {
+                            $('.wuhen_no_use_div').eq(i).hide();
+                        }
+
+                        $('.fslx').html('无痕类型：');
+                        $('.fsdx').html('操作对象：');
+                        $('.yjdj').html('道具内容：');
+                        $('.czlx').parent().show();
+                    }
+
+
+                    for (let i = 0; i < $('#email_audit_dialog span').length; i ++) {
+                        let name = $('#email_audit_dialog span').eq(i).attr('name')
+                        $('#email_audit_dialog span').eq(i).html(data.data[name]);
+
+
+
+                        // 特殊处理
+                        if (name == 'type') {
+                            $('#email_audit_dialog span').eq(i).html(email_type[data.data[name]])
+                        }
+
+                        if (name == 'state') {
+                            $('#email_audit_dialog span').eq(i).html(show_state[data.data[name]]);
+                        }
+
+                        let get_type_arr = {
+                            1: '是',
+                            2: '否'
+                        };
+                        if (name == 'get_type') {
+                            $('#email_audit_dialog span').eq(i).html(get_type_arr[data.data[name]]);
+                        }
+
+                    }
+
+                    for (let i = 0; i < $('#email_audit_dialog textarea').length; i ++) {
+                        let name = $('#email_audit_dialog textarea').eq(i).attr('name');
+                        $('#email_audit_dialog textarea').eq(i).html(data.data[name]);
+                    }
+                    $('textarea[autoHeight]').autoHeight();
+
+                    // 渲染审核记录
+                    table.render({
+                        id: 'audit_log_list',
+                        elem: '#audit_log_list',
+                        page: false,
+                        loading: true,
+                        cols: [[
+                            {field:'new_state', title: '审核结果', align: 'center', templet: function (d) {
+                                    switch (parseInt(d.new_state)) {
+                                        case 1: {
+                                            return "<span style='color:red;'>驳回</span>";
+                                            break;
+                                        }
+                                        case 2: {
+                                            return "<span style='color:red;'>拒绝</span>";
+                                            break;
+                                        }
+                                        case 3: {
+                                            return "<span style='color:green;'>通过</span>";
+                                            break;
+                                        }
+                                        default: {
+                                            return '';
+                                            break;
+                                        }
+                                    }
+                                }},
+                            {field:'audit_reason', title: '审核理由', align: 'center'},
+                            {field:'audit', title: '审核人', align: 'center'},
+                            {field:'audit_time', title: '审核时间', align: 'center'},
+                        ]],
+                        data: data.data['audit_list']
+                    });
+
+                }
+            });
+
+            // api/traceless/emailAudit
+            // api/email/emailAudit
+            // 提交审核
+            $(document).off('click', '#audit_ok').on('click', '#audit_ok', function () {
+                admin.req({
+                    url: admin.getUrl(toUrl),
+                    data: {
+                        id: id, // 审核邮件的id
+                        state: $("#email_audit_dialog input[name='audit_result']:checked").val(),    // 审核状态 0：通过 1：驳回 2：拒绝
+                        audit_reason: $("#email_audit_dialog input[name='audit_reason']").val(),     // 审核理由
+                        pwd: $("#email_audit_dialog input[name='pwd']").val(),    // 操作密码
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        if (data.code == 0) {
+                            layer.msg('审核成功', {icon: 6, anim: 0});
+                            layer.closeAll();
+                            let param = admin.getFormParam('.email_audit_form');
+                            table.reload('audit_list', {
+                                where: param,
+                                page: {
+                                    curr: 1
+                                }
+                            });
+                        } else {
+                            layer.msg(data.msg, {icon: 5, anim: 6});
+                        }
+                    }
+                });
+            })
+
+
+            // 导出
+            $(document).off('click', '#uploadExport').on('click', '#uploadExport', function () {
+                let exportUrl = '/api/email/export/exportMassExcel';
+                if (is_traceless) {
+                    exportUrl = '/api/traceless/export/exportMassExcel';
+                }
+                admin.download({
+                    url: admin.getUrl(exportUrl),
+                    data: {excel_path: excelPath, export_type: 1},
+                    method: 'get',
+                    dataType: 'json',
+                });
+            })
+
+        };
+
+    });
+</script>

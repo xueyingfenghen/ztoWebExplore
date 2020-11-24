@@ -1,0 +1,26 @@
+<style>
+    #interior_pay_fail_detail {
+        padding: 20px;
+    }
+    .red {
+        color: red;
+    }
+    .green {
+        color: green;
+    }
+</style>
+<!--补单失败结果详情-->
+<div id="interior_pay_fail_detail">
+    <button type="button" class="layui-btn layui-btn-theme" id="re_more_interior_pay">重新充值</button>
+    <table id="pay_fail_list"></table>
+</div>
+<script type="text/html" id="state">
+    {{#  if(d.state == 0 ){ }}
+    <span class="green">充值成功</span>
+    {{#  } else { }}
+    <span class="red">充值失败</span>
+    {{#  } }}
+</script>
+<script type="text/html" id="fail_reason">
+    <span class="red">{{ d.fail_reason }}</span>
+</script>

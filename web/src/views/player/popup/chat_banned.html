@@ -1,0 +1,152 @@
+<style>
+    #banned_dialog .banned_set {
+
+    }
+    .green {
+        color: green;
+    }
+    .red {
+        color: red;
+    }
+    .layui-layer-page .layui-layer-content{overflow: hidden;}
+</style>
+<!--解禁/一键解禁-->
+<form class="layui-form layui-form-pane banned_dialog" id="banned_dialog">
+
+
+    <div id="check_user_div" style="display: none;">
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择区服</label>
+            <div class="layui-input-block">
+                <input type="text" name="server_list" autocomplete="off" placeholder="请点击输入框进行区服勾选" class="layui-input server_list" readonly>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label"><span style="padding-left: 10px;" class="user_choose_or_pc">选择玩家</span></label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入角色ID，多角色ID间需分行标识" class="layui-textarea" name="user_list"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <button type="button" class="layui-btn layui-btn-theme" id="check">校验</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="clear">清除</button>
+            <span class="user_check_type red">未校验</span>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item" pane="">
+        <label class="layui-form-label">禁言时长</label>
+        <div class="layui-input-block" style="width: 100%">
+            <input type="radio" name="type" value="0" lay-filter="banns" title="自动禁言" checked="">
+            <input type="radio" name="type" value="1" lay-filter="banns" title="永久禁言">
+            <input type="radio" name="type" value="2" lay-filter="banns" title="手动定时">
+        </div>
+    </div>
+    <span style="color: red;margin-bottom: 10px;display:block;">自动定时：指根据【自动定时设置】功能中的规则自动取对应封禁时长）</span>
+
+    <div class="layui-form-item banned_set">
+
+    </div>
+
+</form>
+<script>
+    layui.use(['table', 'admin', 'form', 'view', 'laydate', 'element'], function () {
+        let admin = layui.admin;
+        let table = layui.table;
+        let form = layui.form;
+        let view = layui.view;
+        let laydate = layui.laydate;
+        let element = layui.element;
+        let $ = layui.jquery;
+
+        check_type = false;
+        checkedRoleArr = '';
+
+        //  区服
+        $.area = function (data) {
+            admin.popup({
+                title: '选择区服'
+                ,area:  ['800px', '600px']
+                ,id: 'select_area'
+                ,btn: ['确定', '取消']
+                ,success: function(layero, index){
+                    layui.view(this.id).render('area', {...data});
+                },yes: function(index, layero){
+                    $(".server_list").val($('#get_area').val());
+                    layer.close(index);
+                }
+            });
+        }
+
+        // 点击选择区服
+        $(document).off('click', '.server_list').on('click', '.server_list', function (e) {
+            $.area({area: e.target.value});
+        })
+
+        // 校验
+        $(document).off('click', '#check').on('click', '#check', function () {
+            admin.req({
+                url: admin.getUrl('/api/public/checkUser'),
+                data: {
+                    server_list: $("input[name='server_list']").val(),
+                    user_list: $("textarea[name='user_list']").val(),
+                },
+                type: 'post',
+                done: function (data) {
+                    if (data.code == 0) {
+                        // 弹出角色校验结果
+                        admin.checkUser('角色校验结果', data.data);
+                        // 普通校验
+                        let checkedNum = 0;
+                        $.each(data.data, function (key, val) {
+                            if (val['state'] == 0) {
+                                checkedNum ++;
+                            }
+                        })
+                        if (checkedNum == data.data.length) {
+                            // 全部校验通过
+                            check_type = true;
+                            checkedRoleArr = $("textarea[name='user_list']").val();
+                            $('.user_check_type').removeClass('red');
+                            $('.user_check_type').addClass('green');
+                            $('.user_check_type').html('校验成功')
+                        } else {
+                            // 校验有错误
+                            check_type = false;
+                            $('.user_check_type').removeClass('green');
+                            $('.user_check_type').addClass('red');
+                            $('.user_check_type').html('校验失败')
+                        }
+                    } else {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                    }
+                }
+            });
+        });
+
+        // 清除
+        $(document).off('click', '#clear').on('click', '#clear', function () {
+            $("input[name='server_list']").val('')
+            $("textarea[name='user_list']").val('')
+            check_type = false;
+            checkedRoleArr = '';
+            $('.user_check_type').removeClass('green');
+            $('.user_check_type').addClass('red');
+            $('.user_check_type').html('未校验')
+        });
+
+        $("textarea[name='user_list']").blur(function () {
+            if (checkedRoleArr !== $("textarea[name='user_list']").val()) {
+                check_type = false;
+                checkedRoleArr = '';
+                $('.user_check_type').removeClass('green');
+                $('.user_check_type').addClass('red');
+                $('.user_check_type').html('校验失败');
+            }
+        })
+
+    })
+</script>

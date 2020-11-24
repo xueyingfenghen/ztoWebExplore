@@ -1,0 +1,100 @@
+<style>
+    .container {
+        overflow: hidden;
+
+    }
+
+    .container>div:first-child {
+        text-align: left;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+                <div class="layui-tab-item" id="search_rmb-gift" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form rmb-gift">
+                        <div class="layui-form-item" id="rmb-gift">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_rmb-gift_button"
+                                lay-filter="query" lay-submit>查询</button>
+                            <button type="reset" class="layui-btn layui-btn-primary" id="reset_rmb-gift">重置</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="layui-tab-item" id="search_week-gift" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form week-gift">
+                        <div class="layui-form-item" id="week-gift">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_week-gift"
+                                lay-filter="search_week-gift" lay-submit>查询</button>
+                            <button type="reset" class="layui-btn layui-btn-primary" id="reset_week-gift">重置</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="layui-tab-item" id="search_month-gift" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form month-gift">
+                        <div class="layui-form-item" id="month-gift">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_month-gift"
+                                lay-filter="search_month-gift" lay-submit>查询</button>
+                            <button type="reset" class="layui-btn layui-btn-primary" id="reset_month-gift">重置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-card tabs container" style="display: none;" id="list_rmb-gift">
+    <div class="layui-card-body" style="margin:0;">
+        <button class="layui-btn layui-btn-theme" data-event="addRMB">新增RMB礼包</button>
+    </div>
+    <div class="layui-card-body" style="margin:0;padding-top: 0;">
+        <table id="rmb_gift_list" lay-filter="rmb_gift_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs container" style="display: none;" id="list_month-gift">
+    <div class="layui-card-body" style="margin:0;">
+        <button class="layui-btn layui-btn-theme" data-event="addPlanMonth">新增计划</button>
+    </div>
+    <div class="layui-card-body" style="margin:0;padding-top: 0;">
+        <table id="month_gift_list" lay-filter="month_gift_list"></table>
+    </div>
+</div>
+
+
+<div class="layui-card tabs container" style="display: none;" id="list_week-gift">
+    <div class="layui-card-body" style="margin:0;">
+        <button class="layui-btn layui-btn-theme" data-event="addPlanWeek">新增计划</button>
+    </div>
+    <div class="layui-card-body" style="margin:0;padding-top: 0;">
+        <table id="week_gift_list" lay-filter="week_gift_list"></table>
+    </div>
+</div>
+
+<script>
+    var jsArr = {
+        'rmb-gift': 'limit_gift_config/rmb_gift',
+        "week-gift": "limit_gift_config/week_gift",
+        "month-gift": 'limit_gift_config/month_gift'
+    };
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+</script>
+
+<script type="text/html" id="edit">
+    <button class="layui-btn layui-btn-normal layui-btn-sm" data-event="edit">修改</button>
+</script>

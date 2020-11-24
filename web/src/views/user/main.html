@@ -1,0 +1,125 @@
+<style>
+    #main-container .layui-input-block {
+        width: 190px;
+    }
+
+    .layui-table-cell {
+        height: inherit;
+    }
+</style>
+
+<title>主体内容</title>
+
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" id="breadcrumb" lay-separator="/">
+    </div>
+</div>
+
+<div class="layui-fluid" id="main-container">
+
+
+</div>
+
+
+<script>
+  //暴露到window全局变量 不建议这样写法
+  var $ = layui.jquery
+  var id = layui.router().search.id;
+  var permissions = layui.sessionData(layui.setter.tableName)['permissions'];
+
+  var breadcrumbs = permissions[id]['breadcrumbs'];
+  var tabs = permissions[id].childrens;
+
+  // 默认加载第一个js
+  var tempJsArr = [tabs[0]];
+  var dataTab = tabs[0];
+
+  var elementTabs = function (jsArr) {
+    layui.element.on('tab(docDemoTabBrief)', function (data) {
+
+      dataTab = layui.jquery(this).attr('data-tab');
+      let layui_tab_item = layui.jquery(this).parent().parent().find('.layui-tab-item');
+      for (let i = 0; i < layui_tab_item.length; i++) {
+        layui_tab_item.eq(i).removeClass("layui-show");
+
+      }
+      for (let i = 0; i < layui.jquery('.tabs').length; i++) {
+        layui.jquery('.tabs').eq(i).removeClass("layui-show");
+      }
+      // 显示list部分
+      layui.jquery('#list_' + dataTab).addClass("layui-show");
+      layui.jquery('#search_' + dataTab).addClass("layui-show");
+      layui.admin.resizeTable()
+      //重载table
+      layui.admin.tabsBody(layui.admin.tabsPage.index).find('.layui-table-view').each(function () {
+        const that = layui.$(this);
+        const tableID = that.attr('lay-id');
+        that.is(":visible") && layui.table.reload(tableID)
+      });
+
+      // 点击tab加载对应的js，此处不会重复加载相同的js
+      if (tempJsArr.indexOf(dataTab) == -1 && undefined != jsArr) {
+        if (typeof jsArr == "object" && undefined != jsArr[dataTab]) {
+          tempJsArr.push(dataTab);
+          layui.use(jsArr[dataTab], layui.factory(jsArr[dataTab]));
+        }
+      }
+
+
+    });
+  };
+
+
+  layui.use(['jquery'], function () {
+    const $ = layui.jquery;
+    $('#breadcrumb').html('');
+    for (let i = 0; i < breadcrumbs.length; i++) {
+      if (breadcrumbs.length - 1 <= i) {
+        $('#breadcrumb').append('<a><cite>' + breadcrumbs[i] + '</cite></a>');
+      } else {
+        $('#breadcrumb').append('<a>' + breadcrumbs[i] + '</a>');
+      }
+    }
+
+    //加载容器内容
+    var renderMain = function (route, data) {
+      layui.view('main-container').render(route, data, {}).done(function () {
+        let str = '';
+        tabs.forEach((item, index) => {
+          str += `<li data-id="${item}" data-tab="${item}" data-route="${permissions[item].route}" class="${index === 0 ? 'layui-this' : ''}">`;
+          str += `${permissions[item]['name']}`
+          str += `${layui.tips[item] ? '<span class="layui-badge layui-bg-gray">?</span>' : ''}</li>`
+        })
+        $(".layui-tab-title").html(str)
+        // 功能说明事件注册
+        tipsEvent()
+
+        var searchId = "#search_" + tabs[0];
+        var listId = "#list_" + tabs[0];
+        $(searchId).addClass("layui-show");
+        $(listId).addClass("layui-show");
+      });
+    };
+
+    //初次加载部分，tab栏
+    if (tabs === undefined) {
+      $('.layui-tab-title').remove();
+    } else {
+      renderMain(permissions[tabs[0]].route, {"tabs": tabs});
+    }
+
+    elementTabs();
+
+    function tipsEvent(elem) {
+      $("div[lay-filter='docDemoTabBrief'] li span.layui-badge").on("click", function (e) {
+        layui.stope(e);
+        const title = e.target.previousSibling.textContent;
+        const parent = e.target.parentElement.getAttribute("data-id");
+        layui.admin.popup({
+          title,
+          content: layui.tips[parent],
+        })
+      })
+    }
+  })
+</script>

@@ -1,0 +1,224 @@
+<style>
+    .layui-input-block span {
+        display: block;
+        line-height: 38px;
+        height: auto;
+        overflow: hidden;
+    }
+
+</style>
+<div class="layui-form" id="template_email" style="display: none">
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">模板名称：</label>
+        <div class="layui-input-block">
+            <span name="template_name"></span>
+        </div>
+    </div>
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">邮件类型：</label>
+        <div class="layui-input-block">
+            <span name="type_desc"></span>
+        </div>
+    </div>
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">邮件标题：</label>
+        <div class="layui-input-block">
+            <span name="email_title"></span>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">邮件内容：</label>
+        <div class="layui-input-block">
+            <p name="email_content" autoHeight="true" class="layui-textarea" readonly></p>
+        </div>
+    </div>
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">能否编辑：</label>
+        <div class="layui-input-block">
+            <span name="edit"></span>
+        </div>
+    </div>
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">申请人：</label>
+        <div class="layui-input-block">
+            <span name="operator_desc"></span>
+        </div>
+    </div>
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">申请时间：</label>
+        <div class="layui-input-block">
+            <span name="operate_time"></span>
+        </div>
+    </div>
+
+</div>
+<div id="template_gift" style="display: none">
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">礼包名称：</label>
+        <div class="layui-input-block">
+            <span name="template_name"></span>
+        </div>
+    </div>
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">礼包类型：</label>
+        <div class="layui-input-block">
+            <span  name="type_desc"></span>
+        </div>
+    </div>
+    <div class="layui-form-item mass_no_use_div">
+        <label class="layui-form-label ">邮件道具：</label>
+        <div class="layui-input-block">
+            <!--            <span name="prop_content_show"></span>-->
+            <p name="prop_desc" autoHeight="true" class="layui-textarea" readonly></p>
+        </div>
+    </div>
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">申请人：</label>
+        <div class="layui-input-block">
+            <span name="operator_desc"></span>
+        </div>
+    </div>
+    <div class="layui-form-item wuhen_no_use_div">
+        <label class="layui-form-label">申请时间：</label>
+        <div class="layui-input-block">
+            <span name="operate_time"></span>
+        </div>
+    </div>
+</div>
+
+<div class="layui-form-item wuhen_no_use_div">
+    <div class="layui-form-item" style="margin-bottom: 0;">
+        <label class="layui-form-label">审核记录：</label>
+        <div class="layui-input-block">
+            <table id="table_pop_audit"></table>
+        </div>
+    </div>
+
+</div>
+
+<div class="layui-form audit_form" lay-filter="layuiadmin-app-form-list"
+     id="layuiadmin-app-form-list">
+    <div class="layui-form-item ">
+
+    </div>
+    <script type="text/html" template>
+        <input type="hidden" name="id" value="{{ d.params.id || '' }}">
+    </script>
+
+    <script type="text/html" template>
+        {{#  if(d.params.event != 'detail'){ }}
+        <div class="layui-form-item">
+            <button type="button" lay-submit lay-filter="layuiadmin-app-form-submit" class="layui-btn layui-btn-theme">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" onclick="layer.closeAll();">取消</button>
+        </div>
+        {{#  } }}
+    </script>
+</div>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    let admin = layui.admin;
+    var $ = layui.jquery;
+    var table = layui.table;
+    var tableId = 'table_pop_audit';
+    // 渲染表单数据
+    $.fn.autoHeight = function(){
+        function autoHeight(elem){
+            elem.style.height = 'auto';
+            elem.scrollTop = 0; //防抖动
+            elem.style.height = elem.scrollHeight + 'px';
+        }
+        this.each(function(){
+            autoHeight(this);
+            $(this).on('keyup', function(){
+                autoHeight(this);
+            });
+        });
+    }
+    $(function () {
+        layui.data.sendParams = function (params) {
+            console.log(params);
+            let divId;
+            switch (params.type) {
+                case 'email':
+                    $("#template_email").addClass('layui-show');
+                    divId = 'template_email';
+                    break;
+                default:
+                    $("#template_gift").addClass('layui-show');
+                    divId = 'template_gift';
+                    break;
+
+            }
+            for (let i = 0; i < $('#'+divId+' span').length; i++) {
+                let name = $('#'+divId+' span').eq(i).attr('name')
+                $('#'+divId+' span').eq(i).html(params[name]);
+
+
+            }
+            for (let i = 0; i <$('#'+divId+' p').length; i++) {
+                let name =$('#'+divId+' p').eq(i).attr('name');
+                $('#'+divId+' p').eq(i).html(params[name]);
+            }
+            $('textarea[autoHeight]').autoHeight();
+
+            table.render({
+                    id: tableId,
+                    elem: '#' + tableId,
+                    url: admin.getUrl('/api/' + params.type + '_template/audit_log'),
+                    method: 'GET',
+                    where: {id: params.id},//请求参数(额外)
+                    limit: Number.MAX_VALUE, // 数据表格默认全部显示-->
+                    parseData: function (res) {
+                        return {
+                            "code": res.code, //解析接口状态
+                            "msg": res.msg, //解析提示文本
+                            "data": res.data.list
+                        };
+                    },
+                    loading: true,
+                    cols: [[ //表头
+                        {field: 'state_desc', title: '审核结果', align: 'center', unresize: true,templet: function (d) {
+                                if (d.audit_state>1){
+                                    return '<div class="layui-table-cell ">'+d.state_desc+'</div>'
+                                }else {
+                                    return '<div class="layui-table-cell " style="color: red;">'+d.state_desc+'</div>'
+                                }
+                            }}
+                        , {field: 'reason', title: '审核理由', align: 'center', unresize: true}
+                        , {field: 'auditor_desc', title: '审核人', align: 'center', unresize: true}
+                        , {field: 'audit_time', title: '审核时间', align: 'center', unresize: true}
+                    ]
+                    ]
+                }
+            );
+            layui.admin.req({
+                url: layui.admin.getUrl('/api/menu/content'),
+                //add字段获取 如果没有就获取默认
+                data: {
+                    'type': 'audit_form'
+                },
+                method: 'post',
+                dataType: 'json',
+                done: function (res) {
+                    var add_field;
+                    if (res.data[0] && res.data[0].json) {
+                        //没有进来说明没有配置 读取默认字段
+                        let json = JSON.parse(res.data[0].json);
+                        if (json.add_field.length > 0)
+                            add_field = json.add_field;
+                    }
+                    var obj = add_field.reverse(); //页面字段内容
+                    var edit_obj = params;//编辑时数据内容
+                    layui.admin.renderPopup(".audit_form", obj, edit_obj);
+                    layui.form.render();
+                }
+            })
+        }
+    })
+</script>
+
+

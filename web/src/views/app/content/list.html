@@ -1,0 +1,100 @@
+<div class="layui-card">
+  <div class="layui-card-body">
+    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+      <ul class="layui-tab-title" lay-filter="tabs">
+      </ul>
+
+
+      <div class="layui-tab-content">
+
+        <!--登录前公告-->
+        <div class="layui-tab-item" id="search_login-announce">
+          <form class="layui-form layui-form-pane form_login-announce">
+            <div class="layui-form-item" id="announce_login-announce_form">
+
+            </div>
+            <div class="layui-form-item">
+              <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_login-announce","tableId": "table_login-announce"}'>查询</button>
+              <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_login-announce","tableId": "table_login-announce"}'>重置</button>
+            </div>
+          </form>
+        </div>
+
+
+        <!--游戏内公告-->
+        <div class="layui-tab-item" id="search_inner-announce">
+          <form class="layui-form layui-form-pane form_game-announce">
+            <div class="layui-form-item" id="announce_game-announce_form">
+
+            </div>
+            <div class="layui-form-item">
+                <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_game-announce","tableId": "table_game-announce"}'>查询</button>
+                <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_game-announce","tableId": "table_game-announce"}'>重置</button>
+            </div>
+          </form>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_login-announce" style="display: none;">
+  <div class="layui-card-body">
+    <button type="button" class="layui-btn layui-btn-theme btn-add" style="margin-bottom: 10px;" data-obj='{"event": "add","type":"login", "tableId": "table_login-announce"}'>新增登录前公告</button>
+    <table id="table_login-announce">
+    </table>
+  </div>
+</div>
+
+<div class="layui-card tabs" id="list_inner-announce" style="display: none;">
+  <div class="layui-card-body">
+    <button type="button" class="layui-btn layui-btn-theme btn-add" style="margin-bottom: 10px;" data-obj='{"event": "add","type":"game", "tableId": "table_game-announce"}'>新增游戏内公告</button>
+    <table id="table_game-announce"></table>
+  </div>
+</div>
+
+<script>
+    layui.use('announce/list', layui.factory('announce/list'));
+</script>
+
+<script type="text/html" id="op">
+    <a class="layui-btn layui-btn-normal layui-btn-xs" data-obj='{"event": "detail", "type":"{{ d.type }}", "tableId": "table_{{ d.type }}-announce", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"登录前公告详情"}'>详情</a>
+    {{#  if(!d.close){ }}
+        <a class="layui-btn layui-btn-xs layui-btn-disabled" style="pointer-events: none">修改</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-disabled" style="pointer-events: none">删除</a>
+    {{#  } else { }}
+        <a class="layui-btn layui-btn-xs layui-btn-warm" data-obj='{"event": "edit", "type":"{{ d.type }}", "tableId": "table_{{ d.type }}-announce", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"修改登录前公告"}'>修改</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" data-obj='{"event": "del", "type":"{{ d.type }}", "tableId": "table_{{ d.type }}-announce", "index":"{{ d.LAY_TABLE_INDEX }}"}'>删除</a>
+    {{#  } }}
+</script>
+
+<!--<script type="text/html" id="status">-->
+<!--  {{#  if(d.close){ }}-->
+<!--  <button type="button" class="layui-btn layui-btn-primary layui-btn-xs layui-btn-disabled" style="pointer-events: none">关闭</button>-->
+<!--  {{#  } else { }}-->
+<!--  <button type="button" class="layui-btn layui-btn-xs" data-obj='{"event": "closeStatus","type":"{{ d.type }}", "tableId": "table_{{ d.type }}-announce", "id":"{{ d.id }}"}'>关闭</button>-->
+<!--  {{#  } }}-->
+<!--</script>-->
+
+<script type="text/html" id="status">
+    {{# if(d.close){ }}
+    <input type="checkbox" lay-skin="switch" lay-text="开启|关闭"  disabled>
+    {{#  } else { }}
+    <span class="layui-btn layadmin-btn-none"
+             data-obj='{"event": "closeStatus","type":"{{ d.type }}", "tableId": "table_{{ d.type }}-announce", "id":"{{ d.id }}", "index":"{{ d.LAY_TABLE_INDEX }}"}'>
+        <input type="checkbox" lay-skin="switch" lay-text="开启|关闭" checked>
+    </span>
+    {{#  } }}
+</script>
+
+<script type="text/html" id="jump">
+    {{#  if(d.is_jump){ }}
+        是
+    {{#  } else { }}
+    否
+    {{#  } }}
+</script>
+

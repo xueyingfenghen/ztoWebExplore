@@ -1,0 +1,20 @@
+<div id="cancelOpenPage">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码：</label>
+            <div class="layui-input-inline">
+                <input type="password" class="layui-input" id="cancelPwd" name="pwd" placeholder="密码" autocomplete="new-password">
+            </div>
+        </div>
+    </form>
+
+    <div class="layui-form-item">
+        <div class="layui-inline" style="padding-left: 140px;">
+            <button type="button" class="layui-btn layui-btn-theme" id="submitBtn">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="cancelBtn">取消</button>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use('server/cancel_open', layui.factory('server/cancel_open'));
+</script>

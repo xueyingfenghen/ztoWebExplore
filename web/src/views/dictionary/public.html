@@ -1,0 +1,219 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" lay-filter="tabs">
+            </ul>
+            <div class="layui-tab-content">
+
+                <div class="layui-tab-item" id="search_public">
+                    <form class="layui-form layui-form-pane">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">类型名称：</label>
+                            <div class="layui-input-inline">
+                                <input  type="text" name="type_name" autocomplete="off" placeholder="请选择类型名称:" class="layui-input">
+                            </div>
+                            <div class="layui-inline">
+                                <button type="button" class="layui-btn layui-btn-theme" lay-submit lay-filter="public-dictionary">查询</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme" style="margin-bottom: 10px;" id="add_dict">新增字典</button>
+
+        <table id="dictionary_table" lay-filter="dictionary_table"></table>
+        <div id="dictionary_table-paginate" lay-filter="dictionary_table-paginate"></div>
+        <!--<div class="layui-form-item">
+            <label class="layui-form-label" style="font-weight: bolder;font-size: 16px">公共字典</label>
+        </div>-->
+    </div>
+
+</div>
+<script>
+    //定义表头
+    var cols = [ //表头
+        {field: 'dict_id', title: '字典ID',align: 'center'}
+        ,{field: 'name', title: '类型名称',align: 'center'}
+        ,{field: 'value', title: '值',align: 'center'}
+        ,{field: 'remark', title: '备注',align: 'center'}
+        ,{field: 'type', title: 'type',align: 'center'}
+        ,{title: '操作',align: 'center',fixed: 'right', toolbar: '#dict_handle'}
+    ];
+    var click = 0;
+    //渲染、监听 表格属性、数据
+    layui.use('table', function(){
+        var page = 1,pageSize = 10,filter = {},$ = layui.jquery;
+        var loadTadle = function(){
+            filter.page = page;filter.limit = pageSize;
+            layui.admin.req({
+                url:layui.admin.getUrl('/api/dict/index'),
+                method: 'get',
+                data: filter,
+                dataType: 'json',
+                done: function (res) {
+                    layui.table.render({
+                        elem: '#dictionary_table'
+                        ,cols: [cols]
+                        ,data:res.data.list,
+                        limit: pageSize
+                    });
+                    layui.laypage.render({
+                        elem: 'dictionary_table-paginate'
+                        ,count: res.data.count //数据总数
+                        , limit: pageSize
+                        , curr: page
+                        , limits: [10, 20, 30, 40, 50]
+                        , layout: ['prev', 'page', 'next', 'skip', 'count', 'limit']
+                        , prev: '<i class="layui-icon">&#xe603;</i>'
+                        , next: '<i class="layui-icon">&#xe602;</i>'
+                        , jump: function (obj, first) {
+                            page = obj.curr;
+                            pageSize = obj.limit;
+                            if (!first) {loadTadle();}
+                        }
+                    });
+                }
+            })
+        };loadTadle();
+
+        //模糊查询
+        layui.form.on('submit(public-dictionary)', function(data){
+            var field = data.field.type_name;
+            filter = {type_name:field};
+            page = 1;
+            pageSize = 10;
+            loadTadle();
+        });
+
+        //新增字典
+        $("#add_dict").on('click',function () {
+            //layer.msg('暂不支持!');
+            layui.admin.popup({
+                title:  '新增字典'
+                ,area: ['500px', '500px']
+                ,id: 'dict_add_form'
+                ,btn: ['确定','取消']
+                ,success: function(layero, index){
+                    layui.view(this.id).render('dictionary/dict_add_form',{id:this.id}).done(function(){});
+                }
+                ,yes:function (index,v) {
+                    var n = $("input[name=name]").val();
+                    var dict_type = $("select[name=dict_type]").val();
+                    var value = $("input[name=value]").val();
+                    var remark = $("input[name=remark]").val();
+                    if(!n) {
+                        layer.msg('类型名称不能为空',{icon: 5});return false;
+                    }
+                    if(!dict_type) {
+                        layer.msg('请选择字典类型',{icon: 5});return false;
+                    }
+
+                    layui.admin.req({
+                        url:layui.admin.getUrl('/api/dict/added'),
+                        method: 'get',
+                        data: {name:n,type:dict_type,value:value,remark:remark},
+                        dataType: 'json',
+                        done: function (res) {
+                            if(res.code == 0){
+                                layer.msg(res.msg,{icon: 1});
+                                layer.close(index);
+                                layui.use('table', function(){
+                                    loadTadle();
+                                })
+                            }else{
+                                layer.msg(res.msg,{icon: 5});
+                            }
+                        }
+                    })
+                }
+            })
+        })
+        //监听修改
+        layui.table.on('tool(dictionary_table)', function(obj){
+            switch (obj.event) {
+                case "edit":
+                    for (i=1;i<=3;i++){
+                        var len = $(obj.tr[0].cells[i]).find('input').length; //当前行每个单元格 DOM
+                        if(len == 0){
+                            obj.tr[0].cells[i].dataset.edit = 'text';
+                            var html = obj.tr[0].cells[i].innerHTML;
+                            var text = obj.tr[0].cells[i].innerText;
+                            var str = "<input class='layui-input layui-table-edit' value="+text+">"
+                            obj.tr[0].cells[i].innerHTML = html + str;
+                        }
+                    }
+                    $(this).attr('lay-event','save');
+                    $(this)[0].text = '保存';
+                    break;
+                case "save":
+                    layui.admin.req({
+                        url: layui.admin.getUrl('/api/dict/modify'),
+                        method: 'post',
+                        data: obj.data,
+                        dataType: 'json',
+                        done: function (res) {
+                            if(res.code == 0){
+                                layer.msg('修改成功',{icon: 1});
+                                for (i=1;i<=3;i++){
+                                    var len = $(obj.tr[0].cells[i]).find('input').length; //当前行每个单元格 DOM
+                                    delete obj.tr[0].cells[i].dataset.edit;
+                                    if(len > 0)$(obj.tr[0].cells[i]).find('input').remove();
+                                }
+                                $(this).attr('lay-event','edit');
+                                $(this)[0].text = '修改';
+                                loadTadle();
+                            } else {
+                                layer.msg('修改失败',{icon: 5});
+                            }
+                        }
+                    })
+                    break;
+                case "detail":
+                    layui.admin.req({
+                        url: layui.admin.getUrl('/api/get_dict'),
+                        method: 'get',
+                        data: obj.data,
+                        dataType: 'json',
+                        done: function (res) {
+                            console.log(res);
+                            // if(res.data.count == 0){
+                            //     layer.msg('没有子字典');
+                            // }else {
+                                layui.admin.popup({
+                                    title: obj.data.name + '类型名称'
+                                    ,area: ['800px', '620px']
+                                    ,id: 'child_dict'
+                                    ,success: function(layero, index){
+                                        layui.view(this.id).render('dictionary/child_dict',obj.data).done(function(){});
+                                    }
+                                });
+                            // }
+                        }
+                    })
+                    break;
+                case "del":
+                    break;
+            }
+        })
+    })
+    function dict_edit(obj)
+    {
+        //console.log(layui.$(obj));
+        //layui.$(obj)[0].text = '保存';
+    }
+</script>
+<script type="text/html" id="dict_handle">
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="edit">修改</a>
+<!--    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>-->
+    <a class="layui-btn layui-btn-disabled layui-btn-xs" lay-event="del">删除</a>
+</script>

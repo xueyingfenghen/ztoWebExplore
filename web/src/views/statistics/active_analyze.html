@@ -1,0 +1,280 @@
+<style>
+    .layui-hidden {
+        display: none;
+    }
+</style>
+<div id="half" style="width: 48%"></div>
+<div id="full" style="width: 100%"></div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+
+                <!--在线情况-->
+                <div class="layui-tab-item" id="search_active-inline" style="display: none;">
+                    <form class="layui-form layui-form-pane form_active_inline">
+                        <div class="layui-form-item" id="form_active_inline">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_active_inline","tableId": "table_active_inline_list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_active_inline","tableId": "table_active_inline_list"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_active_inline","url": "/api/stats_export/active/online"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--活跃情况-->
+                <div class="layui-tab-item" id="search_active-situation" style="display: none;">
+                    <form class="layui-form layui-form-pane form_active-situation">
+                        <div class="layui-form-item" id="form_active-situation">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_active-situation","tableId": "table_active-situation_list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_active-situation","tableId": "table_active-situation_list"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_active-situation","url": "/api/stats_export/active/situation"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--游戏时长-->
+                <div class="layui-tab-item" id="search_game-time" style="display: none;">
+                    <form class="layui-form layui-form-pane form_game-time">
+                        <div class="layui-form-item" id="form_game-time">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn button_game_time"
+                                    data-obj='{"event": "search3","form_class": ".form_game-time","tableId": "table_game-time"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary button_game_time"
+                                    data-obj='{"event": "reset3","form_class": ".form_game-time","tableId": "table_game-time"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn button_game_time"
+                                    data-obj='{"event": "export_excel3","form_class": ".form_game-time","url": "/api/stats_export/active/online"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!--启动次数-->
+                <div class="layui-tab-item" id="search_start-count" style="display: none;">
+                    <form class="layui-form layui-form-pane form_start-count">
+                        <div class="layui-form-item" id="form_start-count">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn button_start_count"
+                                    data-obj='{"event": "search4","form_class": ".form_start-count","tableId": "table_start-count"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary button_start_count"
+                                    data-obj='{"event": "reset4","form_class": ".form_start-count","tableId": "table_start-count"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn button_start_count"
+                                    data-obj='{"event": "export_excel4","form_class": ".form_start-count","url": "/api/stats_export/active/online"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_active-inline" style="display: none;">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">在线情况（当前在线：<span class="online_now" style="color: red;"></span>）
+        </blockquote>
+        <div id="echarts_online" style="width: 100%;height: 500px;"></div>
+        <table id="table_active_inline_list">
+        </table>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_active-situation" style="display: none;">
+    <div class="layui-card-body">
+        <div id="echarts_situation" style="width: 100%;height: 500px;"></div>
+        <table id="table_active-situation_list">
+        </table>
+    </div>
+</div>
+
+<div class="layui-card tabs layui-col-md12" id="list_game-time" style="display: none;">
+    <div class="layui-card-body">
+        <div class="layui-btn-group" style="margin-bottom: 10px;">
+            <button type="button" class="layui-btn button-statis day_avg">日均情况</button>
+            <button type="button" class="layui-btn layui-btn-primary button-statis time_detail">
+                游戏时长明细
+            </button>
+        </div>
+
+        <div id="tab_day_avg" class="layui-show">
+            <div class="layui-card layui-col-sm6">
+                <div class="layui-card-body">
+                    <label>[单次]日均情况</label>
+                    <div id="echarts_game-time_count_avg" style="width: 100%;height: 400px;"></div>
+                    <label >[单次]日均情况详情（平均时长：<span class="count_avg_time"
+                                                                       style="color: red;"></span>）</label>
+                    <table id="table_game-time_count_avg"></table>
+                </div>
+            </div>
+
+            <div class="layui-col-sm6 layui-card">
+                <div class="layui-card-body">
+                    <label>[单日]日均情况</label>
+                    <div id="echarts_game-time_day_avg" style="width: 100%;height: 400px;"></div>
+                    <label >[单日]日均情况详情（平均时长：<span class="day_avg_time" style="color: red;"></span>）</label>
+                    <table id="table_game-time_day_avg"></table>
+                </div>
+            </div>
+        </div>
+        <div id="tab_time_detail" class="layui-hidden">
+            <div class="layui-card layui-col-sm6">
+                <div class="layui-card-body">
+                    <label>[单次]游戏时长明细</label>
+                    <div id="echarts_game-time_count_detail" style="width: 100%;height: 500px;"></div>
+                    <label>[单次]数据详情</label>
+                    <table id="table_game-time_count_detail"></table>
+                </div>
+            </div>
+
+            <div class="layui-col-sm6 layui-card">
+                <div class="layui-card-body">
+                    <label>[单日]游戏时长明细</label>
+                    <div id="echarts_game-time_day_detail" style="width: 100%;height: 500px;"></div>
+                    <label>[单日]数据详情</label>
+                    <table id="table_game-time_day_detail"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--    </div>-->
+<!--</div>-->
+
+<div class="layui-card tabs layui-col-md12" id="list_start-count" style="display: none;">
+    <div class="layui-card-body ">
+        <div class="layui-btn-group" style="margin-bottom: 10px;">
+            <button type="button" class="layui-btn button-statis start_avg">日均情况</button>
+            <button type="button" class="layui-btn layui-btn-primary button-statis start_detail">
+                启动次数明细
+            </button>
+        </div>
+
+        <div id="tab_count_avg" class="layui-show">
+
+            <div class="layui-card layui-col-sm6">
+                <div class="layui-card-body">
+                    <label>[日均启动次数]</label>
+                    <div id="echarts_start-count_avg" style="width: 100%;height: 400px;"></div>
+                </div>
+            </div>
+
+            <div class="layui-col-sm6 layui-card">
+                <div class="layui-card-body">
+                    <label>[日均启动次数]详情（平均次数：<span class="avg_start" style="color: red;"></span>）</label>
+                    <table id="table_start-count_avg"></table>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div id="tab_count_detail" class="layui-hidden">
+
+            <label>启动次数明细</label>
+            <div id="echarts_start-count_detail" style="width: 100%;height: 500px;"></div>
+            <label>数据详情</label>
+            <table id="table_start-count_detail"></table>
+        </div>
+    </div>
+</div>
+<script>
+
+    var jsArr = {
+        'active-inline': 'statistics/active_analyze/active_inline',
+        'active-situation': 'statistics/active_analyze/active_situation',
+        'game-time': 'statistics/active_analyze/game_time',
+        'start-count': 'statistics/active_analyze/start_count',
+    };
+
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    var activeElementTabs = function (jsArr) {
+        return new Promise(function (resolve, reject) {
+            layui.element.on('tab(docDemoTabBrief)', function (data) {
+
+                    let dataTab = $(this).attr('data-tab');
+
+                    let layui_tab_item = $(this).parent().parent().find('.layui-tab-item');
+                    for (let i = 0; i < layui_tab_item.length; i++) {
+                        layui_tab_item.eq(i).removeClass("layui-show");
+                    }
+                    for (let i = 0; i < $('.tabs').length; i++) {
+                        $('.tabs').eq(i).removeClass("layui-show");
+                    }
+                    // 显示list部分
+                    $('#list_' + dataTab).addClass("layui-show");
+                    $('#search_' + dataTab).addClass("layui-show");
+                    switch (dataTab) {
+                        case 'game-time':
+                            layui.table.resize('table_game-time_count_avg');
+                            layui.table.resize('table_game-time_day_avg');
+                            layui.table.resize('table_game-time_count_detail');
+                            layui.table.resize('table_game-time_day_detail');
+                            break;
+                        case 'start-count':
+                            layui.table.resize('table_start-count_avg');
+                            break;
+                    }
+                    // 点击tab加载对应的js，此处不会重复加载相同的js
+                    if (tempJsArr.indexOf(dataTab) == -1 && undefined != jsArr) {
+                        if (typeof jsArr == "object" && undefined != jsArr[dataTab]) {
+                            tempJsArr.push(dataTab);
+                            layui.use(jsArr[dataTab], layui.factory(jsArr[dataTab]));
+                        }
+                    }
+
+                    resolve(data)
+                }
+            );
+        })
+    };
+    activeElementTabs(jsArr);
+</script>
+<script type="text/html" id="max_range_online">
+    最高平均在线
+</script>

@@ -1,0 +1,138 @@
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <table class="layui-table" id="test-table-autowidth" lay-filter="platform"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style type="text/css">
+    .layui-table-header, .layui-table-cell {
+        text-align: center;
+    }
+
+    .layui-table-body table tbody tr .layui-table-cell {
+        /*cursor: pointer;*/
+    }
+
+    .layui-table-body table tbody tr .layui-table-cell:hover {
+        color: #0f60c3;
+    }
+
+    th span {
+        font-size: 25px;
+    }
+
+    tbody {
+        color: #1E9FFF;
+    }
+
+    table {
+        border-collapse: collapse;
+        border: none;
+    }
+
+    .layui-table td, .layui-table th, .layui-table-col-set, .layui-table-fixed-r, .layui-table-grid-down, .layui-table-header, .layui-table-page, .layui-table-tips-main, .layui-table-tool, .layui-table-total, .layui-table-view, .layui-table[lay-skin=line], .layui-table[lay-skin=row] {
+        border-style: none;
+    }
+
+    .layui-table tbody tr:hover, .layui-table thead tr, .layui-table-click, .layui-table-header, .layui-table-hover, .layui-table-mend, .layui-table-patch, .layui-table-tool, .layui-table-total, .layui-table-total tr, .layui-table[lay-even] tr:nth-child(even) {
+        background-color: #FFF;
+    }
+
+    .layui-table-header table thead tr {
+        background-color: #FFF;
+    }
+</style>
+<script>
+  layui.use(['table', 'admin'], function () {
+    let admin = layui.admin;
+    let table = layui.table;
+    let $ = layui.jquery;
+    let table_cols = [];
+    // $(".layui-nav-tree li:first").addClass('layui-nav-itemed'); 默认打开
+    var router = layui.router();
+
+    admin.req({
+      url: admin.getUrl('/api/game/platform_select'), //实际使用请改成服务端真实接口
+      data: {
+        'game_id': router.search.game_id,
+        'rewrite': 1
+      },
+      method: 'get',
+      dataType: 'json',
+      loading: true,
+      done: function (res) {
+        var tableContent = [];
+        var gamelist = layui.sessionData(layui.setter.tableName)['gamelist'];
+        $.each(res.data.list, function (column, item) {
+          //表头数据
+          if (item.id < 1) {
+            table_cols.push({field: column, title: '游戏分组', unresize: true});//设置空表头数据
+          } else {
+            table_cols.push({field: column, title: item.name, unresize: true});//设置表头数据
+          }
+          $.each(item.platforms, function (line, platform) {
+            if (platform.id && platform.name) {
+              if (tableContent[line] === undefined) {
+                tableContent[line] = {};
+              }
+              tableContent[line][column] = `<span class=" LAY-access-router-link " data-game-id="${router.search.game_id}" data-platform-id="${platform.id}">${platform.name}</span>`
+              gamelist[router.search.game_id].platforms[platform.id] = {
+                id: platform.id,
+                name: platform.name
+              };
+            }
+          });
+        });
+        layui.sessionData(layui.setter.tableName, {
+          key: 'gamelist',
+          value: gamelist
+        });
+
+        table.render({
+          elem: '#test-table-autowidth'
+          , cellMinWidth: 250 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+          , data: tableContent
+          , cols: [
+            table_cols
+          ]
+          , height: 'full-120'
+        });
+        $(".LAY-access-router-link").on("click", function (event) {
+          const gameId = event.target.dataset.gameId;
+          const platformId = event.target.dataset.platformId;
+          layui.admin.req({
+            url: layui.admin.getUrl('/api/game/platform_select'), //实际使用请改成服务端真实接口
+            data: {
+              'game_id': gameId,
+              'platform_id': platformId
+            },
+            method: 'post',
+            dataType: 'json',
+            done: function (res) {
+              var gameselect = {};
+              if (res.code == 0) {
+                parent.location.href = 'index.html#/welcome/mode=2';
+                parent.location.reload();
+                gameselect = {
+                  id: gameId,
+                  platformId: platformId
+                };
+
+                layui.sessionData(layui.setter.tableName, {
+                  key: 'gameselect',
+                  value: gameselect
+                });
+              }
+            }
+          });
+
+        })
+      }
+    });
+  });
+</script>

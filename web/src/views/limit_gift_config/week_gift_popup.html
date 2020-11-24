@@ -1,0 +1,291 @@
+<div id="week_gift_popup">
+    <form class="layui-form layui-form-pane" action="" lay-filter="example">
+        <div class="layui-form-item">
+            <label class="layui-form-label">计划名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="plan_name" autocomplete="off" placeholder="请输入计划名称" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择区服</label>
+            <div class="layui-input-block">
+                <input type="text" name="server_id" placeholder="请选择区服" autocomplete="off" class="layui-input " required
+                    maxlength="15" readonly>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+
+            <label class="layui-form-label">开始时间</label>
+            <div class="layui-input-inline">
+                <input type="text" placeholder="请输入开始时间" class="layui-input date-item" name="start_time" max="200">
+            </div>
+
+            <label class="layui-form-label">结束时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="end_time" placeholder="请输入结束时间" class="layui-input date-item">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择礼包</label>
+            <div class="layui-input-inline">
+                <select name="price_rank" id="" lay-filter="price_rank_select"></select>
+            </div>
+            <div class="layui-input-inline">
+                <select name="gift_name" id=""></select>
+            </div>
+            <button class="layui-btn layui-btn-theme" type="button" name="addProp">增加</button>
+        </div>
+        <div class="renderTable">
+            <table lay-filter="prop_table"></table>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-inline ">
+                <button lay-filter="week_submit_action" type="button" class="layui-btn layui-btn-theme submit_action"
+                    lay-submit>确定
+                </button>
+                <button type="button" class="layui-btn layui-btn-primary layer_close">取消</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    layui.extend({ props: '/common/props' });
+
+    layui.use(['form', 'props', 'table', 'laydate'], function () {
+        const {
+            form, admin, view, table, laydate
+        } = layui
+        // console.log(this)
+        form.render('select')
+
+        let server_id = ''
+        const tableData = layui.table.cache['prop_table'] || []
+        const rank_keymap_gift = {}
+        const param = layui.type === 'week' ? layui['limit_gift_config/week_gift'] : layui['limit_gift_config/month_gift']
+        // console.log(param)
+        const { layero, type, index, obj = {}, event: globalEvent } = param
+        layero.find('.date-item').each(function () {
+            laydate.render({
+                elem: this,
+                type: 'datetime'
+            });
+        })
+        // debugger
+        const del = function del(d) {
+            return `<button class="layui-btn  layui-btn-sm layui-btn-danger" type="button" lay-event="delete">删除</button>`
+        }
+        const getCols = (column_name = {}) => {
+            return Object.keys(column_name).map((item) => {
+                return {
+                    field: item,
+                    title: column_name[item],
+                };
+            }) || [];
+        }
+        const renderTable = (prop = [], rank_keymap_gift) => {
+            const data = prop
+            admin.getCols('limit_gift_config_sync_table').then(res => {
+                const [cols] = res.data
+                cols.shift()
+                cols.push({
+                    field: 'sort',
+                    title: '显示顺序',
+                    edit: 'text',
+                    width: 100,
+                    align: "center"
+                }, {
+                    field: 'action',
+                    title: '操作',
+                    templet: del,
+                    width: 120,
+                    align: "center"
+                })
+                table.render({
+                    id: 'prop_table',
+                    elem: layero.find('table[lay-filter=prop_table]'),
+                    data: data.length ? data : [],
+                    cols: [cols],
+                    width: 1500
+                })
+            })
+        }
+        const renderProp = async (prop = {}) => {
+            layero.find('input[name][type!=checkbox]').each(function () {
+                const name = this.name
+                const value = prop[name]
+                $(this).val(value || "")
+            })
+            layero.find('input[name=server_id]').val(prop.server_list)
+            if (globalEvent === 'edit') {
+                layero.find('input[name=server_id]').attr('disabled', 'disabled').attr('readonly', true)
+            }
+            server_id = prop.server_list
+        }
+        layui.view('props_content_divs').render('common/prop_select', {
+            props_list: [],
+            required_props: true,
+            is_email: true
+        })
+
+
+        const getType = () => {
+            return layui.type === 'week' ? 1 : 2
+        }
+        //档次
+        admin.req({
+            url: admin.getUrl('/api/rmb_gift/getAllGiftByLevel'),
+            data: {
+                type: getType()
+            }
+        }).then(({ data }) => {
+            Object.assign(rank_keymap_gift, data)
+            const placeholder = `<option value="">请选择档次</option>`
+            const keys = Object.keys(data).map(item => {
+                return `<option value=${item}>${item}</option>`
+            })
+            layero.find('select[name=price_rank]').html(placeholder + keys)
+            if (!$.isEmptyObject(obj)) {
+                renderProp(obj)
+                renderTable(obj.gift_list, rank_keymap_gift)
+            } else {
+                renderTable([])
+            }
+            form.render('select')
+        })
+        //级联
+        form.on('select(price_rank_select)', function (obj) {
+            const value = obj.value
+            const gifts = rank_keymap_gift[value]
+            const placeholder = `<option value="">请选择礼包</option>`
+            const str = Object.keys(gifts).map(item => {
+                return `<option value=${item} data-left=${JSON.stringify(gifts[item])}>${gifts[item].gift_name}</option>`
+            })
+            layero.find('select[name=gift_name]').html(placeholder + str)
+            form.render('select')
+        })
+        //开窗
+        const openDialog = function openDialog(e) {
+            const target = e.target
+            admin.popup({
+                title: "选择区服",
+                type: 1,
+                shade: [0.3, "#000"],
+                area: ["1000px", "600px"],
+                btn: ['确定', '取消'],
+                btnAling: 'l',
+                id: "select_area",
+                resize: false,
+                success(layero, index) {
+                    view(this.id)
+                        .render("/area", { all: 1, area: target.value })
+                },
+                yes: function (index, layero) {
+                    const value = layero.find('#details').text().split("：")[1]
+                    const ids = [...layero.find('.search-box').find('input[type=checkbox][name]').filter(":checked")].map(item => item.value)
+                    server_id = ids.join(",")
+                    $(target).val(value)
+                    layer.close(index)
+                }
+            });
+        }
+
+        const addProp = function addProp(data, e) {
+            const left = layero.find('select[name=gift_name] option:selected').attr('data-left')
+            const curData = JSON.parse(left) || '{}'
+            const len = layui.table.cache['prop_table'].length
+            for (let item of layui.table.cache['prop_table']) {
+                if (item.gift_id === curData.gift_id) {
+                    layer.msg('不要重复添加', { icon: 0 })
+                    return
+                }
+            }
+            curData.sort = len + 1
+            layui.table.cache['prop_table'].push(curData)
+            table.reload('prop_table', {
+                data: layui.table.cache['prop_table'] || []
+            })
+
+        }
+
+        layero.find('input[name=server_id]').unbind().on('click', openDialog)
+        layero.find('button[name=addProp]').unbind().on('click', addProp)
+        form.on('submit(week_submit_action)', function (submitObj) {
+            // console.log(obj)
+            const param = Object.assign({}, submitObj.field, {
+                server_id,//区服ID
+                type: getType(),
+                gift_id: layui.table.cache['prop_table'].map(item => (item.gift_id)).join(","),
+                sort: layui.table.cache['prop_table'].map(item => (item.sort)).join(",")
+            })
+
+            let msg = '添加成功'
+            let url = '/api/rmb_gift/addGiftPlan'
+            if (globalEvent === 'edit') {
+                url = '/api/rmb_gift/editGiftPlan'
+                msg = '编辑成功'
+                Object.assign(param, {
+                    plan_id: obj.plan_id
+                })
+            }
+            if (globalEvent === 'copy') {
+                msg = '复制成功'
+                url = '/api/rmb_gift/addGiftPlan'
+            }
+            layero.find('button[lay-filter=submit_action]').addClass('layui-btn-disabled').attr('disabled', 'disabled')
+            admin.req({
+                url,
+                data: param,
+                type: 'post'
+            }).then(res => {
+                if (res.code === 0) {
+                    table.reload(`${layui.type}_gift_list`)
+                    layer.close(index)
+                    layer.msg(res.msg || msg, { icon: 6 })
+                } else {
+                    layero.find('button[lay-filter=submit_action]').removeClass('layui-btn-disabled').removeAttr('disabled')
+                    layer.msg(res.msg, { icon: 5 })
+                }
+            })
+
+        })
+        table.on(`tool(prop_table)`, function (obj) {
+            const {
+                data, event
+            } = obj
+            const tableData = layui.table.cache['prop_table']
+            if (event === 'delete') {
+                const {
+                    gift_id
+                } = data
+                for (let index in tableData) {
+                    const item = tableData[index]
+                    if (item.gift_id === gift_id) {
+                        tableData.splice(index, 1)
+                        table.reload('prop_table', {
+                            data: tableData
+                        })
+                        return
+                    }
+
+                }
+            }
+        })
+        table.on('edit(prop_table)', function (obj) {
+            const {
+                field, data, event
+            } = obj
+            const tableData = layui.table.cache['prop_table']
+            if (field) {
+                obj.update({
+                    [field]: obj.value
+                })
+            }
+
+        })
+        layero.find('.layer_close').unbind().on('click', function () {
+            layer.closeAll()
+        })
+    })
+</script>

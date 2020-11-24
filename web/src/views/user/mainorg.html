@@ -1,0 +1,76 @@
+<style>
+    .layui-inline {
+        margin-bottom: 10px !important;
+        margin-right: 0px !important;
+        margin-left: 0px !important;
+    }
+
+    .layui-input-block {
+        width: 130px;
+    }
+</style>
+
+<title>主体内容</title>
+
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" id="breadcrumb">
+    </div>
+</div>
+
+<div class="layui-tab layui-tab-card" lay-filter="layui-tab" style="height: 100%;margin-top: 0px">
+    <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+    </ul>
+    <!-- 主体内容 -->
+    <div class="layui-container" id="main-container" style="width: 100%;padding: 0px">
+
+    </div>
+</div>
+
+
+<script>
+    layui.use(['admin', 'form', 'element', 'tree', 'treeTable'], function () {
+        var $ = layui.jquery;
+        var id = this.router().search.id;
+        console.log(this.router().search.id);
+        var permissions = layui.sessionData(layui.setter.tableName)['permissions'];
+
+        var breadcrumbs = permissions[id]['breadcrumbs'];
+        console.log(breadcrumbs);
+        $('#breadcrumb').html('');
+        for (i = 0; i < breadcrumbs.length; i++) {
+            if (breadcrumbs.length - 1 <= i) {
+                $('#breadcrumb').append('<a><cite>' + breadcrumbs[i] + '</cite></a>');
+            } else {
+                $('#breadcrumb').append('<a>' + breadcrumbs[i] + '</a>');
+            }
+        }
+
+        //加载容器内容
+        var renderMain = function (route, data) {
+            layui.view('main-container').render(route, data);
+        };
+
+        //初次加载部分，tab栏
+        var tabs = permissions[id].childrens;
+        if (tabs === undefined) {
+            $('.layui-tab-title').remove();
+        } else {
+            for (i = 0; i < tabs.length; i++) {
+                var id = tabs[i];
+                //添加选项卡标题
+                if (i === 0) {
+                    $(".layui-tab-title").append('<li class="layui-this" data-route="' + permissions[id].route + '">' + permissions[id]['name'] + '</li>');
+                    renderMain(permissions[id].route, {});
+                } else {
+                    $(".layui-tab-title").append('<li data-route="' + permissions[id].route + '">' + permissions[id]['name'] + '</li>');
+                }
+            }
+        }
+
+        //监听选项卡点击事件
+        layui.element.on('tab(layui-tab)', function (data) {
+            var route = $(this).data('route');
+            renderMain(route, {});
+        });
+    });
+</script>

@@ -1,0 +1,46 @@
+<table class="layui-hide" id="table_pop_audit" lay-filter="table_pop_audit"></table>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    let admin = layui.admin;
+    var $ = layui.jquery;
+    var table = layui.table;
+    var tableId = 'table_pop_audit';
+    // 渲染表单数据
+
+    $(function () {
+        layui.data.sendParams = function (params) {
+            console.log(params);
+            admin.getCols("statistics_runoff-watch_table").then(function (data) {
+                table.render({
+                        id: tableId,
+                        elem: '#' + tableId,
+                        url: admin.getUrl('/api/user_loss/loss_monitor'),
+                        method: 'GET',
+                        where: params,//请求参数(额外)
+                        request: {
+                            pageName: 'page' //页码的参数名称，默认：page
+                            , limitName: 'page_size' //每页数据量的参数名，默认：limit
+                        },
+                        parseData: function (res) {
+                            return {
+                                "code": res.code, //解析接口状态
+                                "msg": res.msg, //解析提示文本
+                                "data": res.data.list,
+                                "count": res.data.total
+                            };
+                        },
+                        loading: true,
+                        page: true,
+                        cols: data.data
+                    }
+                );
+            })
+
+        }
+    })
+</script>
+
+

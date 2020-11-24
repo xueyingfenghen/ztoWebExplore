@@ -1,0 +1,317 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+                <div class="layui-tab-item" id="search_player-league-info" style="display: none;">
+                    <form class="layui-form layui-form-pane leagueSearch">
+                        <div class="layui-form-item" id="leagueSearch">
+                            <!--                    内容需要渲染-->
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reseat">重置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs">
+    <div class="layui-card-body">
+        <table id="league_list"></table>
+    </div>
+</div>
+
+
+<script>
+  var templet = [];
+  layui.use(['table', 'admin', 'form', 'view'], function () {
+    let admin = layui.admin;
+    let table = layui.table;
+    let form = layui.form;
+    let view = layui.view;
+    let $ = layui.jquery;
+
+    let reseatParam;
+    let id;
+    let server_id = '';
+    // 渲染搜索框
+    $.initSearchForm = function () {
+      return new Promise(function (resolve, reject) {
+        admin.req({
+          url: admin.getUrl('/api/base/getFormList'),
+          data: {
+            name: 'player_league_list_search_form',
+          },
+          type: 'post',
+          done: function (data) {
+            $('#leagueSearch').html(data.data['form']);
+            form.render();
+            resolve();
+          }
+        });
+      });
+    };
+
+    // 帮会信息表格
+    $.leagueList = function (cols) {
+      let param = admin.getFormParam('.leagueSearch');
+      reseatParam = param;
+      // 玩家列表
+      table.render({
+        id: 'league_list',
+        elem: '#league_list',
+        url: admin.getUrl('/api/player/getLeagueList'),
+        method: 'GET',
+        where: param,//请求参数(额外)
+        request: {
+          pageName: 'page' //页码的参数名称，默认：page
+          , limitName: 'limit' //每页数据量的参数名，默认：limit
+        },
+        response: { //定义后端 json 格式，详细参见官方文档
+          statusName: 'code', //状态字段名称
+          statusCode: '0', //状态字段成功值
+          msgName: 'msg', //消息字段
+          countName: 'countAll', //总页数字段
+          dataName: 'data', //数据字段
+        },
+        page: true,
+        loading: true,
+        cols: cols,
+        done: function (res) {
+          // $('#allCount').html(res.sum);
+        }
+      });
+    };
+
+    $.person_list = function (cols, id, server_id) {
+      table.render({
+        id: 'person_list',
+        elem: '#person_list',
+        url: admin.getUrl('/api/player/leaguePersonList'),
+        method: 'GET',
+        where: {
+          league_id: id,
+          server_id: server_id
+        },//请求参数(额外)
+        request: {
+          pageName: 'page' //页码的参数名称，默认：page
+          , limitName: 'limit' //每页数据量的参数名，默认：limit
+        },
+        response: { //定义后端 json 格式，详细参见官方文档
+          statusName: 'code', //状态字段名称
+          statusCode: '0', //状态字段成功值
+          msgName: 'msg', //消息字段
+          countName: 'countAll', //总页数字段
+          dataName: 'data', //数据字段
+        },
+        page: true,
+        loading: true,
+        cols: cols
+      });
+    }
+
+
+    // 初始化玩家字段信息
+    $.initPlayField = function () {
+      return new Promise(function (resolve, reject) {
+        admin.req({
+          url: admin.getUrl('/api/player/getPlayerDetailField'),
+          data: {
+            name: 'player_league_detail',
+          },
+          type: 'post',
+          done: function (data) {
+            let html = '';
+            $.each(data.data, function (key, val) {
+              html += "<blockquote class='layui-elem-quote'>" + val['value'] + "</blockquote>";
+              $.each(val['children'], function (k, v) {
+                let spanOrA = v.do_more == null ? "<span name='" + v.field + "'></span>" : "<a href='javascript:;' name='" + v.field + "' class='" + v.do_more + "'></a>";
+                html +=
+                  "<div class='layui-inline'>" +
+                  "<label class='layui-form-label'>" + v.value + "</label>" +
+                  "<div class='layui-input-inline'>"+
+                  "<div class='layui-input'>" + spanOrA + "</div>" +
+                  "</div>" +
+                  "</div>";
+              })
+            })
+            $('#content-alert .layui-form-item').html(html);
+            resolve();
+          }
+        });
+      });
+    };
+
+
+    // 玩家信息详情
+    $.initPlayerValue = function (id, server_id) {
+      admin.req({
+        url: admin.getUrl('/api/player/getLeagueDetailVal'),
+        data: {
+          league_id: id,
+          server_id: server_id
+        },
+        type: 'post',
+        done: function (data) {
+          $.each(data.data, function (key, val) {
+            $("#content-alert span[name=" + key + "]").html(val);
+            $("#content-alert a[name=" + key + "]").html(val);
+          });
+        }
+      });
+    }
+
+    // 初始化搜索框
+    $.initSearchForm().then(function () {
+      admin.req({
+        url: admin.getUrl('/api/base/getTableCols'),
+        data: {
+          name: 'player_league_list',
+        },
+        type: 'post',
+        done: function (data) {
+          let cols = data.data;
+          $.leagueList(cols);
+          // 获取templet对应的字段名，用于模版引擎绑定数据
+          templet = admin.getTemplet(cols);
+        }
+      });
+    });
+
+    // 查询按钮
+    $(document).off('click', '#search').on('click', '#search', function () {
+
+      if ($("select[name='server_id']").val() == '') {
+        layer.msg('请先选择区服', {icon: 5, anim: 6});
+        return;
+      }
+
+      let param = admin.getFormParam('.leagueSearch');
+      table.reload('league_list', {
+        where: param,
+        page: {
+          curr: 1
+        }
+      });
+    });
+
+    // 重置
+    $(document).off('click', '#reseat').on('click', '#reseat', function () {
+      admin.resetForm('.leagueSearch');
+      let param = admin.getFormParam('.leagueSearch');
+      table.reload('league_list', {
+        where: param,
+        page: {
+          curr: 1
+        }
+      });
+    });
+
+
+    // 查看成员详情
+    $(document).off('click', '.detail_person').on('click', '.detail_person', function () {
+      id = $(this).attr('data-type');
+      server_id = $(this).attr('data-server');
+      admin.popup({
+        title: '帮会成员详情'
+        , area: ['80%', '80%']
+        , id: 'league_person_detail'
+        // ,btn: ['确定', '取消']
+        , success: function (layero, index) {
+          view(this.id).render('player/popup/leaguePersonDetail').done(function () {
+
+            admin.req({
+              url: admin.getUrl('/api/base/getTableCols'),
+              data: {
+                name: 'player_league_person_list',
+              },
+              type: 'post',
+              done: function (data) {
+                $.person_list(data.data, id, server_id)
+              }
+            });
+
+          });
+        }
+        , yes: function (index, layero) {
+
+        }
+        , btn2: function (index, layero) {
+          //按钮【按钮二】的回调
+        }
+        , cancel: function () {
+          //右上角关闭回调
+        },
+      });
+    })
+
+
+    // 查看详情
+    $(document).off('click', '.detail_league').on('click', '.detail_league', function () {
+      id = $(this).attr('data-type');
+      server_id = $(this).attr('data-server');
+      admin.popup({
+        title: '帮会详情'
+        , area: ['80%', '80%']
+        , id: 'content-alert'
+        // ,btn: ['确定', '取消']
+        , success: function (layero, index) {
+          view(this.id).render('player/popup/leagueInfo').done(function () {
+            // 渲染玩家详情内容
+            $.initPlayField().then(function () {
+              $.initPlayerValue(id, server_id);
+            })
+          });
+        }
+        , yes: function (index, layero) {
+
+        }
+        , btn2: function (index, layero) {
+          //按钮【按钮二】的回调
+        }
+        , cancel: function () {
+          //右上角关闭回调
+        },
+      });
+    })
+
+
+  });
+</script>
+<script type="text/html" id="state">
+    {{#
+    var fn = function(){
+    return d[templet[0]];
+    };
+    }}
+
+
+    {{#  if(fn() ==1 ){ }}
+    自由加入
+    {{#  } else if(fn() ==2 ) { }}
+    不可加入
+    {{#  } else if(fn() ==3 ) { }}
+    验证加入
+    {{#  } else { }}
+    {{#  } }}
+</script>
+
+<script type="text/html" id="edit">
+    {{#
+    var fn = function(){
+    return d[templet[1]];
+    };
+    }}
+    <button type="button" class="layui-btn layui-btn-theme layui-btn-xs detail_person" data-type={{ fn() }} data-server={{d.server_id}}>
+        成员详情
+    </button>
+    <button type="button" class="layui-btn layui-btn-warm layui-btn-xs detail_league" data-type={{ fn() }} data-server={{d.server_id}}>
+        帮会详情
+    </button>
+</script>

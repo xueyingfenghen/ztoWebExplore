@@ -1,0 +1,339 @@
+<style>
+    #notice_preview {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+    }
+    #notice_preview_textarea
+    {
+        position: fixed;
+        left: 39%;
+        /*right: 0;*/
+        top: 30%;
+        /*bottom: 0;*/
+        /*margin: auto;*/
+        width: 274px;
+        height: 394px;
+    }
+</style>
+  <div class="layui-form layui-form-pane notice_form" lay-filter="layuiadmin-app-form-list" id="layuiadmin-app-form-list">
+    <script type="text/html" template>
+      <input type="hidden" name="id" value="{{ d.params.id || '' }}">
+    </script>
+      <input type="hidden" name="server_id">
+      <script type="text/html" template>
+          {{#  if(d.params.event != 'detail'){ }}
+          <div class="layui-form-item">
+              <button type="button" lay-submit lay-filter="layuiadmin-app-form-submit" class="layui-btn layui-btn-theme">确定</button>
+              <button type="button"  class="layui-btn layui-btn-primary" onclick="layer.closeAll();">取消</button>
+              <button type="button" class="layui-btn layui-btn-normal" id="preview">效果预览</button>
+          </div>
+          {{#  } }}
+      </script>
+  </div>
+<div id="show_gm_content"></div>
+  <script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+  <script>
+      function Mysend() {
+          layui.use('form',function () {
+              var $ = layui.jquery;
+              var val = $('input:radio[name="send"]:checked').val();
+              if(val == 0){
+                  $("#hide_time").hide();
+              }else {
+                  $("#hide_time").show();
+                  $("input[name='start_time']").val('');
+              }
+          })
+      }
+      function Mypltoform() {
+          layui.use('form',function () {
+              var $ = layui.jquery;
+              var val = $('input:radio[name="all_pltoform"]:checked').val();
+              console.log(val);
+              if(val == 1){
+                  $("#hide_area").hide();
+              }else {
+                  $("#hide_area").show();
+              }
+          })
+      }
+      function Myjump(jump_url) {
+          layui.use('form',function () {
+              var $ = layui.jquery;
+              var val = $('input:radio[name="is_jump"]:checked').val();
+              console.log(val);
+              if(val == 0){
+                  $("#hide_jump").hide();
+              }else {
+                  $("#hide_jump").show();
+                  layui.admin.req({
+                      url:layui.admin.getUrl('/api/dict'),
+                      method: 'post',
+                      data: {type:'GameNoticeLink'},
+                      dataType: 'json',
+                      done: function (res) {
+                          var data = res.data.list;
+                          if(data.length > 0){
+                              var str = '<option value="">请选择</option>';
+                              $.each(data,function (i,items) {
+                                  var dict_id = items.dict_id
+                                      ,name = items.name
+                                      ,selected = '';
+                                  if (jump_url == items.value) selected = 'selected';
+                                  str += "<option value="+dict_id+" "+selected+">"+name+"</option>";
+                              })
+                              $("select[name=jump_url]").html(str);
+                              layui.form.render();
+                          }
+                      }
+                  });
+              }
+          })
+      }
+      var $ = layui.jquery;
+      $(document).off('click', '#preview').on('click', '#preview', function () {
+          var title =  $(".notice_form input[name=title]").val();
+          var cont = $("textarea[name=content]").val();
+
+          var str = cont.match(/##(\S*)##/);//匹配之间
+          var replace_str = false;
+          if(str) replace_str = str[1].match(/##(\S*)/);//匹配之后  //匹配之前str.match(/##(\S*)/)[1];
+          if(replace_str) cont = cont.replace(/##(\S*)##/, '<u style="color: #0000CC">'+replace_str[1]+'</u>');
+
+          layui.view('show_gm_content').render('app/content/preview',{title:title,cont:cont}).done(function(){});
+      });
+
+
+      $(function () {
+          layui.data.sendParams = function (params){
+                  layui.admin.req({
+                      url:layui.admin.getUrl('/api/menu/content'),
+                      //add字段获取 如果没有就获取默认
+                      data: {
+                          'type': params.type
+                      },
+                      method: 'post',
+                      dataType: 'json',
+                      done: function (res) {
+                          var add_field;
+                          if(res.data[0] && res.data[0].json){
+                              //没有进来说明没有配置 读取默认字段
+                              let json = JSON.parse(res.data[0].json);
+                              if(json.add_field.length > 0)
+                                  add_field = json.add_field;
+                          }
+                          var obj = add_field.reverse(); //页面字段内容
+                          var edit_obj = params;//编辑时数据内容
+                          if(edit_obj.server_id != '全平台')layui.jquery("input[name=server_id]").val(edit_obj.server_id);
+                          layui.admin.renderPopup(".notice_form", obj, edit_obj);
+                          //绑定事件
+                          $(document).off('click', '#sendMethod').on('click', '#sendMethod', Mysend);
+                          $(document).off('click', '#isJump').on('click', '#isJump', Myjump);
+                          $(document).off('click', '#isPlatformAll').on('click', '#isPlatformAll', Mypltoform);
+
+                          if(edit_obj.all_platform == 1){ //编辑页面判断是否全平台
+                              $("input[name='all_pltoform'][value='1']").prop("checked",true);
+                              $("input[name='all_pltoform'][value='0']").prop("checked",false);
+                              Mypltoform();
+                          }
+                          if(edit_obj.is_jump == 1){ //编辑页面判断是否跳转
+                              $("input[name='is_jump'][value='1']").prop("checked",true);
+                              $("input[name='is_jump'][value='0']").prop("checked",false);
+                              Myjump(edit_obj.jump_url);
+                          }
+                              // if(edit_send == '立即发送'){ //编辑页面判断发送方式
+                              //     $("input[name='send'][value='1']").prop("checked",false);
+                              //     $("input[name='send'][value='0']").prop("checked",true);
+                              //     Mysend();
+                              // }
+                              // layui.laydate.render({
+                              //     elem: "#"+laydate_id+""
+                              //     ,type: 'datetime' //时间格式：yyyy/MM/dd HH:mm:ss
+                              // });
+
+
+                          // $.each(obj, function(i, val){
+                          //     var str = '';
+                          //     var edit_field = edit_obj[val.field] || '';
+                          //
+                          //
+                          //
+                          //     if(val.type == 'text' && val.title != '选择区服' && val.title != '跳转链接'){
+                          //       str = " <div class=\"layui-form-item\">\n" +
+                          //           "  <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //           "  <div class=\"layui-input-inline\">\n" +
+                          //           "  <input type=\"text\" name=\""+ obj[i].field +"\" value=\""+edit_field+"\" lay-verify=\"required\" placeholder=\"请输入"+ obj[i].title +"\" autocomplete=\"off\" class=\"layui-input\">\n" +
+                          //           "  </div>\n" +
+                          //           "  </div>";
+                          //     }else if (val.type == 'textarea'){
+                          //         str = "<div class=\"layui-form-item\">\n" +
+                          //             " <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //             " <div class=\"layui-input-inline\">\n" +
+                          //             " <textarea name=\""+ obj[i].field +"\" lay-verify=\"required\" style=\"width: 400px; height: 150px;\" autocomplete=\"off\" class=\"layui-textarea\">\n" +
+                          //             edit_field
+                          //             " </textarea>\n" +
+                          //             " </div>\n" +
+                          //             "</div>";
+                          //     }else if (val.type == 'time'){
+                          //         var id = '';
+                          //         if(val.title == '开始时间') id = 'hide_time';
+                          //         str = "      <div class=\"layui-form-item\" id=\""+id+"\">\n" +
+                          //             "          <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //             "          <div class=\"layui-input-inline\">\n" +
+                          //             "              <input value=\""+edit_field+"\" type=\"text\" class=\"layui-input "+id+"\" lay-verify=\"required\" id=\""+ obj[i].field +"\" placeholder=\""+ obj[i].title +"\" name=\""+ obj[i].field +"\">\n" +
+                          //             "          </div>\n" +
+                          //             "      </div>";
+                          //         var laydate_id = obj[i].field;
+                          //     }else if (val.title == '选择区服'){
+                          //         str = " <div class=\"layui-form-item\" id=\"hide_area\">\n" +
+                          //             "  <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //             "  <div class=\"layui-input-inline\">\n" +
+                          //             "  <input onclick=\"area()\"readonly value=\""+edit_field+"\" type=\"text\" name=\""+ obj[i].field +"\" value=\"\" lay-verify=\"required\" placeholder=\"请输入"+ obj[i].title +"\" autocomplete=\"off\" class=\"layui-input select_area\">\n" +
+                          //                 "<span>* 点击输入框进行区服勾选</span>\n"+
+                          //             "  </div>\n" +
+                          //             "  </div>";
+                          //     }else if (val.type == 'radio' && val.title == '发送方式'){
+                          //         //这个暂时写死 因为有需求要点击”立即发送“隐藏开始时间
+                          //         str = "      <div class=\"layui-form-item\">\n" +
+                          //             "          <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //             "          <div class=\"layui-input-block\" onclick=\"Mysend()\">\n" +
+                          //             "              <input type=\"radio\" name=\"send\" value=\"1\" title=\"定时发送\" checked=\"\" >\n" +
+                          //             "              <input type=\"radio\" name=\"send\" value=\"0\" title=\"立即发送\">\n" +
+                          //             "          </div>\n" +
+                          //             "      </div>";
+                          //         var edit_send = params.event == 'edit' && edit_field != 1 ? '立即发送': '';
+                          //     }
+                          //     else if (val.type == 'radio' && val.title == '全平台'){
+                          //         //这个暂时写死 因为有需求要点击”全平台-是“要隐藏区服 name暂时写死 要跟后端插入数据时配合
+                          //         str = "      <div class=\"layui-form-item\">\n" +
+                          //             "          <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //             "          <div class=\"layui-input-block\" onclick=\"Mypltoform()\">\n" +
+                          //             "              <input type=\"radio\" name=\"all_pltoform\" value=\"0\" title=\"否\" checked=\"\" >\n" +
+                          //             "              <input type=\"radio\" name=\"all_pltoform\" value=\"1\" title=\"是\" >\n" +
+                          //             "          </div>\n" +
+                          //             "      </div>";
+                          //         var edit_all_pltoform = edit_field;
+                          //     }else if (val.type == 'radio' && val.title == '是否跳转'){
+                          //         //这个暂时写死 因为有需求要点击”是否跳转“ 隐藏跳转链接字段
+                          //         str = "      <div class=\"layui-form-item\">\n" +
+                          //             "          <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //             "          <div class=\"layui-input-block\" onclick=\"Myjump()\">\n" +
+                          //             "              <input type=\"radio\" name=\"is_jump\" value=\"0\" title=\"否\" checked=\"\" >\n" +
+                          //             "              <input type=\"radio\" name=\"is_jump\" value=\"1\" title=\"是\">\n" +
+                          //             "          </div>\n" +
+                          //             "      </div>";
+                          //         var edit_is_jump = edit_field;
+                          //     }else if (val.title == '跳转链接'){
+                          //         //这个暂时写死 因为有需求要点击”是否跳转“ 隐藏跳转链接字段
+                          //         str = " <div class=\"layui-form-item\" id=\"hide_jump\" style='display: none'>\n" +
+                          //             "  <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //             "  <div class=\"layui-input-inline\">\n" +
+                          //             "  <input value=\""+edit_field+"\" type=\"text\" name=\""+ obj[i].field +"\" value=\"\" placeholder=\"请输入"+ obj[i].title +"\" autocomplete=\"off\" class=\"layui-input jump_url\">\n" +
+                          //             "  </div>\n" +
+                          //             "  </div>";
+                          //     }
+                          //     else if (val.type == 'radio' && val.title != '全平台' && val.title != '发送方式'&& val.title != '是否跳转'){
+                          //         var input = '';
+                          //         var name = obj[i].field;
+                          //         $.each(val.label,function (i,val) {
+                          //             if(val && i == 0) input += "<input type=\"radio\" name=\""+ name +"\" value=\""+ i +"\" title=\""+ val +"\" checked >";
+                          //             if(val && i != 0) input += "<input type=\"radio\" name=\""+ name +"\" value=\""+ i +"\" title=\""+ val +"\">";
+                          //         })
+                          //         str = "      <div class=\"layui-form-item\">\n" +
+                          //             "          <label class=\"layui-form-label\">"+ obj[i].title +"</label>\n" +
+                          //             "          <div class=\"layui-input-block\">\n" +
+                          //             input
+                          //         "          </div>\n" +
+                          //         "      </div>";
+                          //     }
+                          //
+                          //
+                          //
+                          //
+                          //     $(".notice_form").prepend(str);
+                          //     if(edit_all_pltoform == 1){ //编辑页面判断是否全平台
+                          //         $("input[name='all_pltoform'][value='1']").prop("checked",true);
+                          //         $("input[name='all_pltoform'][value='0']").prop("checked",false);
+                          //         Mypltoform();
+                          //     }
+                          //     if(edit_is_jump == 1){ //编辑页面判断是否跳转
+                          //         $("input[name='is_jump'][value='1']").prop("checked",true);
+                          //         $("input[name='is_jump'][value='0']").prop("checked",false);
+                          //         Myjump();
+                          //     }
+                          //     if(edit_send == '立即发送'){ //编辑页面判断发送方式
+                          //         $("input[name='send'][value='1']").prop("checked",false);
+                          //         $("input[name='send'][value='0']").prop("checked",true);
+                          //         Mysend();
+                          //     }
+                          //     layui.laydate.render({
+                          //         elem: "#"+laydate_id+""
+                          //         ,type: 'datetime' //时间格式：yyyy/MM/dd HH:mm:ss
+                          //     });
+                          // })
+                          //console.log($("input[name='all_pltoform']"));
+                          layui.use('laydate',function () {
+                              var  laydate = layui.laydate;
+                              var startTime = laydate.render({
+                                  elem: '#start_time'
+                                  ,type: 'datetime' //时间格式：yyyy/MM/dd HH:mm:ss
+                                  ,done: function(value, date, endDate) {
+                                      endTime.config.min = {
+                                          year: date.year,
+                                          month: date.month - 1,//重点！！！
+                                          date: date.date,
+                                          hours:date.hours,
+                                          minutes:date.minutes,
+                                          seconds:date.seconds
+                                      }
+
+                                      var stime = new Date(Date.parse(value.replace("-", "/")));
+                                      var etime = new Date(Date.parse($("#end_time").val().replace("-", "/")));
+                                      if(stime>etime){ //开始时间若大于结束时间，则把开始时间的日期回填到结束时间
+                                          $("#end_time").val(value);
+                                      }
+                                  }
+                              });
+                              var endTime = laydate.render({
+                                  elem: '#end_time'
+                                  ,type: 'datetime' //时间格式：yyyy/MM/dd HH:mm:ss
+                                  ,min: $("#start_time").val() //可选择的最小日期为开始日期
+                              });
+                          })
+                          layui.form.render();
+                      }
+                  })
+              if(params.event == 'detail'){
+                  $("#start_time,#end_time").attr('disabled',true);
+              }
+          }
+      })
+      //选择区服
+      var area_arr = '';
+      function area(data){
+          layui.admin.popup({
+              title: '选择区服'
+              // ,area: layui.admin.screen() < 2 ? ['80%', '300px'] : ['700px', '500px']
+              ,area:  ['1250px', '500px']
+              ,id: 'select_area'
+              ,btn: ['确定', '取消']
+              ,success: function(layero, index){
+                  layui.view(this.id).render('area',{...data});
+              },yes: function(index, layero){
+                  //layui.jquery('#get_area').val(); 区服拼接后的值
+                  area_arr = layui.jquery('#get_area_all').val(); //区服转数组的值
+                  layui.jquery("input[name=area]").val(layui.jquery('#get_area').val());
+                  layui.jquery("input[name=server_id]").val(layui.jquery('#get_area_all').val());
+                  layer.close(index);
+              }
+          });
+      }
+  </script>
+
+

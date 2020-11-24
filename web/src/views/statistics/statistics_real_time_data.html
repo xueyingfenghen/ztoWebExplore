@@ -1,0 +1,210 @@
+<style>
+    #real_time_data_search .layui-inline {
+        margin-bottom: 10px!important;
+        margin-right: 20px!important;
+    }
+    #real_time_data_search .layui-input-block {
+        width: 190px;
+    }
+    .layuiadmin-badge {
+        cursor: pointer;
+    }
+    .layuiadmin-big-font .layui-badge {
+        top: -10px;
+        right: -20px;
+    }
+    .layuiadmin-card-list {
+        height: 120px;
+    }
+    .number_show {
+        cursor: pointer;
+    }
+    .underline {
+        text-decoration:underline;
+    }
+    .statRight{
+        float: right;
+    }
+    .statBox{
+        margin: 0 5px;
+        width: 19%;
+    }
+    .boxIcon{
+        border-radius: 30px;
+        position: relative;
+        top: 50px;
+    }
+    .boxIcon i{
+        font-size: 32px;
+    }
+</style>
+
+<!--<title>实时数据</title>-->
+
+<!--<div class="layui-card layadmin-header">-->
+<!--    <div class="layui-breadcrumb" lay-filter="breadcrumb">-->
+<!--        <a lay-href="">数据分析</a>-->
+<!--        <a><cite>实时数据</cite></a>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="">
+
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+                </ul>
+                <div class="layui-tab-content">
+                    <form class="layui-form layui-form-pane real_time_data_search">
+                        <div class="layui-form-item" id="real_time_data_search">
+                            <!--                    内容需要渲染-->
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search-btn">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="reset-btn">重置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-header">实时监控
+            <div class="statRight">
+                <button type="button" class="layui-btn layui-btn-sm yesterday_or_now" data-type=1 id="yesterday_statistics">昨日统计</button>
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary yesterday_or_now" data-type=2 id="now_statistics">当前实时</button>
+            </div>
+        </div>
+        <div class="layui-card-body layui-row">
+            <div class="layui-col-md12">
+                <div class="layui-col-md2 statBox">
+                    <div class="layui-col-md2 boxIcon"><i class="layui-icon layui-icon-rmb"></i></div>
+                    <div class="layui-card layui-col-md10">
+                        <div class="layui-card-header">
+                            本月收入
+                            <span class="layui-badge layui-bg-blue layuiadmin-badge statHelp" data-type=0 id="monthIncomeHelp">?</span>
+                        </div>
+                        <div class="layui-card-body layuiadmin-card-list">
+                            <p class="layuiadmin-big-font"><span id="monthIncome">0</span><span class="layui-badge layui-bg-gray" id="monthIncomeRate">--</span></p>
+                            <p>
+                                历史总计
+                                <span class="layuiadmin-span-color"><span id="historyTotal"></span>元</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-md2 statBox">
+                    <div class="layui-col-md2 boxIcon"><i class="layui-icon layui-icon-rmb"></i></div>
+                    <div class="layui-card layui-col-md10">
+                        <div class="layui-card-header">
+                            <span id="incomeTitle">昨日收入</span>
+                            <span class="layui-badge layui-bg-blue layuiadmin-badge statHelp" data-type=1 id="dayIncomeHelp">?</span>
+                        </div>
+                        <div class="layui-card-body layuiadmin-card-list">
+                            <p class="layuiadmin-big-font"><span class="number_show" id="dayIncome" data-type=1>0</span><span class="layui-badge layui-bg-gray" id="dayIncomeRate">--</span></p>
+                            <p>
+                                ARPU
+                                <span class="layuiadmin-span-color"><span id="dayArpu"></span>元</span>
+                            </p>
+                            <p>
+                                ARPPU
+                                <span class="layuiadmin-span-color"><span id="dayArppu"></span>元</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-md2 statBox">
+                    <div class="layui-col-md2 boxIcon"><i class="layui-icon layui-icon-email"></i></div>
+                    <div class="layui-card layui-col-md10">
+                        <div class="layui-card-header">
+                            <span id="rechargePlayerTitle">昨日充值玩家</span>
+                            <span class="layui-badge layui-bg-blue layuiadmin-badge statHelp" data-type=2 id="rechargePlayerHelp">?</span>
+                        </div>
+                        <div class="layui-card-body layuiadmin-card-list">
+                            <p class="layuiadmin-big-font"><span class="number_show underline" data-type=2 id="rechargePlayer">0</span><span class="layui-badge layui-bg-gray" id="rechargePlayerRate">--</span></p>
+                            <p>
+                                充值次数（次）
+                                <span class="layuiadmin-span-color" id="rechargeNum">0</span>
+                            </p>
+                            <p>
+                                人均充值次数（次）
+                                <span class="layuiadmin-span-color" id="rechargeAvgNum">0</span>
+                            </p>
+                            <p>
+                                付费率
+                                <span class="layuiadmin-span-color" id="activeRechargeRate">0%</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-md2 statBox">
+                    <div class="layui-col-md2 boxIcon"><i class="layui-icon layui-icon-chart"></i></div>
+                    <div class="layui-card layui-col-md10">
+                        <div class="layui-card-header">
+                            <span id="activeTitle">昨日活跃</span>
+                            <span class="layui-badge layui-bg-blue layuiadmin-badge statHelp" data-type=3 id="activeUserHelp">?</span>
+                        </div>
+                        <div class="layui-card-body layuiadmin-card-list">
+                            <p class="layuiadmin-big-font"><span class="number_show underline" data-type=3 id="activeUserNum">0</span><span class="layui-badge layui-bg-gray" id="activeUserRate">--</span></p>
+                            <p>
+                                <span id="activeUserTitle">昨日最高在线</span>
+                                <span class="layuiadmin-span-color" id="onlineMax">0</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-md2 statBox">
+                    <div class="layui-col-md2 boxIcon"><i class="layui-icon layui-icon-group"></i></div>
+                    <div class="layui-card layui-col-md10">
+                        <div class="layui-card-header">
+                            <span id="newUserTitle">昨日新增玩家</span>
+                            <span class="layui-badge layui-bg-blue layuiadmin-badge statHelp" data-type=4 id="newUserHelp">?</span>
+                        </div>
+                        <div class="layui-card-body layuiadmin-card-list">
+                            <p class="layuiadmin-big-font"><span class="number_show underline" data-type=4 id="newUserNum"></span><span class="layui-badge layui-bg-gray" id="newUserRate">--</span></p>
+                            <p id="userTwoRemainItem">
+                                次日留存率
+                                <span class="layuiadmin-span-color" id="userTwoRemain">0%</span>
+                            </p>
+                            <p>
+                                本月新增玩家
+                                <span class="layuiadmin-span-color" id="monthNewUser"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-sm12">
+                <div class="layui-card laui-col-md10">
+                    <div class="layui-card-header">
+                        <div class="statRight">
+                            <label class="layui-form-label" style="width: auto;">额外对比日期</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input extraDate" id="extraDate" placeholder="请选择额外对比日期">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-card-body">
+                        <div id="monitorChart" style="height: 500px;"></div>
+                        <div style="margin-top: 10px;">
+                            <table id="hour_info_table" lay-filter="hour_info_table"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    var jsArr = {
+        'statistics-real-time-data': 'statistics/real_time/real_time',
+    };
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+
+    // layui.use('statistics/real_time/real_time', layui.factory('statistics/real_time/real_time'));
+</script>

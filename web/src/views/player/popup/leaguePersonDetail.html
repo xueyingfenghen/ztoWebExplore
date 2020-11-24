@@ -1,0 +1,31 @@
+<style>
+    #league_person_detail {
+        padding: 20px;
+    }
+</style>
+<div id="league_person_detail">
+    <table id="person_list"></table>
+</div>
+<script>
+    layui.use(['admin', 'view'], function () {
+        let admin = layui.admin;
+        let view = layui.view;
+        $(document).off('click', '.show_role_detail').on('click', '.show_role_detail', function () {
+            let role_id = $(this).attr('data-type');
+            admin.popup({
+                title: '玩家详情'
+                ,area: ['80%', '80%']
+                ,id: 'content-alert'
+                ,success: function(layero, index){
+                    view(this.id).render('player/popup/userInfo', {id: role_id}).done(function(){
+
+                    });
+                }
+            });
+        })
+    })
+</script>
+<script type="text/html" id="get_detail">
+    <a href="javascript:;" style="color: #1E9FFF;text-decoration:underline;" class="show_role_detail" data-type="{{d.role_id}}">{{ d.role_id }}</a>
+</script>
+

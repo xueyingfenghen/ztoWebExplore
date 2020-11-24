@@ -1,0 +1,110 @@
+<style>
+    #err_do_dialog {
+        padding: 20px;
+    }
+    .red {
+        color: red;
+    }
+    .green {
+        color: green;
+    }
+</style>
+<!-- 异常操作 -->
+<form class="layui-form layui-form-pane err_do_dialog" id="err_do_dialog">
+
+    <!-- 异常操作部分 -->
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">当前状态</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="text" name="now_state" class="layui-input now_state" placeholder="" readonly>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item" pane="" id="err_type_radio">
+        <label class="layui-form-label">操作类型</label>
+        <div class="layui-input-block">
+            <!-- <input type="radio" name="err_type" value=1 lay-filter="err_type" title="屏蔽邮件" checked="">
+            <input type="radio" name="err_type" value=2 lay-filter="err_type" title="清除邮件">
+            <input type="radio" name="err_type" value=3 lay-filter="err_type" title="修改邮件"> -->
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="password" name="pwd" class="layui-input" placeholder="请输入密码" autocomplete="new-password">
+            </div>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-theme" id="exec_err_do">确定</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="cancel_err_do">取消</button>
+    </div>
+
+
+</form>
+<script type="text/html" template lay-done="layui.data.done(d)">
+
+</script>
+<script>
+
+    layui.data.done = function (d) {
+        let editId = d.params.editId;
+        let type = d.params.type;
+        let is_traceless = d.params.is_traceless;
+
+        layui.use( ['table', 'admin', 'form', 'element', 'common'], function(){
+            let admin = layui.admin;
+            let table = layui.table;
+            let form = layui.form;
+            let element = layui.element;
+            let $ = layui.jquery;
+
+            admin.req({
+                url: admin.getUrl('/api/email/getDoErrType'),
+                data: {
+                    id: editId,
+                },
+                type: 'get',
+                done: function (data) {
+                    $('.now_state').val(data.data['name'])
+                    admin.initRadio(data.data['type'], '#err_type_radio .layui-input-block', 'err_type', 'err_type');
+                    form.render();
+                }
+            });
+            form.render();
+
+            // 执行异常操作
+            $('#exec_err_do').click(function () {
+                let param = admin.getFormParam('.err_do_dialog');
+                param.id = editId;
+                let url = '/api/email/execErrDo';
+                if (parseInt(is_traceless)) {
+                    url = '/api/traceless/channelTraceless';
+                }
+                admin.req({
+                    url: admin.getUrl(url),
+                    data: param,
+                    type: 'post',
+                    done: function (data) {
+                        if (data.code == 0) {
+                            admin.reload(reloadArr[type]['sel'], reloadArr[type]['tableId']);
+                            layer.closeAll();
+                            layer.msg('操作成功', {icon: 6, anim: 0});
+                        } else {
+                            layer.msg(data.msg, {icon: 5, anim: 6});
+                        }
+                    }
+                });
+            })
+
+        });
+
+    };
+
+</script>

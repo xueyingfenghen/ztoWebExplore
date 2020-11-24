@@ -1,0 +1,268 @@
+<form class="layui-form layui-form-pane" lay-filter="LAY-form-area-select">
+    <div class="layui-form-item">
+        <div class="layui-inline" pane>
+            <label class="layui-form-label">区服分组</label>
+            <div class="layui-input-inline">
+                <select name="server_type" lay-filter="server_type">
+                    <option value="1">正常区服</option>
+                    <option value="2">已合区区服</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline" pane>
+            <label class="layui-form-label">区服范围</label>
+            <div class="layui-input-inline">
+                <select name="select_area" lay-filter="select_area">
+                    <option value="section_area">选择区服范围</option>
+                    <option value="many_area">自定义区服范围</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layadmin-label-block">
+            <span>区服选择</span>
+            <div class="layadmin-label-search">
+                <div class="layui-input-inline many_area" style="width: 390px;display: none">
+                    <input type="text" name="many_area" placeholder="请输入区服,并用英文逗号分隔开,例:5,7,10,20-100" autocomplete="on"
+                           class="layui-input">
+                </div>
+                <div class="layui-input-inline section_area">
+                    <input onkeyup="this.value=this.value.replace(/[^\d]/g,'')" type="text" name="start_area"
+                           placeholder="请输入开始区服" autocomplete="on" class="layui-input">
+                </div>
+                <div class="layui-input-inline section_area">
+                    <input onkeyup="this.value=this.value.replace(/[^\d]/g,'')" type="text" name="end_area"
+                           placeholder="请输入结束区服" autocomplete="on" class="layui-input">
+                </div>
+                <button type="button" class="layui-btn layui-btn-theme" id="define">筛选</button>
+                <input hidden id="get_area">
+                <input hidden id="get_area_all">
+            </div>
+        </label>
+        <div class="layadmin-input-block">
+            <input id="allChoose" type="checkbox" lay-skin="primary" title="全选" class="layui-input"
+                   lay-filter="allChoose" value="checkall"/>
+            <div class="search-box">
+            </div>
+        </div>
+
+    </div>
+    <blockquote class="layui-elem-quote" id="details">已选区服()：</blockquote>
+</form>
+<script template lay-done="layui.data.sendParams(d.params)"></script>
+<script>
+  layui.data.sendParams = function (params) {
+    const route = (!!params && params.all === 1 ? '/api/server/getAllServer' : '/api/server/server_ids');
+
+    layui.use('form', function () {
+      var form = layui.form,
+        $ = layui.jquery,
+        allChoose = $("#allChoose");
+      form.render(null, 'LAY-form-area-select');
+
+      //初始化服务端区服数据
+      var filter = {};
+      var loadArea = function () {
+        layui.admin.req({
+          url: layui.admin.getUrl(route),
+          method: 'get',
+          data: filter,
+          dataType: 'json',
+          done: function (res) {
+            const $searchBbox = $(".search-box")
+            if (res.data.list.length > 0) {//判断区服数据不为空
+              var str = '';
+              $.each(res.data.list, function (i, items) {
+                var server_name = items.server_name //区服名称  后续根据服务端真实值在替换
+                  , server_id = items.server_id; //区服编号(id)  后续根据服务端真实值在替换 如果是10001 就减1000到时候
+                str += '<input class="layui-input single" lay-filter="single" type="checkbox" name="area[]" lay-skin="primary"' +
+                  `title="${server_id}区-${server_name}" value="${server_id}" />`;
+              })
+              $searchBbox.empty();
+              $searchBbox.append(str);
+              form.render('checkbox', "LAY-form-area-select");
+              // 回显已选区服
+              var server_filter_hidden = $('#server-filter-hidden').val() || params.area
+              if (server_filter_hidden) {
+                var child = $(".search-box input[type='checkbox']");
+                fill(child, server_filter_hidden)
+              }
+              details();
+            } else {
+              allChoose[0].checked = false;
+              $searchBbox.empty();
+              form.render('checkbox', "LAY-form-area-select");
+            }
+          }
+        });
+      };
+      loadArea();
+
+      //监听全选操作
+      form.on('checkbox(allChoose)', function (data) {
+        var child = $(".search-box input[type='checkbox']");
+        child.each(function (index, item) {
+          item.checked = data.elem.checked;
+        });
+        form.render('checkbox');
+        details();
+      });
+
+      //监听单个复选框操作
+      form.on('checkbox(single)', function (data) {
+        var count = 0, items = $(".single");
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].checked == true) {
+            count++;
+          }
+        }
+        if (count == items.length) {
+          allChoose[0].checked = true;
+        } else {
+          allChoose[0].checked = false;
+        }
+        form.render('checkbox');
+        details();
+      });
+
+      //监听下拉框搜索 选择区服范围
+      var Class = 'section_area';
+      form.on('select(select_area)', function (data) {
+        Class = data.value;
+        var section_area = 'section_area',//选择区服
+          many_area = 'many_area';//自定义区服
+        if (Class == many_area) {
+          $("." + section_area).css('display', 'none');
+          $("." + many_area).css('display', 'block');
+        } else if (Class == section_area) {
+          $("." + many_area).css('display', 'none');
+          $("." + section_area).css('display', 'block');
+        }
+      });
+      //监听下拉框搜索 选择区服类型
+      form.on('select(server_type)', function (data) {
+        filter['server_type'] = data.value;
+        allChoose[0].checked = false;
+        loadArea();
+      })
+      //监听确定按钮
+      $("#define").on('click', function () {
+        $(".search-box input[type='checkbox']").prop('checked', false);
+        allChoose[0].checked = false;
+        form.render('checkbox');
+        var child = $(".search-box input[type='checkbox']");
+        if (Class == 'section_area') {
+          var start = $("input[name=start_area]").val();
+          var end = $("input[name=end_area]").val();
+          //01 和 1相等
+          if (start > 0 && end > 0) {
+            select_area(child, parseInt(start), parseInt(end));
+          }
+        } else if (Class == 'many_area') {
+          var many_area = $("input[name=many_area]").val();
+          if (many_area) {
+            var array = many_area.split(",");
+            form.render('checkbox');
+            $.each(array, function (i, items) {
+              if (/(^[1-9]\d*$)/.test(items)) {//只能输入正整数（不包括负整数和0）
+                child.each(function (i, item) {
+                  var val = parseInt(item.value);
+                  var arr_val = parseInt(items);
+                  if (val == arr_val) {
+                    item.checked = true;
+                  }
+                });
+                form.render('checkbox');
+              } else {
+                var section = items.split("-");
+                var s = section[0];   //区间开始值
+                var e = section[1];  //区间结束值
+                if (/(^[1-9]\d*$)/.test(s) && /(^[1-9]\d*$)/.test(e)) {
+                  select_area(child, parseInt(s), parseInt(e));
+                }
+              }
+            });
+          }
+        }
+        details();
+      })
+
+      // 已选区服回填
+      var fill = function (child, str) {
+        var arr = layui.admin.strTransferArr(str)
+        child.each(function (i, item) {
+          var val = +item.value;
+          if (arr.includes(val)) {
+            item.checked = true;
+          }
+        });
+        var child_len = $(".search-box input[type='checkbox']").length;
+        var len = $(".search-box input[type='checkbox']:checked").length;
+        if (child_len === len) {
+          allChoose[0].checked = true;
+        }
+        details();
+        form.render('checkbox');
+      }
+
+      //选择区间区服操作
+      var select_area = function (child, start, end) {
+        child.each(function (i, item) {
+          var val = item.value;
+          if (val <= end && val >= start) {
+            item.checked = true;
+          }
+        });
+        form.render('checkbox');
+      }
+
+      //获取已选区服 填充到页面 “已选区服”上的数据
+      var current_area = function () {
+        var child = $(".search-box input[type='checkbox']");
+        var arr = [], result = [], str = '';
+        if (child.length > 0) {
+          child.each(function (i, v) {
+            if (v.checked) arr.push(v.value);
+          })
+          var i = 0;
+          result[i] = [arr[0]];
+          arr.reduce(function (prev, cur) {
+            cur - prev === 1 ? result[i].push(cur) : result[++i] = [cur];
+            return cur;
+          });
+        }
+        //得到选中的区服 console.log(result);
+        if (result.length > 0) {
+          for (j = 0, len = result.length; j < len; j++) {
+            var flag = '';
+            if (j > 0) flag = ',';
+            var first = result[j][0];
+            var last = result[j].length > 1 ? '-' + result[j][result[j].length - 1] : '';
+            str += flag + first + last;
+          }
+        }
+        $("#get_area").val(str);
+        $("#get_area_all").val(arr);
+        return str;
+        //console.log(str);//拼接后区服数据
+        //console.log(arr); //原区服数据 ["9", "10", "10001"]
+        //console.log(result); //处理后区服数据  (2) [Array(2), Array(1)]
+        //0: (2) ["9", "10"]
+        //1: ["10001"]
+      }
+
+      // “已选区服” 填充字符
+      var details = function () {
+        $("#details").empty();
+        var str = '已选区服()：';
+        var len = $(".search-box input[type='checkbox']:checked").length;
+        if (len > 0) str = '已选区服(' + len + ')：' + current_area();
+        $("#details").append(str);
+        if (str == '已选区服()：') $("#get_area").val('');
+        if (str == '已选区服()：') $("#get_area_all").val('');
+      }
+    });
+  }
+</script>

@@ -1,0 +1,176 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-form-item">
+            <button type="button" class="layui-btn layui-btn-normal" style="float: left" id="child_add_dict">新增子字典</button>
+        </div>
+    </div>
+    <table id="child_table" lay-filter="child_table"></table>
+    <div id="child_table-paginate" lay-filter="child_table-paginate"></div>
+</div>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+
+<script>
+    var $ = layui.jquery;
+    layui.data.sendParams = function (params) {
+        console.log('进来了',params);
+        //定义表头
+        var cols = [ //表头
+            {field: 'dict_id', title: '子字典ID',align: 'center'}
+            ,{field: 'name', title: '子字典名称',align: 'center'}
+            ,{field: 'value', title: '值',align: 'center'}
+            ,{field: 'remark', title: '备注',align: 'center'}
+            ,{field: 'type', title: 'type',align: 'center'}
+            ,{title: '操作',align: 'center',fixed: 'right', toolbar: '#child_dict_handle'}
+        ];
+        //渲染、监听 表格属性、数据
+        layui.use('table', function(){
+            var page = 1,pageSize = 10,filter = params,$ = layui.jquery;
+            var loadTadle = function(){
+                filter.page = page;filter.limit = pageSize;
+                layui.admin.req({
+                    url:layui.admin.getUrl('/api/get_dict'),
+                    method: 'get',
+                    data: filter,
+                    dataType: 'json',
+                    done: function (res) {
+                        layui.table.render({
+                            elem: '#child_table'
+                            ,cols: [cols]
+                            ,data:res.data.list,
+                            limit: pageSize
+                        });
+                        layui.laypage.render({
+                            elem: 'child_table-paginate'
+                            ,count: res.data.count //数据总数
+                            , limit: pageSize
+                            , curr: page
+                            , limits: [10, 20, 30, 40, 50]
+                            , layout: ['prev', 'page', 'next', 'skip', 'count', 'limit']
+                            , prev: '<i class="layui-icon">&#xe603;</i>'
+                            , next: '<i class="layui-icon">&#xe602;</i>'
+                            , jump: function (obj, first) {
+                                page = obj.curr;
+                                pageSize = obj.limit;
+                                if (!first) {loadTadle();}
+                            }
+                        });
+                    }
+                })
+            };loadTadle();
+
+            //新增字典
+            $("#child_add_dict").on('click',function () {
+                layui.admin.popup({
+                    title:  '新增子字典'
+                    ,area: ['500px', '500px']
+                    ,id: 'child_dict_add'
+                    ,btn: ['确定','取消']
+                    ,success: function(layero, index){
+                        layui.view(this.id).render('dictionary/child_dict_add',filter).done(function(){});
+                    }
+                    ,yes:function (index) {
+                        var obj = $("input[type=radio][name=dict_id]");
+                        var data = [];
+                        console.log('新增原始数据',obj);
+                        for (i=0;i<obj.length;i++){
+                            var o = {
+                                sort:i,
+                                dict_id:obj[i].value,
+                                name:obj[i].title,
+                                value:$(obj[i]).data("v"),
+                                remark:$(obj[i]).data("r"),
+                                type:$(obj[i]).data("t"),
+                            };
+                            data.push(o);
+                        }
+                        console.log('新增数据',data);
+                        layui.admin.req({
+                            url:layui.admin.getUrl('/api/add_child_dict'),
+                            method: 'get',
+                            data: {data:data,id:filter.id},
+                            dataType: 'json',
+                            done: function (res) {
+                                if(res.code == 0){
+                                    layer.msg(res.msg,{icon: 1});
+                                    layer.close(index);
+                                    layui.use('table', function(){
+                                        loadTadle();
+                                    })
+                                }else{
+                                    layer.msg(res.msg,{icon: 5});
+                                }
+                            }
+                        })
+                    }
+                })
+            })
+            //监听修改
+            layui.table.on('tool(child_table)', function(obj){
+                console.log(obj);
+                switch (obj.event) {
+                    case "edit":
+                        for (i=1;i<=3;i++){
+                            var len = $(obj.tr[0].cells[i]).find('input').length; //当前行每个单元格 DOM
+                            if(len == 0){
+                                obj.tr[0].cells[i].dataset.edit = 'text';
+                                var html = obj.tr[0].cells[i].innerHTML;
+                                var text = obj.tr[0].cells[i].innerText;
+                                var str = "<input class='layui-input layui-table-edit' value="+text+">"
+                                obj.tr[0].cells[i].innerHTML = html + str;
+                            }
+                        }
+                        $(this).attr('lay-event','save');
+                        $(this)[0].text = '保存';
+                        break;
+                    case "save":
+                        layui.admin.req({
+                            url: layui.admin.getUrl('/api/dict/modify'),
+                            method: 'post',
+                            data: obj.data,
+                            dataType: 'json',
+                            done: function (res) {
+                                if(res.code == 0){
+                                    layer.msg('修改成功',{icon: 1});
+                                    for (i=1;i<=3;i++){
+                                        var len = $(obj.tr[0].cells[i]).find('input').length; //当前行每个单元格 DOM
+                                        delete obj.tr[0].cells[i].dataset.edit;
+                                        if(len > 0)$(obj.tr[0].cells[i]).find('input').remove();
+                                    }
+                                    $(this).attr('lay-event','edit');
+                                    $(this)[0].text = '修改';
+                                    loadTadle();
+                                } else {
+                                    layer.msg('修改失败',{icon: 5});
+                                }
+                            }
+                        })
+                        break;
+                    case "del":
+                        layer.confirm('真的删除当前子字典吗', function(index){
+                            layui.admin.req({
+                                url:layui.admin.getUrl('/api/del_child_dict'),
+                                method: 'get',
+                                data: {id:obj.data.id,pid:obj.data.pid},
+                                dataType: 'json',
+                                done: function (res) {
+                                    if(res.code == 0){
+                                        layer.msg(res.msg,{icon: 1});
+                                        loadTadle();
+                                    }else {
+                                        layer.msg(res.msg,{icon: 5});
+                                    }
+                                }
+                            })
+                        });
+                        break;
+                }
+            })
+        })
+    }
+</script>
+<script type="text/html" id="child_dict_handle">
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>

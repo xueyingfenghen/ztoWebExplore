@@ -1,0 +1,20 @@
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+      "loss_vip": [
+        {
+          "role_vip": 0,
+          "loss_users": 100
+        },
+        {
+          "role_vip": 1,
+          "loss_users": 120
+        },
+        {
+          "role_vip": 2,
+          "loss_users": 180
+        }
+      ]
+    }
+}

@@ -1,0 +1,61 @@
+<div class="layui-form-item" pane="">
+    <label class="layui-form-label">道具选择</label>
+    <div class="layui-input-block">
+        <input type="radio" class="prop_choose_type" name="prop_choose_type" value="0" lay-filter="prop_choose_type" lay-verify="props_rightnow" title="即时配置" checked="">
+        <input type="radio" class="prop_choose_type" name="prop_choose_type" value="1" lay-filter="prop_choose_type" lay-verify="props_rightnow" title="礼包模版">
+        <input type="radio" class="no-prop-choose prop_choose_type" name="prop_choose_type" value="2" lay-filter="prop_choose_type" title="无">
+    </div>
+</div>
+
+<!--    礼包配置-->
+<div class="layui-form-item gift_bag" style="display: none;">
+    <div class="layui-inline">
+        <label class="layui-form-label">礼包类型</label>
+        <div class="layui-input-block" style="width: 190px;">
+            <select name="gift_bag_type" lay-filter="gift_type" lay-search>
+                <option value="">请选择礼包类型</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-inline">
+        <label class="layui-form-label">礼包名称</label>
+        <div class="layui-input-block" style="width: 190px;">
+            <select name="gift_bag_name" id=gift_id" lay-filter="gift_id" lay-search>
+                <option value="">请选择礼包名称</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!--    道具选择-->
+<div class="layui-form-item prop_conf">
+    <label class="layui-form-label">道具添加</label>
+    <div class="layui-input-inline">
+        <select name="prop_type" lay-filter="prop_type" lay-search>
+            <option value="">请选择道具类别</option>
+        </select>
+    </div>
+    <div class="layui-input-inline">
+        <select name="prop_id" id="prop_id" class="prop_id" lay-filter="prop_id" lay-search>
+            <option value="">请选择道具名称</option>
+        </select>
+    </div>
+    <div class="layui-input-inline">
+        <input type="text" name="prop_num" class="layui-input" style="width: 190px" placeholder="请输入道具数量">
+    </div>
+    <button type="button" class="layui-btn layui-btn-theme" id="add_prop">添加</button>
+</div>
+
+<div class="layui-form-item prop_conf prop_content">
+    <table id="prop_content"></table>
+</div>
+
+<script type="text/html" id="prop_edit">
+    <input type="hidden" name="props[]" value="{{d.prop_type}},{{ d.prop_id }},{{ d.prop_num }}" autocomplete="off">
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger prop_del" data-type={{d.prop_id}} data-prop-type={{d.prop_type}}>删除</button>
+</script>
+
+
+<script type="text/html" template lay-done="layui.data.propsSendParams(d.params)">
+
+</script>

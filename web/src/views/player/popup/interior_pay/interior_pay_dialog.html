@@ -1,0 +1,425 @@
+<style>
+    #replenish_person_add_dialog {
+        padding: 20px;
+    }
+    #replenish_person_add_dialog .formDiv {
+        width: auto;
+        display: inline-block;
+    }
+    #replenish_person_add_dialog .buttonDiv {
+        width: auto;
+        display: inline-block;
+        position: relative;
+        top: -2px;
+    }
+    .nickName {
+        display: inline-block;
+        padding-left: 30px;
+    }
+    .layui-hidden {
+        display: none;
+    }
+    .green {
+        color: green;
+    }
+    .red {
+        color: red;
+    }
+    .layui-input-block {
+        width: 190px;
+    }
+
+    .layui-disabled-color {
+        color: green;/*输入文字、光标颜色*/
+        -webkit-text-fill-color: green;/*输入文字、placeholder颜色*/
+        caret-color: green;/*光标颜色*/
+    }
+
+
+</style>
+<!--解禁/一键解禁-->
+<form class="layui-form layui-form-pane replenish_person_add_dialog" id="replenish_person_add_dialog">
+
+    <input type="hidden" name="hasUser" id="hasUser" value=0>
+    <!--选择区服， 角色id-->
+    <div class="layui-form-item content content1" data-type="content1">
+        <div class="formDiv"></div>
+        <div class="buttonDiv">
+            <button type="button" class="layui-btn layui-btn-theme" id="checkUser">校验</button>
+            <span class="nickName"></span>
+        </div>
+    </div>
+    <!--充值类型-->
+    <div class="layui-form-item" pane="">
+        <label class="layui-form-label">充值类型</label>
+        <div class="layui-input-block" style="width: 100%;">
+            <input type="radio" name="pay_type" value=1 lay-filter="pay_type" title="固定充值" checked="">
+            <input type="radio" name="pay_type" value=2 lay-filter="pay_type" title="RMB礼包">
+        </div>
+    </div>
+    <!--    固定充值-->
+    <div class="pay_type_1">
+        <!--金额类型-->
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">金额类型</label>
+            <div class="layui-input-block" style="width: 100%;">
+                <input type="radio" name="money_type" value=1 lay-filter="money_type" title="固定档次" checked="">
+                <input type="radio" name="money_type" value=2 lay-filter="money_type" title="自定义">
+            </div>
+        </div>
+        <!--充值档位 数量-->
+        <div class="layui-form-item content content2 money_type_1" data-type="content2" style="margin-bottom: 0;">
+            <div class="formDiv"></div>
+            <div class="buttonDiv">
+                <button type="button" class="layui-btn layui-btn-theme" id="add">添加</button>
+            </div>
+        </div>
+        <div class="layui-form-item money_type_2" style="margin-bottom: 0;display: none;">
+            <div class="layui-inline">
+                <label class="layui-form-label">充值金额</label>
+                <div class="layui-input-block" style="width:300px">
+                    <input type="text" class="layui-input input_money" placeholder="请输入充值金额">
+                </div>
+            </div>
+            <div class="buttonDiv">
+                <button type="button" class="layui-btn layui-btn-theme" id="add_money">添加</button>
+            </div>
+        </div>
+
+        <!--充值内容（table形式）-->
+        <div class="layui-form-item">
+            <table id="pay_content"></table>
+        </div>
+    </div>
+    <div class="pay_type_2" style="display: none;">
+        <div id="show_rmb_gift_content"></div>
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">选择礼包</label>-->
+<!--            <div class="layui-input-inline">-->
+<!--                <select name="price_rank" lay-filter="price_rank_select"></select>-->
+<!--            </div>-->
+<!--            <div class="layui-input-inline">-->
+<!--                <select name="gift_name"></select>-->
+<!--            </div>-->
+<!--            <button class="layui-btn layui-btn-theme" type="button" name="addProp">增加</button>-->
+<!--        </div>-->
+<!--        <div class="renderTable">-->
+<!--            <table lay-filter="prop_table"></table>-->
+<!--        </div>-->
+    </div>
+    <!--充值总额-->
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">充值总额</label>
+            <div class="layui-input-block" style="width:300px">
+                <input type="text" class="layui-input layui-disabled layui-disabled-color" placeholder="" value="0" disabled>
+            </div>
+        </div>
+    </div>
+    <!--充值理由-->
+    <div class="layui-form-item content content3" data-type="content3">
+        <div class="formDiv"></div>
+        <div class=""></div>
+    </div>
+    <!--密码-->
+    <div class="layui-form-item content" data-type="content4">
+        <div class="formDiv"></div>
+        <div class=""></div>
+    </div>
+
+    <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-theme" id="add-interior-pay">添加</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="channel-interior-pay">取消</button>
+    </div>
+
+</form>
+<script>
+    layui.use(['table', 'admin', 'form'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let admin = layui.admin;
+        let $ = layui.jquery;
+
+        var payData = [];
+        var rechargeArr = [];
+
+        let server_id = '';
+        let user_id = '';
+
+        let cols = [[
+            {field:'recharge_grade', title: '充值档位', align: 'center'},
+            {field:'recharge_num', title: '数量', align: 'center'},
+            {field:'recharge_grade_id', title: '操作', align: 'center', templet: '#pay_content_edit'}
+        ]];
+
+
+        // 用于临时记录充值档位的id和名字
+        let rechargeId = '';
+        let rechargeName = '';
+
+
+        let nameArr = {};
+        for (let i = 0; i < $('#replenish_person_add_dialog .content').length; i ++) {
+            let contentName = $('#replenish_person_add_dialog .content').eq(i).attr('data-type');
+            nameArr[contentName] = 'player_interior_pay_person_add_dialog_' + contentName;
+        }
+
+        // 输入框等完成渲染
+        admin.req({
+            url: admin.getUrl('/api/base/getFromGroupList'),
+            data: {
+                nameArr: nameArr
+            },
+            type: 'post',
+            done: function (data) {
+                for (let k in data.data) {
+                    for (let i = 0; i < $('#replenish_person_add_dialog .content').length; i ++) {
+                        let contentName = $('#replenish_person_add_dialog .content').eq(i).attr('data-type');
+                        if (k == contentName) {
+                            $('#replenish_person_add_dialog .content').eq(i).find('.formDiv').html(data.data[k]);
+                        }
+                    }
+                }
+                $("select[name='recharge_grade']").attr('lay-filter', 'recharge_grade');
+                $("select[name='replenish_reason']").attr('lay-filter', 'replenish_reason');
+
+                $("select[name='server_id']").attr('lay-filter', 'server_id');
+
+                $('.content3').find('.layui-inline').eq(1).addClass('layui-hidden');
+                form.render();
+            }
+        });
+
+        // 设置表格（记录充值档位内容）
+        $.initTable = function () {
+            table.render({
+                id: 'pay_content',
+                elem: '#pay_content',
+                page: false,
+                loading: true,
+                cols: cols,
+                data: payData,
+                limit: 1000
+            });
+        }
+
+        $.initTable();
+
+
+        // 添加充值档位
+        $.addRecharge = function (pushParam) {
+            let num = parseInt(pushParam.recharge_num);
+            let pushNum = 0;
+            $.each(payData, function (key, val) {
+                if (payData[key]['recharge_grade_id'] == pushParam['recharge_grade_id']) {
+                    payData[key]['recharge_num'] = parseInt(payData[key]['recharge_num']) + num;
+                    pushNum ++;
+                    return ;
+                }
+            });
+            if (!pushNum) {
+                pushParam.recharge_num = num;
+                payData.push(pushParam);
+            }
+            // for (let i = 0; i < num; i ++) {
+            //     pushParam.recharge_num = 1;
+            //     payData.push(pushParam);
+            // }
+        };
+
+        // 删除
+        $.delRecharge = function (recharge_grade_id) {
+            for (let k in payData) {
+                if (payData[k]['recharge_grade_id'] == recharge_grade_id) {
+                    payData.splice(k, 1);
+                    return ;
+                }
+            }
+        };
+
+        // 补单理由
+        form.on('select(replenish_reason)', function (data) {
+            // 不记录充值流水
+            if (data.value === '0') {
+                $('.content3').find('.layui-inline').eq(1).removeClass('layui-hidden')
+            } else {
+                $('.content3').find('.layui-inline').eq(1).addClass('layui-hidden')
+            }
+        });
+
+        // 充值档位改变时
+        form.on('select(recharge_grade)', function (data) {
+            rechargeName =data.elem[data.elem.selectedIndex].text;
+            rechargeId = data.value;
+        });
+
+        // 删除充值档位
+        $(document).off('click', '.del').on('click', '.del', function () {
+            let recharge_grade_id = $(this).attr('data-type');
+            $.delRecharge(recharge_grade_id);
+            $.initTable();
+            $.totalMoney();
+        });
+
+
+        // 添加充值档位
+        $(document).off('click', '#add').on('click', '#add', function () {
+            if (rechargeId == '' || rechargeId == 0) {
+                layer.msg('请选择充值档位', {icon: 5, anim: 6});
+                return ;
+            }
+            if ($('#recharge_num').val().trim() == '') {
+                layer.msg('请填写数量', {icon: 5, anim: 6});
+                return ;
+            }
+            if (!(/(^[1-9]\d*$)/.test($('#recharge_num').val()))) {
+                layer.msg('数量必须为正整数', {icon: 5, anim: 6});
+                return ;
+            }
+            let pushParam = {
+                recharge_grade: rechargeName,
+                recharge_num: $('#recharge_num').val(),
+                recharge_grade_id: rechargeId,
+                order: ''
+            };
+            $.addRecharge(pushParam);
+            $.initTable();
+            $.totalMoney();
+        });
+
+        // 校验用户是否存在，返回昵称
+        $(document).off('click', '#checkUser').on('click', '#checkUser', function () {
+            admin.req({
+                url: admin.getUrl('/api/player/getNickname'),
+                data: {
+                    server_id: $('#replenish_person_add_dialog .content1 .server_id').val(),
+                    user_id: $('#replenish_person_add_dialog .content1 .user_id').val(),
+                },
+                type: 'post',
+                done: function (data) {
+                    $('.nickName').removeClass('red');
+                    $('.nickName').removeClass('green');
+                    if (data.code == 0) {
+                        $('.nickName').addClass('green');
+                        $('.nickName').html(data.data['nickname'])
+                        $('#hasUser').val(1)
+                        user_id = $('#replenish_person_add_dialog .content1 .user_id').val();
+                    } else {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                        $('.nickName').addClass('red');
+                        $('.nickName').html('未找到该玩家信息')
+                        $('#hasUser').val(0)
+                    }
+                }
+            });
+        })
+
+        // 区服查询选择 校验状态查询设置为未校验
+        form.on('select(server_id)', function (data) {
+            if ($('#hasUser').val() != 0 && server_id != data.value) {
+                $('.nickName').addClass('red');
+                $('.nickName').html('未找到该玩家信息')
+                $('#hasUser').val(0)
+            }
+            server_id = data.value;
+        });
+
+        //
+        $(document).on('blur', '#replenish_person_add_dialog .content1 .user_id', function () {
+            if ($('#hasUser').val() != 0 && user_id != $('#replenish_person_add_dialog .content1 .user_id').val()) {
+                $('.nickName').addClass('red');
+                $('.nickName').html('未找到该玩家信息')
+                $('#hasUser').val(0)
+            }
+        })
+
+        /*****************************/
+
+        $.totalMoney = function (type = 1) {
+            let totalNum = 0;
+            if (type == 1) {
+                $.each(payData, function (key, val) {
+                    totalNum += parseInt(rechargeArr[val['recharge_grade_id']]['recharge']) * parseInt(val['recharge_num']);
+                });
+            } else {
+                let tempArr = table.cache.rmb_list;
+                $.each(tempArr, function (key, val) {
+                    totalNum += parseInt(val['price_rank']) * parseInt(val['gift_num'])
+                })
+            }
+            $('.layui-disabled-color').val(totalNum);
+        }
+
+        // 获取充值档内容
+        admin.req({
+            url: admin.getUrl('/api/pay/getRecharge'),
+            data: {},
+            type: 'get',
+            done: function (data) {
+                rechargeArr = data.data;
+            }
+        });
+
+        // 邮件选择 1 固定档位 2 自定义
+        form.on('radio(money_type)', function (data) {
+            if (parseInt(data.value) == 1) {
+                $('.money_type_1').show();
+                $('.money_type_2').hide();
+                payData = [];
+                $.initTable();
+                $.totalMoney($("radio[name='pay_type']").val());
+            } else {
+                $('.money_type_2').show();
+                $('.money_type_1').hide();
+                payData = [];
+                $.initTable();
+                $.totalMoney();
+                $.totalMoney($("radio[name='pay_type']").val());
+            }
+        });
+
+        // 邮件选择 1 固定充值 2 RMB礼包
+        form.on('radio(pay_type)', function (data) {
+            if (parseInt(data.value) == 1) {
+                $('.pay_type_1').show();
+                $('.pay_type_2').hide();
+                $.totalMoney(1);
+            } else {
+                $('.pay_type_2').show();
+                $('.pay_type_1').hide();
+                $.totalMoney(2);
+            }
+        });
+
+        $(document).off('click', '#add_money').on('click', '#add_money', function () {
+            let input_money = $('.input_money').val();
+            if (!(/(^[1-9]\d*$)/.test(input_money))) {
+                layer.msg('充值金额必须为正整数', {icon: 5, anim: 6});
+                return ;
+            }
+            layer.msg('功能未开放', {icon: 5, anim: 6});
+            return ;
+            // 请求后端计算出符合金额的充值档位
+            admin.req({
+                url: admin.getUrl('/api/pay/getBestRechargeByMoney'),
+                data: {
+                    money: input_money
+                },
+                type: 'post',
+                done: function (data) {
+
+                }
+            });
+
+        })
+
+        // RMB礼包部分
+        layui.view('show_rmb_gift_content').render('limit_gift_config/popup/get_rmb_gift', {
+
+        }).done(function(){});
+
+    })
+</script>
+<script type="text/html" id="pay_content_edit">
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger del" data-type={{ d.recharge_grade_id }}>删除</button>
+</script>

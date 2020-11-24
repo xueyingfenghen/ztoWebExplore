@@ -1,0 +1,196 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+
+                <!--基础信息监控-->
+                <div class="layui-tab-item" id="search_welfare-base" style="display: none;">
+                    <form class="layui-form layui-form-pane form_welfare-base">
+                        <div class="layui-form-item" id="form_welfare-base">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">选择区服</label>
+                                <div class="layui-input-block" style="width: auto;">
+                                    <input type="text" name="server_list" autocomplete="off" placeholder="请选择区服" class="layui-input server_list" readonly onclick="layui.admin.area({area:this.value})">
+                                </div>
+                                <span style="display: inline-block;margin-top: 10px;">* 点击输入框进行区服勾选</span>
+                            </div>
+                            <div class="div_welfare-base"></div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_welfare-base","tableId": "table_welfare-base"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_welfare-base","tableId": "table_welfare-base"}'>
+                                重置
+                            </button>
+
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 详细监控日志 -->
+                <div class="layui-tab-item" id="search_welfare-log" style="display: none;">
+                    <form class="layui-form layui-form-pane form_welfare-log">
+                        <div class="layui-form-item" id="form_welfare-log">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_welfare-log","tableId": "table_welfare-log"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_welfare-log","tableId": "table_welfare-log"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn "
+                                    data-obj='{"event": "export_excel","form_class": ".form_welfare-log","url":""}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 黑名单 -->
+                <div class="layui-tab-item" id="search_welfare-black" style="display: none;">
+                    <form class="layui-form layui-form-pane form_welfare-black">
+                        <div class="layui-form-item" id="form_welfare-black">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_welfare-black","tableId": "table_welfare-black"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_welfare-black","tableId": "table_welfare-black"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_welfare-black","url":""}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_welfare-base" style="display: none;">
+    <div class="layui-card-header">基础信息监控</div>
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn add-wealth-dialog">
+            新增福利号
+        </button>
+        <button type="button" class="layui-btn layui-btn-normal">
+            监控规则配置
+        </button>
+        <table id="table_welfare-base" style="margin-top: 10px;">
+        </table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_welfare-log" style="display: none;">
+    <div class="layui-card-header">详细监控日志</div>
+    <div class="layui-card-body">
+        <table id="table_welfare-log">
+        </table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_welfare-black" style="display: none;">
+    <div class="layui-card-header">黑名单</div>
+    <div class="layui-card-body">
+        <table id="table_welfare-black">
+        </table>
+    </div>
+</div>
+
+<script>
+
+    // var jsArr = {
+    //     'runoff-time': 'statistics/runoff_analyze/runoff_time',
+    //     'runoff-node': 'statistics/runoff_analyze/runoff_node',
+    //     'runoff-watch': 'statistics/runoff_analyze/runoff_watch',
+    // }
+    // layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    // elementTabs(jsArr);
+
+    layui.use(['table', 'form', 'admin', 'common', 'view'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let admin = layui.admin;
+        let view = layui.view;
+
+
+        let initArray = [
+            {
+                // 基础监控信息
+                form_name: 'monitoring_form_welfare-base',
+                cols_name: 'monitoring_table_welfare-base',
+                tableId: 'table_welfare-base',
+                form_class: '.form_welfare-base',
+                sel_name: '.div_welfare-base',
+                url: '/api/'
+            }
+        ];
+
+        $.each(initArray, function(i, obj){
+            admin.initForms(obj.form_name, obj.sel_name).then(function () {
+                admin.getCols(obj.cols_name).then(function (data) {
+                    let param = admin.getFormParam(obj.form_class);
+                    table.render({
+                        id: obj.tableId,
+                        elem: '#' + obj.tableId,
+                        url: admin.getUrl(obj.url),
+                        method: 'GET',
+                        where: param,//请求参数(额外)
+                        request: {
+                            pageName: 'page' //页码的参数名称，默认：page
+                            ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                        },
+                        response: { //定义后端 json 格式，详细参见官方文档
+                            statusName: 'code', //状态字段名称
+                            statusCode: '0', //状态字段成功值
+                            msgName: 'msg', //消息字段
+                            countName: 'countAll', //总页数字段
+                            dataName: 'data', //数据字段
+                        },
+                        page: true,
+                        loading: true,
+                        cols: data.data
+                    });
+                });
+            });
+        });
+
+        // 新增福利号
+        $(document).off('click', '.add-wealth-dialog').on('click', '.add-wealth-dialog', function () {
+            admin.popup({
+                title: '新增福利号'
+                ,area: ['80%', '80%']
+                ,id: 'add_wealth_number'
+                ,success: function(layero, index){
+                    view(this.id).render('monitoring/popup/add_wealth_number', {
+
+                    }).done(function(){
+
+                    });
+                }
+            });
+        })
+
+
+    })
+
+</script>

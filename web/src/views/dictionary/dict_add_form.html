@@ -1,0 +1,94 @@
+<style>
+    .layui-input {
+     width: 100%;
+    }
+    .layui-form-label.layui-required:after,#type_flag:after{
+        content:"*";
+        color:red;
+        position: absolute;
+        top:12px;
+        left:15px;
+    }
+</style>
+<form class="layui-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label" id="type_flag"></label>
+        <div class="layui-input-block">
+            <input type="text" name="name" lay-verify="required" autocomplete="off" placeholder="请输入字典名称" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item dict_type">
+        <label class="layui-form-label layui-required">字典类型</label>
+        <div class="layui-input-block">
+            <select name="dict_type" lay-verify="required">
+                <option value="">请选择类型</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">值</label>
+        <div class="layui-input-block">
+            <input type="text" name="value"  autocomplete="off" placeholder="请输入值" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">备注</label>
+        <div class="layui-input-block">
+            <input type="text" name="remark"  autocomplete="off" placeholder="请输入备注内容" class="layui-input">
+        </div>
+    </div>
+
+</form>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    //定义一个 lay-done 对应的全局方法，以供动态模板执行
+    var $ =layui.$;
+    $(function () {
+        layui.data.sendParams = function (params) {
+            console.log('子字典新增进来了',params,params.type);
+            var id = params.id;
+            var type = params.type;
+            var type_flag = '';
+            if (id == 'dict_add_form') type_flag = '类型名称';
+            if (id == 'child_dict_add_form') type_flag = '子字典名称';
+            $("#type_flag")[0].innerText = type_flag;
+            //字典类型下拉框 初始化    主字典新增和密码字典类型新增 使用配置文件严格控制  下拉框随便加把
+            if(type == 'VerifyPassword' || id == 'dict_add_form'){
+                layui.use('form', function(){
+                    var form = layui.form;
+                    var admin = layui.admin;
+                    form.render();
+
+                    admin.req({
+                        url: layui.admin.getUrl('/api/dict/deploy'),
+                        method: 'get',
+                        data: {type:type},
+                        dataType: 'json',
+                        done: function (res) {
+                            var data = res.data.list;
+                            var str = '';
+                            var disabled = '';
+                            var obj = $("input[type=radio][name=dict_id]");
+                            $.each(data, function (i, item) {
+                                disabled = item.disabled ? 'disabled' :  '';
+                                for (key=0;key<obj.length;key++){
+                                    if($(obj[key]).data("t") == i) disabled = 'disabled';
+                                }
+                                str += "<option value="+i+"  "+ disabled +">"+item.name+"</option>";
+                            });
+                            $("select[name=dict_type]").append(str);
+                            form.render();
+                        }
+                    })
+                })
+            }else {
+                $(".dict_type").css("display",'none');
+            }
+        };
+    })
+
+
+</script>

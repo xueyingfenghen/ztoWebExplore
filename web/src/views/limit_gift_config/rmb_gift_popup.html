@@ -1,0 +1,344 @@
+<div>
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">礼包类型</label>
+            <div class="layui-input-inline">
+                <select name="gift_type" class="layui-input" lay-filter="rmb_gift_type"></select>
+            </div>
+
+            <label class="layui-form-label">价格档次</label>
+            <div class="layui-input-inline">
+                <select name="price_rank" class="layui-input" lay-filter="price_rank"></select>
+            </div>
+
+            <label class="layui-form-label">礼包ID</label>
+            <div class="layui-input-inline">
+                <select name="recharge_id" class="layui-input" placeholder="请选择礼包ID"></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">礼包名称</label>
+            <div class="layui-input-inline">
+                <input type="text" placeholder="请输入礼包名称" class="layui-input" name="gift_name" max="200">
+            </div>
+            <label class="layui-form-label">显示折扣</label>
+            <div class="layui-input-inline">
+                <select name="discount" autocomplete="off" placeholder="请选择折扣"></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin: 0;" id="countTable">
+                <table lay-filter="countTable" name="countTable"></table>
+            </div>
+            <div style="text-align:center;">
+                <i class="layui-icon layui-icon-addition addIcon" style="padding:10px;cursor: pointer;"> </i>
+            </div>
+        </div>
+        <div id="props_content_divs">
+
+        </div>
+        <!-- <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block" style="width: 200px;">
+                <input type="password" placeholder="请输入密码" class="layui-input" name="password" data-name="password">
+            </div>
+        </div> -->
+        <div class="layui-form-item">
+            <div class="layui-input-inline">
+                <button lay-filter="rmb_submit_action" type="button" class="layui-btn layui-btn-theme submit_action"
+                    lay-submit>确定
+                </button>
+                <button type="button" class="layui-btn layui-btn-primary layer_close">取消</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    layui.extend({ props: '/common/props' });
+
+    layui.use(['form', 'props', 'admin', 'table'], function () {
+        const {
+            form, admin, table
+        } = layui
+        const param = layui['limit_gift_config/rmb_gift']
+        const isEmpty = (obj) => {
+            for (let key in obj) {
+                return true
+            }
+            return false
+        }
+        const {
+            layero, index, obj, event: globalEvent
+        } = param
+
+        layui.view('props_content_divs').render('common/prop_select', {
+            props_list: obj.prop_content,
+            required_props: true,
+            is_email: true
+        })
+        const reset = function reset() {
+            [...layero.find('input[name]')].forEach(function () {
+                $(this).val('')
+            });
+            [...layero.find('select[name]')].forEach(function () {
+                $(this).val('')
+            })
+        }
+
+        // console.log(layui)
+        admin.req({
+            url: admin.getUrl('/api/rmb_gift/getAllSelect')
+        }).then((res) => {
+            const { id, discount = [], price_rank = [], wm = [] } = res.data
+            layero.find('input[name=gift_id]').val(id);
+            [
+                {
+                    key: 'discount',
+                    val: discount,
+                    name: '折扣'
+                },
+                {
+                    key: 'price_rank',
+                    val: price_rank,
+                    name: '价格档次'
+                },
+                {
+                    key: 'gift_type',
+                    val: wm,
+                    name: '礼包类型'
+                }
+            ].forEach(item_obj => {
+                const placeholder = `<option placeholder="" value="" disabled selected>请选择${item_obj.name}</option>`
+                const str = item_obj.val.map(item => {
+                    return `<option value=${item.key}>${item.val}</option>`
+                }).join("")
+                layero.find(`select[name=${item_obj.key}]`).html(placeholder + str).val(obj[item_obj.key])
+            })
+            form.render('select')
+        })
+        /**
+         * @param {string} type 礼包类型
+         * @param {number} price 价格
+         * @param {number} edit_id 当前编辑数据的唯一值
+         * @param {number} id 礼包id
+         */
+        const renderGiftId = (type, price, edit_id = 0, id) => {
+            admin.req({
+                url: '/api/rmb_gift/getRechargeIdByPrice',
+                // method: 'post',
+                data: { price, type, edit_id }
+            }).then(({ data }) => {
+                const str = data.map(({ key, val }) => {
+                    return `<option value=${key}>${val}</option>`
+                }).join('')
+                layero.find('select[name=recharge_id]').html(str).val(id)
+                form.render('select')
+            })
+        }
+        const renderForm = (data) => {
+            for (let key in data) {
+                const input = layero.find(`input[name=${key}]`)
+                const select = layero.find(`select[name=${key}]`)
+                if (input) {
+                    input.val(data[key])
+                } else {
+                    select.val(data[key])
+                }
+            }
+            renderGiftId(data.gift_type, data.price_rank, data.gift_id, data.recharge_id)
+        }
+        const renderTable = (data) => {
+            table.render({
+                elem: layero.find('table[name=countTable]'),
+                id: "countTable",
+                cols: [
+                    [
+                        {
+                            type: 'numbers',
+                            title: '序号',
+                            align: 'center',
+                            width: 250
+
+                        },
+                        {
+                            field: 'vipExp',
+                            title: 'vip经验',
+                            edit: 'text',
+                            align: "center",
+                        },
+                        {
+                            field: 'totalLimit',
+                            title: '限购次数',
+                            edit: 'text',
+                            align: "center",
+
+
+                        },
+                        {
+                            field: 'action',
+                            title: '操作',
+                            templet: function () {
+                                return `<button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="del" type="button">删除</button>`
+                            },
+                            align: 'center',
+                            width: 250
+                        }
+                    ]
+                ],
+                data
+            })
+            table.on('tool(countTable)', function (tableObj) {
+                const { event } = tableObj
+                if (event === 'del') {
+                    // debugger
+                    tableObj.del()
+                }
+            })
+            table.on('edit(countTable)', function (obj) {
+                const {
+                    field, value
+                } = obj
+                // console.log(obj)
+                const toNumber = +value
+                if (field === "totalLimit" && (Number.isNaN(toNumber) || toNumber === 0)) {
+                    layer.msg('限购次数有误', { icon: 5 })
+                    obj.update({
+                        [field]: ''
+                    })
+                    return
+                } else if (field === 'vipExp' && (Number.isNaN(toNumber) || toNumber < 0)) {
+                    layer.msg('VIP经验有误', { icon: 5 })
+                    obj.update({
+                        [field]: ''
+                    })
+                    return
+                }
+                if (field) {
+                    obj.update({
+                        [field]: obj.value
+                    })
+                }
+
+            })
+        }
+        if (isEmpty(param.obj)) {
+            renderForm(param.obj)
+            renderTable(param.obj.limit_content)
+        } else {
+            renderTable(
+                [
+                    {
+                        vipExp: '',
+                        totalLimit: ''
+                    }
+                ]
+            )
+        }
+        form.on('submit(rmb_submit_action)', function (submitObj) {
+            const param = {}
+            const {
+                discount = "",
+                gift_name = "",
+                gift_type = "",
+                password = "",
+                price_rank = "",
+                recharge_id = ""
+            } = submitObj.field
+
+            Object.assign(param, {
+                gift_id: obj.gift_id,
+                discount,
+                gift_name,
+                recharge_id,
+                gift_type,
+                password,
+                price_rank,
+                limit_content: JSON.stringify(layui.table.cache['countTable']),
+                prop_desc: JSON.stringify(layui.table.cache['prop_content']),
+                vip: layui.table.cache['countTable'].map(item => (item.vipExp)).join(","),
+                limit_count: layui.table.cache['countTable'].map(item => (item.totalLimit)).join(","),
+            })
+            const isvalidCountTable = (table) => {
+                return table.every(item => {
+                    return item.totalLimit && item.vipExp
+                })
+            }
+            if (/^\[\]$/.test(param.prop_desc)) {
+                layer.msg('请选择道具', { icon: 5 })
+                return
+            }
+            if (!isvalidCountTable(layui.table.cache['countTable'])) {
+                layer.msg('请输入VIP经验”|“请输入购买次数”', { icon: 5 })
+                return;
+            }
+            let url = '/api/rmb_gift/add'
+            if (globalEvent === 'edit') {
+                url = '/api/rmb_gift/edit'
+            }
+            layero.find('button[lay-filter=rmb_submit_action]').addClass('layui-btn-disabled').attr('disabled', 'disabled')
+            admin.req({
+                url,
+                method: 'post',
+                data: param,
+                done(res) {
+                    if (res.code === 0) {
+                        layer.msg(res.msg, { icon: 6 })
+                        layer.close(index)
+                        table.reload('rmb_gift_list')
+                    } else {
+                        layero.find('button[lay-filter=rmb_submit_action]').removeClass('layui-btn-disabled').removeAttr('disabled')
+                        layer.msg(res.msg, { icon: 5 })
+                    }
+                },
+                error(error) {
+                    layer.msg(error)
+                    console.log(error)
+                }
+            })
+
+        })
+
+        form.on('select(price_rank)', function (priceObj) {
+            const value = priceObj.value
+            const type = layero.find('select[name=gift_type]').val()
+            const edit_id = param.obj.gift_id
+            const price = value
+            if (!type || !price) {
+                return
+            }
+            renderGiftId(type, price, edit_id)
+
+        })
+        // debugger
+        form.on('select(rmb_gift_type)', function (giftObj) {
+            const type = giftObj.value
+            const price = layero.find('select[name=price_rank]').val()
+            if (!type || !price) {
+                return
+            }
+            const edit_id = param.obj.gift_id
+            renderGiftId(type, price, edit_id)
+
+        })
+
+        layero.find('i[class~=addIcon]').unbind().on('click', function () {
+            const data = {
+                vipExp: "", totalLimit: ""
+            }
+            const tableData = layui.table.cache['countTable']
+            tableData.push(data)
+            table.reload('countTable', {
+                data: tableData
+            })
+        })
+        reset()
+        // closeIndex()
+        layero.find('.layer_close').unbind().on('click', function () {
+            layer.close(index)
+        })
+        form.render('select')
+    })
+</script>
+<style>
+</style>

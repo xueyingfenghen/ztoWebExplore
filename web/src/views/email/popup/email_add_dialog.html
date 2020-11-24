@@ -1,0 +1,1196 @@
+<style>
+    #replenish_person_add_dialog {
+        padding: 20px;
+    }
+
+    #replenish_person_add_dialog .formDiv {
+        width: auto;
+        display: inline-block;
+    }
+
+    #replenish_person_add_dialog .buttonDiv {
+        width: auto;
+        display: inline-block;
+        position: relative;
+        top: -2px;
+    }
+
+    .red {
+        color: red;
+    }
+
+    .green {
+        color: green;
+    }
+</style>
+<!--解禁/一键解禁-->
+<form class="layui-form layui-form-pane email_add_dialog" id="email_add_dialog">
+
+    <!--    excel上传插件-->
+
+    <div class="layui-upload import_excel" style="margin-bottom: 20px;" style="display: none">
+        <button type="button" class="layui-btn layui-btn-normal" id="testList">选择文件</button>
+        <div class="layui-upload-list">
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th>文件名</th>
+                    <th>大小</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="demoList"></tbody>
+            </table>
+        </div>
+        <div>
+            <button type="button" class="layui-btn layui-btn-theme" id="testListAction">上传</button>
+            <button type="button" class="layui-btn" id="export">导出</button>
+            <span class="import_excel_check_type red">未校验</span>
+        </div>
+
+    </div>
+
+    <div class="choose_user_and_server" style="display: none">
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择区服</label>
+            <div class="layui-input-block">
+                <input type="text" name="server_list" autocomplete="off" placeholder="请点击输入框进行区服勾选"
+                       class="layui-input server_list" readonly>
+            </div>
+        </div>
+
+        <!--范围邮件内容-->
+        <div id="range_content" style="display: none;"></div>
+
+        <!--渠道邮件邮件内容-->
+        <div id="channel_content" style="display: none;"></div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label"><span style="padding-left: 10px;"
+                                                  class="user_choose_or_pc">选择玩家</span></label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入角色ID，多角色ID间需分行标识" class="layui-textarea" name="user_list"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item check-btn-box">
+            <button type="button" class="layui-btn layui-btn-theme" id="check">校验</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="clear">清除</button>
+            <span class="user_check_type red">未校验</span>
+        </div>
+    </div>
+
+    <div class="layui-form-item operator_type" style="display: none;">
+        <label class="layui-form-label">操作类型</label>
+        <div class="layui-input-inline">
+            <select name="operator_type" lay-search>
+                <option value="">请选择操作类型</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item get_type" pane="" style="display: none;">
+        <label class="layui-form-label">新用户可领</label>
+        <div class="layui-input-block">
+            <input type="radio" name="get_type" value=2 lay-filter="get_type" title="否" checked="">
+            <input type="radio" name="get_type" value=1 lay-filter="get_type" title="是">
+        </div>
+    </div>
+
+    <div class="about_email_content" style="display: none;">
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">邮件选择</label>
+            <div class="layui-input-block">
+                <input type="radio" name="email_type" value="0" lay-filter="email_type" title="即时编辑" checked="">
+                <input type="radio" name="email_type" value="1" lay-filter="email_type" title="邮件模板">
+            </div>
+        </div>
+        <!--    邮件模版-->
+        <div class="layui-form-item email_temp" style="display: none;">
+            <div class="layui-inline">
+                <label class="layui-form-label">邮件类型</label>
+                <div class="layui-input-block" style="width: 190px;">
+                    <select name="email_temp_type" lay-search lay-filter="email_temp_type">
+                        <option value="">请选择邮件类型</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">邮件标题</label>
+                <div class="layui-input-block" style="width: 190px;">
+                    <select name="email_temp_title" lay-search lay-filter="email_temp_title">
+                        <option value="">请选择邮件标题</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮件标题</label>
+            <div class="layui-input-block">
+                <input type="text" name="email_title" autocomplete="off" placeholder="请输入邮件标题" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label"><span style="padding-left: 10px;">邮件内容</span></label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入邮件内容" class="layui-textarea" name="email_content"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="props_content_divs" class="prop_choose_div" style="display: none">
+        <!--        <div class="layui-form-item" pane="">-->
+        <!--            <label class="layui-form-label">道具选择</label>-->
+        <!--            <div class="layui-input-block">-->
+        <!--                <input type="radio" name="prop_choose_type" value=0 lay-filter="prop_choose_type" title="即时配置" checked="">-->
+        <!--                <input type="radio" name="prop_choose_type" value=1 lay-filter="prop_choose_type" title="礼包模版">-->
+        <!--                <input type="radio" class="no-prop-choose" name="prop_choose_type" value="2" lay-filter="prop_choose_type" title="无">-->
+        <!--            </div>-->
+        <!--        </div>-->
+
+        <!--        &lt;!&ndash;    礼包配置&ndash;&gt;-->
+        <!--        <div class="layui-form-item gift_bag" style="display: none;">-->
+        <!--            <div class="layui-inline">-->
+        <!--                <label class="layui-form-label">礼包类型</label>-->
+        <!--                <div class="layui-input-block" style="width: 190px;">-->
+        <!--                    <select name="gift_bag_type" lay-search lay-filter="gift_bag_type">-->
+        <!--                        <option value="">请选择礼包类型</option>-->
+        <!--                    </select>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--            <div class="layui-inline">-->
+        <!--                <label class="layui-form-label">礼包名称</label>-->
+        <!--                <div class="layui-input-block" style="width: 190px;">-->
+        <!--                    <select name="gift_bag_name" lay-search lay-filter="gift_bag_name">-->
+        <!--                        <option value="">请选择礼包名称</option>-->
+        <!--                    </select>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--        </div>-->
+
+        <!--        &lt;!&ndash;    道具选择&ndash;&gt;-->
+        <!--        <div class="layui-form-item prop_conf">-->
+        <!--            <label class="layui-form-label">道具添加</label>-->
+        <!--            <div class="layui-input-inline">-->
+        <!--                <select name="prop_type" lay-filter="prop_type" lay-search>-->
+        <!--                    <option value="">请选择道具类别</option>-->
+        <!--                </select>-->
+        <!--            </div>-->
+        <!--            <div class="layui-input-inline">-->
+        <!--                <select name="prop_id" id="prop_id" class="prop_id" lay-search>-->
+        <!--                    <option value="">请选择道具名称</option>-->
+        <!--                </select>-->
+        <!--            </div>-->
+        <!--            <div class="layui-input-inline">-->
+        <!--                <input type="text" name="prop_num" class="layui-input" placeholder="请输入道具数量">-->
+        <!--            </div>-->
+        <!--            <button type="button" class="layui-btn layui-btn-theme" id="add_prop">添加</button>-->
+        <!--        </div>-->
+
+        <!--        <div class="layui-form-item prop_conf prop_content">-->
+        <!--            <table id="prop_content"></table>-->
+        <!--        </div>-->
+    </div>
+
+    <div class="about_time" style="display: none">
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">发送方式</label>
+            <div class="layui-input-block">
+                <input type="radio" name="send_type" value="0" lay-filter="send_type" title="立即发送" checked="">
+                <input type="radio" name="send_type" value="1" lay-filter="send_type" title="定时发送">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline timing_time_label" style="display: none">
+                <label class="layui-form-label">定时时间</label>
+                <div class="layui-input-block" style="width: 190px;">
+                    <input type="text" name="timing_time" class="layui-input timing_time" id="timing_time"
+                           placeholder="请选择定时时间">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">过期时间</label>
+                <div class="layui-input-block" style="width: 190px;">
+                    <input type="text" name="past_time" class="layui-input past_time" id="past_time"
+                           placeholder="请选择过期时间">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">申请理由</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <select name="apply_reason" lay-filter="apply_reason" lay-search>
+                    <option value="">请选择申请理由</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline apply_reason_other" style="display: none">
+            <label class="layui-form-label">其他</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="text" name="apply_reason_other" class="layui-input" placeholder="请输入申请原因">
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item audit">
+        <label class="layui-form-label">审核人</label>
+        <div class="layui-input-inline">
+            <select name="audit" lay-search>
+                <option value="">请选择审核人</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-theme" id="add_email_to">提交</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="cancel_email_to">取消</button>
+        <button type="button" class="layui-btn layui-btn-normal" id="look_email_to" style="display: none;">效果预览</button>
+    </div>
+
+    <div id="show_gm_content">
+
+    </div>
+
+</form>
+<script type="text/html" template lay-done="layui.data.done(d)">
+
+</script>
+<script>
+
+  layui.extend({props: '/common/props'});
+
+  layui.data.done = function (d) {
+    // var before_server_list = '';
+    // var before_user_list = '';
+    // var before_title = '';
+    // var before_cont = '';
+    // var before_prop_content = '';
+    // var before_past_time = '';
+    // 1 全服邮件 2 玩家邮件 3 范围邮件 4 群发邮件 5 渠道邮件
+    var type = parseInt(d.params.type);
+    // 0 邮件 1 无痕
+    var is_traceless = parseInt(d.params.is_traceless);
+
+    let editId = d.params.editId;
+
+    // 记录道具内容
+    var propData = [];
+
+    // 用来记录范围邮件联盟编号
+    var leagueData = [];
+    // 用来记录编辑内容（原来的数据）
+    var emailDetail = [];
+
+    // 获取对应需要请求的的url
+    $.getThisUrl = function (type, is_traceless, is_edit) {
+      let typeArr = {
+        1: 'full',
+        2: 'player',
+        3: 'range',
+        4: 'mass',
+        5: 'channel'
+      };
+      let is_tracelessArr = {
+        0: 'email',
+        1: 'traceless'
+      };
+      let is_editArr = {
+        0: 'addEmail',
+        1: 'editEmail'
+      };
+      let url = '/api/' + is_tracelessArr[is_traceless] + '/' + typeArr[type] + '/' + is_editArr[is_edit];
+      return url;
+    };
+
+
+    layui.use(['table', 'admin', 'form', 'view', 'laydate', 'element', 'upload', 'props'], function () {
+      let admin = layui.admin;
+      let table = layui.table;
+      let form = layui.form;
+      let view = layui.view;
+      let laydate = layui.laydate;
+      let element = layui.element;
+      let $ = layui.jquery;
+      let upload = layui.upload;
+
+      let excel_path = '';    // 上传的excel文件名（仅用于群发邮件）
+      let original_path = ''; // 原始上传文件的名字
+      let check_type = false; // 校验状态 true 校验成功 false 校验失败
+      let checkedRoleArr = '';
+
+      let header = layui.setter.header;
+      let headers = {};
+      if (header.tokenName) {
+        headers[header.tokenName] = layui.data(layui.setter.tableName)[header.tokenName] || '';
+      }
+
+      let uploadUrl;
+      if (is_traceless) {
+        // 无痕
+        uploadUrl = '/api/traceless/upload/uploadExcel';
+      } else {
+        // gm
+        uploadUrl = '/api/email/upload/uploadExcel';
+      }
+
+      //多文件列表示例
+      var demoListView = $('#demoList')
+        , uploadListIns = upload.render({
+        elem: '#testList'
+        , url: admin.getUrl(uploadUrl)
+        , accept: 'file'
+        , multiple: false
+        , auto: false
+        , bindAction: '#testListAction'
+        , exts: 'xlsx'
+        , headers: headers
+        , choose: function (obj) {
+          // var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+          // var files = this.files = obj.pushFile();
+          // console.log(files)
+
+          //读取本地文件
+          obj.preview(function (index, file, result) {
+            var tr = $(['<tr id="upload-' + index + '">'
+              , '<td>' + file.name + '</td>'
+              , '<td>' + (file.size / 1024).toFixed(1) + 'kb</td>'
+              , '<td>等待上传</td>'
+              , '<td>'
+              , '<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
+              , '<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
+              , '</td>'
+              , '</tr>'].join(''));
+
+            //单个重传
+            tr.find('.demo-reload').on('click', function () {
+              obj.upload(index, file);
+            });
+
+            //删除
+            tr.find('.demo-delete').on('click', function () {
+              delete files[index]; //删除对应的文件
+              tr.remove();
+              uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+            });
+
+            // demoListView.append(tr);
+            demoListView.html(tr);
+          });
+        }
+        , done: function (res, index, upload) {
+          if (res.code == 0) { //上传成功
+
+            if (res.data['type'] == 0) {
+              // 解析成功
+              check_type = true;
+              excel_path = res.data['file'];
+              original_path = res.data['original'];
+              $('.import_excel_check_type').removeClass('red');
+              $('.import_excel_check_type').addClass('green');
+              $('.import_excel_check_type').html('校验成功')
+            } else {
+              // 解析失败
+              check_type = false;
+              excel_path = res.data['file'];
+              original_path = res.data['original'];
+              $('.import_excel_check_type').removeClass('green');
+              $('.import_excel_check_type').addClass('red');
+              $('.import_excel_check_type').html('校验失败');
+            }
+
+            var tr = demoListView.find('tr#upload-' + index)
+              , tds = tr.children();
+            // 超过上传数量限制
+            if (res.data['type'] == 2) {
+              tds.eq(2).html("<span style='color: #FF5722;'>" + res.msg + "</span>");
+            } else {
+              tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+            }
+            tds.eq(3).html(''); //清空操作
+            delete this.files[index]; //删除文件队列已经上传成功的文件
+
+
+          } else {
+            var tr = demoListView.find('tr#upload-' + index)
+              , tds = tr.children();
+            tds.eq(2).html('<span style="color: #5FB878;">上传失败</span>');
+            tds.eq(3).html(''); //清空操作
+            layer.msg(data.msg, {icon: 5, anim: 6});
+          }
+        }
+        , error: function (index, upload) {
+          var tr = demoListView.find('tr#upload-' + index)
+            , tds = tr.children();
+          tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+          tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
+        }
+      });
+
+
+      // 渲染时间选择器
+      laydate.render({
+        elem: '#timing_time'
+        , type: 'datetime'
+      });
+      laydate.render({
+        elem: '#past_time'
+        , type: 'datetime'
+      });
+
+      // 渲染radio
+      form.render();
+
+      // 获取区服列表
+      $.area = function (data) {
+        admin.popup({
+          title: '选择区服',
+          area: ['800px', '600px'],
+          id: 'select_area',
+          btn: ['确定', '取消'],
+          success: function (layero, index) {
+            layui.view(this.id).render('area', {...data});
+          },
+          yes: function (index, layero) {
+            $(".server_list").val($('#get_area').val());
+            layer.close(index);
+            // gm邮件 全服邮件 排除玩家可以不选
+            if (!is_traceless && (type == 1 || type == 3 || type == 5) && $("input[name='server_list']").val() != '' && $("textarea[name='user_list']").val() == '') {
+              check_type = true;
+              checkedRoleArr = '';
+              $('.user_check_type').removeClass('red');
+              $('.user_check_type').addClass('green');
+              $('.user_check_type').html('校验成功');
+            }
+          }
+        });
+      };
+
+      // 获取道具类型,渲染下拉框
+      $.getPropType = function () {
+        admin.req({
+          url: admin.getUrl('/api/email/getPropType'),
+          data: {},
+          type: 'post',
+          done: function (data) {
+            let res = data.data;
+            admin.initSelect(res, "select[name='prop_type']", '请选择道具类型');
+            form.render();
+          }
+        });
+      };
+
+
+      // 发送方式
+      $.sendTypeShow = function (value) {
+        if (value == 0) {
+          $('.timing_time_label').hide();
+        }
+        if (value == 1) {
+          $('.timing_time_label').show();
+        }
+      };
+
+      // 邮件选择
+      $.emailTypeShow = function (value) {
+        if (value == 0) {
+          // 即时编辑
+          $.enable_edit(1);
+          $('.email_temp').hide();
+        }
+        if (value == 1) {
+          // 邮件模版
+          $.showEmailTemp($("#email_add_dialog select[name='email_temp_title']").val());
+          $('.email_temp').show();
+        }
+      }
+
+      // 道具选择
+      $.propChooseTypeShow = function (value) {
+        if (value == 0) {
+          $('.gift_bag').hide();
+          $('.prop_conf').show();
+          $('.prop_content').show();
+          $('.audit').show();
+          $.initTable()
+        }
+        if (value == 1) {
+          $('.gift_bag').show();
+          $('.prop_conf').hide();
+          $('.prop_content').show();
+          $('.audit').show();
+          // $.showTempPropContent($("#email_add_dialog select[name='gift_bag_name']").val());
+          $.initTable(1);
+        }
+        if (value == 2) {
+          $('.gift_bag').hide();
+          $('.prop_conf').hide();
+          $('.prop_content').hide();
+          $('.audit').hide();
+        }
+      }
+
+      // 申请原因
+      $.applyReasonShow = function (value) {
+        if (value === '0') {
+          $('.apply_reason_other').show();
+        } else {
+          $('.apply_reason_other').hide();
+
+        }
+      }
+
+
+      // 渲染道具类型下拉框
+      // $.getPropType();
+
+
+      // 渲染表单数据
+      $.initData = function () {
+        return new Promise(function (resolve, reject) {
+          let url = '/api/email/initAddEmailData';
+          let router = 'gm-audit';
+          if (is_traceless) {
+            url = '/api/traceless/initAddTracelessData';
+            router = 'traceless-audit';
+          }
+          admin.req({
+            url: admin.getUrl(url),
+            data: {
+              router: router
+            },
+            type: 'post',
+            done: function (data) {
+              admin.initSelect(data.data['apply_reason'], "select[name='apply_reason']", '请选择申请理由');
+              admin.initSelect(data.data['audit'], "select[name='audit']", '请选择审核人');
+              admin.initSelect(data.data['operator_type'], "select[name='operator_type']", '请选择操作类型');
+              admin.initSelect(data.data['email_temp_type'], "select[name='email_temp_type']", '请选择邮件类型');
+              admin.initSelect(data.data['gift_bag_type'], "select[name='gift_bag_type']", '请选择礼包类型');
+              form.render();
+              resolve();
+            }
+          });
+        })
+      };
+
+      // 获取邮件内容数据
+      $.initData().then(function () {
+        // 界面状态为修改邮件--初始化
+        if (editId != undefined) {
+          let detailUrl = '/api/email/getEmailDetailById';
+          if (is_traceless) {
+            detailUrl = '/api/traceless/getEmailDetailById'
+          }
+          admin.req({
+            url: admin.getUrl(detailUrl),
+            data: {id: editId, type: 1},
+            type: 'post',
+            done: function (data) {
+              // 初始化原来的邮件内容
+              emailDetail = data.data;
+              let formData = data.data;
+              formData = JSON.stringify(formData);
+              let options = {jsonValue: formData, isDebug: false};
+              $('.email_add_dialog').initForm(options);
+              form.render();
+
+              $.sendTypeShow(data.data['send_type']);
+              $.applyReasonShow(data.data['apply_reason']);
+              // $.propChooseTypeShow(data.data['prop_choose_type']);
+              $.emailTypeShow(data.data['email_type']);
+
+              // 渲染邮件模版-邮件标题select
+              $.showTempTitleList(data.data['email_temp_type']).then(function (res) {
+                if (parseInt(data.data['email_type']) == 1) {
+                  $.showEmailTemp(data.data['email_temp_title'], 'init');
+                }
+                $("#email_add_dialog select[name='email_temp_title']").val(data.data['email_temp_title']);
+                form.render();
+              });
+
+              // 渲染完成 角色校验默认通过
+              check_type = true;
+              checkedRoleArr = $("textarea[name='user_list']").val();
+              $('.user_check_type').removeClass('red');
+              $('.user_check_type').addClass('green');
+              $('.user_check_type').html('校验成功');
+
+              // 单独渲染道具添加列表
+              propData = data.data['prop_content'];
+
+
+              layui.view('props_content_divs').render('common/prop_select', {
+                props_list: propData,
+                required_props: is_traceless,
+                is_email: true
+              }).done(function () {
+                if (parseInt(data.data['prop_choose_type']) == 1) {
+                  $("select[name='gift_bag_type']").val(data.data['gift_bag_type']);
+                  $.propChooseTypeShow(data.data['prop_choose_type']);
+                  $("input:radio[name='prop_choose_type'][value='" + data.data['prop_choose_type'] + "']").attr("checked", "checked");
+                  form.render('radio');
+                  // 渲染礼包模版
+                  $.change_gift_type(data.data['gift_bag_type']);
+                  $("#email_add_dialog select[name='gift_bag_name']").val(data.data['gift_bag_name']);
+                  form.render('select');
+                  // $.showGiftList(data.data['gift_bag_type']).then(function () {
+                  //     $("#email_add_dialog select[name='gift_bag_name']").val(data.data['gift_bag_name']);
+                  //     form.render('select');
+                  // });
+                  // $.initTable(1);
+                } else {
+                  // $.initTable();
+                }
+              });
+
+            }
+          });
+        } else {
+          layui.view('props_content_divs').render('common/prop_select', {
+            props_list: [],
+            required_props: is_traceless
+          }).done(function () {
+
+          });
+        }
+      });
+
+
+      // 设置表格（记录道具内容）type 0 可删除 1 不可删除
+      $.initTable = function (type = 0) {
+        type = parseInt(type);
+        let table_cols = [[
+          {field: 'prop_type_name', title: '道具类型', align: 'center'},
+          {field: 'prop_type', title: '道具类型', align: 'center', 'hide': true},
+          {field: 'prop_name', title: '道具名称', align: 'center'},
+          {field: 'prop_num', title: '数量', align: 'center'},
+        ]];
+        if (!type) {
+          table_cols[0].push({field: 'prop_id', title: '操作', align: 'center', templet: '#prop_edit'});
+        }
+        table.render({
+          id: 'prop_content',
+          elem: '#prop_content',
+          page: false,
+          loading: true,
+          cols: table_cols,
+          limit: 1000,
+          data: propData
+        });
+      };
+
+      // $.initTable();
+
+      /****************道具内容表格***************/
+      // 添加充值档位
+      // $.addProp = function (pushParam) {
+      //     for (let k in propData) {
+      //         if (pushParam.prop_id == propData[k]['prop_id'] && pushParam.prop_type == propData[k]['prop_type']) {
+      //             pushParam.prop_num = parseInt(pushParam.prop_num);
+      //             propData[k]['prop_num'] += pushParam.prop_num;
+      //             return ;
+      //         }
+      //     }
+      //     pushParam.prop_num = parseInt(pushParam.prop_num);
+      //     propData.push(pushParam);
+      // };
+      //
+      //
+      // // 删除
+      // $.delProp = function (prop_id, prop_type) {
+      //     for (let k in propData) {
+      //         if (propData[k]['prop_id'] == prop_id && propData[k]['prop_type'] == prop_type) {
+      //             propData.splice(k, 1);
+      //             return ;
+      //         }
+      //     }
+      // };
+      /****************道具内容表格***************/
+
+
+      /*********************新增邮件dialog部分*********************/
+
+      // 是否可领取
+      if (!is_traceless && type == 1) {
+        $('.get_type').show();
+      }
+
+      if (is_traceless) {
+        // 无痕
+        $('.about_email_content').hide();
+        $('.operator_type').show();
+        $('.about_time').hide();
+        $(".no-prop-choose").attr('disabled', true);
+        $('#look_email_to').hide();
+      } else {
+        // 邮件
+        $('.about_email_content').show();
+        $('.operator_type').hide();
+        $('.about_time').show();
+        $(".no-prop-choose").attr('disabled', false);
+        $('#look_email_to').show();
+      }
+
+      switch (type) {
+        // 全服邮件
+        case 1: {
+          $('.user_choose_or_pc').html('排除玩家');
+          $('.import_excel').hide();
+          $('.choose_user_and_server').show();
+          $('.prop_choose_div').show();
+          break;
+        }
+        // 玩家邮件
+        case 2: {
+          $('.import_excel').hide();
+          $('.choose_user_and_server').show();
+          $('.prop_choose_div').show();
+          break;
+        }
+        // 范围邮件
+        case 3: {
+          $('.import_excel').hide();
+          $('.choose_user_and_server').show();
+          $('.prop_choose_div').show();
+
+          $('.user_choose_or_pc').html('排除玩家');
+          $('#range_content').show();
+          layui.view('range_content').render('email/popup/range_content', {editId: editId}).done(function () {
+
+          });
+
+          break;
+        }
+        // 群发邮件
+        case 4: {
+          $('.import_excel').show();
+          $('.choose_user_and_server').hide();
+          $('.prop_choose_div').hide();
+          break;
+        }
+        // 渠道邮件
+        case 5: {
+          $('.import_excel').hide();
+          $('.choose_user_and_server').show();
+          $('.prop_choose_div').show();
+
+          $('.check-btn-box').hide();
+          $('.user_choose_or_pc').parent().parent().hide();
+          $('#channel_content').show();
+          $('.about_time').hide();
+
+          layui.view('channel_content').render('email/popup/channel_content', {}).done(function () {
+
+          });
+          break;
+        }
+        default: {
+          alert('error')
+        }
+      }
+
+      // 邮件选择 0 即时邮件 1 邮件模版
+      form.on('radio(email_type)', function (data) {
+        $.emailTypeShow(data.value)
+      });
+
+      // 道具选择 0 即时配置 1 礼包模版 2 无
+      // form.on('radio(prop_choose_type)', function (data) {
+      //     $.propChooseTypeShow(data.value)
+      // });
+
+      // 发送方式
+      form.on('radio(send_type)', function (data) {
+        $.sendTypeShow(data.value);
+      });
+
+      // 申请原因（其他）
+      form.on('select(apply_reason)', function (data) {
+        $.applyReasonShow(data.value);
+      });
+
+      // 切换道具类型联动
+      // form.on('select(prop_type)', function (data) {
+      //     admin.req({
+      //         url: admin.getUrl('/api/email/getPropByType'),
+      //         data: {
+      //             prop_type: data.value
+      //         },
+      //         type: 'post',
+      //         done: function (data) {
+      //             admin.initSelect(data.data, "select[name='prop_id']", '请选择道具名称');
+      //             $("select[name='prop_id']").val('');
+      //             form.render();
+      //         }
+      //     });
+      // });
+
+      // 邮件是否可编辑状态
+      $.enable_edit = function (enable_edit) {
+        enable_edit = parseInt(enable_edit);
+        if (enable_edit) {
+          // 允许修改
+          $("#email_add_dialog input[name='email_title']").attr('readonly', false);
+          $("#email_add_dialog textarea[name='email_content']").attr('readonly', false);
+
+          $("#email_add_dialog input[name='email_title']").removeClass('layui-disabled');
+          $("#email_add_dialog textarea[name='email_content']").removeClass('layui-disabled');
+        } else {
+          // 不允许修改
+          $("#email_add_dialog input[name='email_title']").attr('readonly', true);
+          $("#email_add_dialog textarea[name='email_content']").attr('readonly', true);
+
+          $("#email_add_dialog input[name='email_title']").addClass('layui-disabled');
+          $("#email_add_dialog textarea[name='email_content']").addClass('layui-disabled');
+        }
+      };
+
+      // 邮件模版渲染邮件内容
+      $.showEmailTemp = function (value, type = 'change') {
+
+        if (value == '' || value == undefined) {
+          return;
+        }
+
+        let url = '/api/email/getEmailTempDetailById';
+        if (is_traceless) {
+          url = '/api/traceless/getEmailTempDetailById';
+        }
+        admin.req({
+          url: admin.getUrl(url),
+          data: {
+            id: value
+          },
+          type: 'get',
+          done: function (res) {
+            let list = res.data;
+            if (list.length == 0) {
+              $.enable_edit(1);
+              $("#email_add_dialog input[name='email_title']").val('');
+              $("#email_add_dialog textarea[name='email_content']").val('');
+            } else {
+              $.enable_edit(list['enable_edit']);
+
+              // 渲染时
+              if (type == 'change') {
+                $("#email_add_dialog input[name='email_title']").val(list['email_title']);
+                $("#email_add_dialog textarea[name='email_content']").val(list['email_content']);
+              }
+              if (type == 'init') {
+                if (parseInt(list['enable_edit']) == 1) {
+                  // 可编辑
+                } else {
+                  // 不可编辑
+                  $("#email_add_dialog input[name='email_title']").val(list['email_title']);
+                  $("#email_add_dialog textarea[name='email_content']").val(list['email_content']);
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 渲染邮件模版下拉框
+      $.showTempTitleList = function (value) {
+        return new Promise(function (resolve, reject) {
+          let url = '/api/email/getEmailListByType';
+          if (is_traceless) {
+            url = '/api/traceless/getEmailListByType';
+          }
+          admin.req({
+            url: admin.getUrl(url),
+            data: {
+              type: value
+            },
+            type: 'get',
+            done: function (res) {
+              admin.initSelect(res.data, "select[name='email_temp_title']", '请选择邮件标题');
+              $("select[name='email_temp_title']").val('');
+              form.render();
+              resolve();
+            }
+          });
+        })
+      };
+
+      $.showGiftList = function (value) {
+        return new Promise(function (resolve, reject) {
+          let url = '/api/email/getGiftListByType';
+          if (is_traceless) {
+            url = '/api/traceless/getGiftListByType';
+          }
+          admin.req({
+            url: admin.getUrl(url),
+            data: {
+              type: value
+            },
+            type: 'get',
+            done: function (res) {
+              admin.initSelect(res.data, "select[name='gift_bag_name']", '请选择礼包名称');
+              $("select[name='gift_bag_name']").val('');
+              form.render();
+              resolve();
+            }
+          });
+        })
+      };
+
+      // 渲染礼包模版道具内容
+      // $.showTempPropContent = function (value) {
+      //     let url = '/api/email/getGiftContentById';
+      //     if (is_traceless) {
+      //         url = '/api/traceless/getGiftContentById';
+      //     }
+      //     admin.req({
+      //         url: admin.getUrl(url),
+      //         data: {
+      //             id: value
+      //         },
+      //         type: 'get',
+      //         done: function (res) {
+      //             propData = res.data;
+      //             $.initTable(1);
+      //         }
+      //     });
+      // }
+
+      // 邮件模版类型-切换礼包类型select
+      form.on('select(email_temp_type)', function (data) {
+        $.showTempTitleList(data.value);
+      });
+
+      // 邮件模版-邮件模版选择，渲染对应标题和内容
+      form.on('select(email_temp_title)', function (data) {
+        $.showEmailTemp(data.value);
+      });
+
+
+      // 礼包类型切换
+      // form.on('select(gift_bag_type)', function (data) {
+      //     $.showGiftList(data.value);
+      // });
+
+      // 选择道具礼包，渲染对应礼包内容
+      // form.on('select(gift_bag_name)', function (data) {
+      //     $.showTempPropContent(data.value);
+      // });
+
+      // 添加道具
+      // $(document).off('click', '#add_prop').on('click', '#add_prop', function () {
+      //     let prop_id = $("select[name='prop_id']").val();
+      //     let prop_num = $("input[name='prop_num']").val();
+      //     let prop_type = $("select[name='prop_type']").val();
+      //     if (prop_id.trim() === '') {
+      //         layer.msg('请选择道具', {icon: 5, anim: 6});
+      //         return ;
+      //     }
+      //     if (prop_num.trim() === '') {
+      //         layer.msg('请输入道具数量', {icon: 5, anim: 6});
+      //         return ;
+      //     }
+      //     if (!(/(^[1-9]\d*$)/.test(prop_num))) {
+      //         layer.msg('道具数量必须为正整数', {icon: 5, anim: 6});
+      //         return ;
+      //     }
+      //     // 获取选择
+      //     let prop_name = admin.selectText("select[name='prop_id']");
+      //     let prop_type_name = admin.selectText("select[name='prop_type']");
+      //     let pushParam = {
+      //         prop_type_name: prop_type_name,
+      //         prop_type: prop_type,
+      //         prop_id: prop_id,
+      //         prop_name: prop_name,
+      //         prop_num: prop_num
+      //     };
+      //     $.addProp(pushParam);
+      //     $.initTable();
+      // });
+      //
+      // // 删除道具
+      // $(document).off('click', '.prop_del').on('click', '.prop_del', function () {
+      //     $.delProp($(this).attr('data-type'), $(this).attr('data-prop-type'));
+      //     $.initTable();
+      // });
+
+
+      // 点击选择区服
+      $(document).off('click', '.server_list').on('click', '.server_list', function (e) {
+        // const param = layui.admin.transferData(e.target.value)
+        $.area({area: e.target.value});
+      });
+
+
+      // 校验
+      $(document).off('click', '#check').on('click', '#check', function () {
+
+        // 全服邮件 排除玩家可以为空
+        if ((type == 1 || type == 3 || type == 5) && $("input[name='server_list']").val() != '' && $("textarea[name='user_list']").val() == '') {
+          check_type = true;
+          $('.user_check_type').removeClass('red');
+          $('.user_check_type').addClass('green');
+          $('.user_check_type').html('校验成功');
+          return;
+        }
+
+        admin.req({
+          url: admin.getUrl('/api/public/checkUser'),
+          data: {
+            server_list: $("input[name='server_list']").val(),
+            user_list: $("textarea[name='user_list']").val(),
+          },
+          type: 'post',
+          done: function (data) {
+            if (data.code == 0 && type != 4) {
+              // 弹出角色校验结果
+              admin.checkUser('角色校验结果', data.data);
+              // 普通校验
+              let checkedNum = 0;
+              $.each(data.data, function (key, val) {
+                if (val['state'] == 0) {
+                  checkedNum++;
+                }
+              })
+              if (checkedNum == data.data.length) {
+                // 全部校验通过
+                check_type = true;
+                checkedRoleArr = $("textarea[name='user_list']").val();
+                $('.user_check_type').removeClass('red');
+                $('.user_check_type').addClass('green');
+                $('.user_check_type').html('校验成功')
+              } else {
+                // 校验有错误
+                check_type = false;
+                $('.user_check_type').removeClass('green');
+                $('.user_check_type').addClass('red');
+                $('.user_check_type').html('校验失败')
+              }
+            } else {
+              layer.msg(data.msg, {icon: 5, anim: 6});
+            }
+          }
+        });
+      });
+
+      // 清除
+      $(document).off('click', '#clear').on('click', '#clear', function () {
+        $("input[name='server_list']").val('')
+        $("textarea[name='user_list']").val('')
+        check_type = false;
+        $('.user_check_type').removeClass('green');
+        $('.user_check_type').addClass('red');
+        $('.user_check_type').html('未校验')
+      });
+
+      $("textarea[name='user_list']").blur(function () {
+        if ($("textarea[name='user_list']").val() !== checkedRoleArr) {
+          check_type = false;
+          $('.user_check_type').removeClass('green');
+          $('.user_check_type').addClass('red');
+          $('.user_check_type').html('未校验')
+        }
+      });
+
+      // 提交邮件
+      $(document).off('click', '#add_email_to').on('click', '#add_email_to', function () {
+
+        if ((type == 1 || type == 3 || type == 5) && $("input[name='server_list']").val() == '') {
+          layer.msg('请先选择区服', {icon: 5, anim: 6});
+          return;
+        }
+
+        if (!check_type) {
+          layer.msg('未校验或校验失败，请重新校验', {icon: 5, anim: 6});
+          return;
+        }
+
+        let param = admin.getFormParam('.email_add_dialog');
+        param.prop_content = table.cache.prop_content;
+        param.type = type;
+        if (type == 4) {
+          param.excel_path = excel_path;
+          param.original_path = original_path;
+        }
+        // 范围邮件添加的参数
+        if (type == 3) {
+          param.range = admin.getRangeData();
+        }
+        // 渠道邮件
+        if (type == 5) {
+          param.channel = [];
+          $("input[name='channel']:checked").each(function () {
+            param.channel.push($(this).val());
+          });
+        }
+        param.is_traceless = is_traceless;
+
+        let okMsg = '添加邮件成功';
+        let is_edit = 0;
+        if (editId != undefined) {
+          // 编辑模式
+          is_edit = 1;
+          param.id = editId;
+          okMsg = '修改邮件成功';
+        }
+
+        let url = $.getThisUrl(type, is_traceless, is_edit);
+        admin.req({
+          url: admin.getUrl(url),
+          data: param,
+          type: 'post',
+          done: function (data) {
+            if (data.code == 0) {
+              layer.msg(okMsg, {icon: 6, anim: 0});
+              layer.closeAll();
+              admin.reload(reloadArr[type]['sel'], reloadArr[type]['tableId']);
+            } else {
+              layer.msg(data.msg, {icon: 5, anim: 6});
+            }
+          }
+        });
+      });
+
+      // 取消
+      $(document).off('click', '#cancel_email_to').on('click', '#cancel_email_to', function () {
+        layer.closeAll();
+      });
+
+      // 导出
+      $(document).off('click', '#export').on('click', '#export', function () {
+        let exportUrl = '/api/email/export/exportMassExcel';
+        if (is_traceless) {
+          exportUrl = '/api/traceless/export/exportMassExcel';
+        }
+        admin.download({
+          url: admin.getUrl(exportUrl),
+          data: {excel_path: excel_path, export_type: 0},
+          method: 'get',
+          dataType: 'json',
+        });
+      });
+
+      /*********************新增邮件dialog部分*********************/
+
+      $(document).off('click', '#look_email_to').on('click', '#look_email_to', function () {
+        layui.view('show_gm_content').render('email/email_show/email_show_shengong', {
+          propData: table.cache.prop_content
+        }).done(function () {
+        });
+      });
+
+    });
+
+  };
+
+
+</script>
+<script type="text/html" id="prop_edit">
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger prop_del" data-type={{ d.prop_id }}
+            data-prop-type={{d.prop_type}}>删除
+    </button>
+</script>

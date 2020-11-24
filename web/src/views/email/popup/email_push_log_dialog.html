@@ -1,0 +1,110 @@
+<style>
+    #email_push_log_dialog {
+        padding: 20px;
+    }
+    .red {
+        color: red;
+    }
+    .green {
+        color: green;
+    }
+</style>
+<!--补单失败结果详情-->
+<div id="email_push_log_dialog">
+    <button type="button" class="layui-btn layui-btn-theme" id="re_push">重新推送</button>
+    <table id="push_list"></table>
+</div>
+<script type="text/html" template lay-done="layui.data.done(d)"></script>
+
+<script>
+    layui.data.done = function (d) {
+
+        var id = d.params.id;
+        var is_traceless = d.params.is_traceless;
+
+        layui.use(['admin', 'common', 'table'], function () {
+            let admin = layui.admin;
+            let table = layui.table;
+            let $ = layui.jquery;
+
+
+            let listUrl = '/api/email/getEmailPushList';
+            let pushUrl = '/api/email/rePushEmail';
+            if (is_traceless) {
+                // 无痕
+                listUrl = '/api/traceless/getEmailPushList';
+                pushUrl = '/api/traceless/rePushEmail';
+            }
+
+            admin.getCols('email_push_fail_log_list').then(function (data) {
+                table.render({
+                    id: 'push_list',
+                    elem: '#push_list',
+                    url: admin.getUrl(listUrl),
+                    method: 'GET',
+                    where: {id: id},//请求参数(额外)
+                    response: { //定义后端 json 格式，详细参见官方文档
+                        statusName: 'code', //状态字段名称
+                        statusCode: '0', //状态字段成功值
+                        msgName: 'msg', //消息字段
+                        dataName: 'data', //数据字段
+                    },
+                    page: false,
+                    loading: true,
+                    cols: data.data
+                });
+            })
+
+
+            // 重新推送
+            $('#re_push').click(function () {
+                let checkData = table.checkStatus('push_list').data;
+                let idArr = [];
+                $.each(checkData, function (key, val) {
+                    idArr.push(val['role_id']);
+                });
+
+                if (typeof idArr != "object") {
+                    layer.msg('请选择推送对象', {icon: 5, anim: 6});
+                    return ;
+                }
+
+                if (idArr.length < 1) {
+                    layer.msg('请选择推送对象', {icon: 5, anim: 6});
+                    return ;
+                }
+
+                admin.req({
+                    url: admin.getUrl(pushUrl),
+                    data: {
+                        id: id,
+                        idArr: idArr
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        if (data.code == 0) {
+                            layer.msg('推送成功！', {icon: 6, anim: 0});
+                            table.reload('push_list');
+                        } else {
+                            layer.msg(data.msg, {icon: 5, anim: 6});
+                        }
+                    }
+                });
+            })
+
+
+        })
+
+    }
+</script>
+<script type="text/html" id="push_state">
+    {{#  if(d.state == 0 ){ }}
+    <span>未推送</span>
+    {{#  } else if(d.state ==1 ) { }}
+    <span class="green">推送成功</span>
+    {{#  } else if(d.state ==2 ) { }}
+    <span class="red">推送失败</span>
+    {{#  } else { }}
+    <span class="red">未知状态</span>
+    {{#  } }}
+</script>

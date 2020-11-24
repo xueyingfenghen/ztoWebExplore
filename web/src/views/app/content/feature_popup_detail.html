@@ -1,0 +1,112 @@
+<button type="button" class="layui-btn layui-btn-warm" onclick="onekey_switch(1)">一键开启</button>
+<button type="button" class="layui-btn layui-btn-danger" onclick="onekey_switch(2)">一键关闭</button>
+<table class="layui-hide" id="feature_popup_detail_table"></table>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script>
+    //定义表头
+    var COLS = [ //表头
+                {type: 'checkbox',fixed:'left'}
+                ,{field:'feature',title: '功能名称',align:'center'}
+                ,{field:'server_id',  title: '区服名称',align:'center'}
+                ,{field: 'status', title:'开关', toolbar: '#feature_popup_detail_op',align:'center'}
+    ];
+    var params = {};
+    var $ = layui.jquery;
+    layui.data.sendParams = function (params) {
+            console.log('开关详情',params);
+            layui.use('table', function(){
+                var table = layui.table;
+                table.render({
+                    elem: '#feature_popup_detail_table'
+                    ,url: layui.admin.getUrl('/api/configuration/detail') //模拟接口
+                    ,where: params
+                    ,cols: [COLS]
+                    ,method:'get'
+                    ,parseData: function(res){
+                        return {
+                            "code":res.code, //解析接口状态
+                            "msg": '', //解析提示文本
+                            "count": res.data.count, //解析数据长度
+                            "data": res.data.list//解析数据列表
+                        };
+                    }
+                    ,page: true,limit: 10,limits: [10, 15, 20, 25, 30]
+                });
+            });
+    }
+    //监听开关操作
+    layui.form.on('switch(close_status)', function () {
+        var status = this.checked ? 1 : 2;
+        var type   = $(this).attr('data-type');
+        var server_id   = $(this).attr('data-server_id');
+        var feature   = $(this).attr('data-feature');
+        var data = {};
+        if(server_id > 0) data[server_id] = [type];
+        layui.admin.req({
+            url: layui.admin.getUrl('/api/configuration/switch'),
+            method: 'post',
+            data: {data:data,status:status,server_id:server_id,feature:feature},
+            dataType: 'json',
+            done: function (res) {
+                if(res.error){
+                    layer.msg('开关成功',{icon:1});
+                    //执行重载
+                    layui.table.reload('feature_popup_detail_table', {
+                        page: {curr: 1}
+                        ,where: {}
+                    });
+                }else {
+                    layer.msg(res.msg,{icon:5});
+                }
+            }
+        })
+    })
+    //一键开关
+    function onekey_switch(status){
+        var checkStatus = layui.admin.checkboxData('feature_popup_detail_table');//得到选中的数据
+        if(checkStatus.length == 0){
+            layer.msg('请先勾选要操作的功能',{icon:5});
+        }else{
+            var data = {};
+            for (k=0;k<checkStatus.length;k++){
+                data[checkStatus[k].server_id] = [checkStatus[k].type];
+            }
+            layui.admin.req({
+                url: layui.admin.getUrl('/api/configuration/switch'),
+                method: 'post',
+                data: {data:data,status:status,server_id:getInfo(checkStatus,'server_id'),feature:getInfo(checkStatus,'feature')},
+                dataType: 'json',
+                done: function (res) {
+                    if(res.error){
+                        layer.msg('开关成功',{icon:1});
+                        //执行重载
+                        layui.table.reload('feature_popup_detail_table', {
+                            page: {curr: 1}
+                            ,where: {}
+                        });
+                    }else {
+                        layer.msg(res.msg,{icon:5});
+                    }
+                }
+            })
+        }
+    }
+
+    function getInfo(arr,flag)
+    {
+        var str  = '',dot = ',';
+        for (var i = 0;i<arr.length;i++){
+            if(i == arr.length - 1 ) dot = '';
+            str += arr[i][flag] + dot;
+        }
+        return str;
+    }
+
+</script>
+<script type="text/html" id="feature_popup_detail_op">
+    {{#  if(d.status){ }}
+        <input lay-filter="close_status" data-feature="{{d.feature}}" data-server_id="{{d.server_id}}" data-type="{{d.type}}" type="checkbox" lay-skin="switch" lay-text="开启|关闭" {{ d.status == 1 ?  'checked' : ''}}>
+    {{#  } }}
+</script>

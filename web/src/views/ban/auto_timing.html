@@ -1,0 +1,229 @@
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-inline">
+        <label class="layui-form-label">封禁理由：</label>
+        <div class="layui-input-inline">
+            <select name="ban_reason"  lay-search="" lay-filter="ban_reason">
+                <option value="">直接选择或搜索选择</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-inline">
+        <div class="layui-input-inline rests_reason" style="display: none;">
+            <input type="text" name="rests_reason"  autocomplete="off" placeholder="请输入其他理由" class="layui-input">
+        </div>
+    </div>
+<!--    <div class="layui-inline">-->
+<!--        <label class="layui-form-label">VIP等级：</label>-->
+<!--        <div class="layui-input-inline">-->
+<!--            <select name="vip"  lay-search="" lay-filter="vip">-->
+<!--                <option value="">请选择</option>-->
+<!--                <option value="<=">≤</option>-->
+<!--                <option value=">=">≥</option>-->
+<!--            </select>-->
+<!--        </div>-->
+<!--    </div>-->
+    <div class="layui-inline">
+        <label class="layui-form-label" style="width: 125px">最小VIP经验：</label>
+        <div class="layui-input-inline">
+            <input  name="min" class="layui-input" type="number" min="0" max="100000" style="width: 155px">
+        </div>
+    </div>
+    <div class="layui-inline">
+        <label class="layui-form-label" style="width: 125px">最大VIP经验：</label>
+        <div class="layui-input-inline">
+            <input  name="max" class="layui-input" type="number" min="0" max="100000" style="width: 155px">
+        </div>
+    </div>
+<!--    <div class="layui-inline">-->
+<!--        <input  name="number" class="layui-input" type="number" min="0" max="100">-->
+<!--    </div>-->
+<!--    <div class="layui-inline">-->
+<!--        <button type="button" class="layui-btn add">添加</button>-->
+<!--        <button type="reset" class="layui-btn layui-btn-primary">重置</button>-->
+<!--    </div>-->
+</form>
+<table class="layui-hide" id="auto_timiing"></table>
+
+<div class="layui-form-item" style="margin-left: 48%">
+    <button type="button" class="layui-btn layui-btn-sm add"><i class="layui-icon"></i></button>
+</div>
+
+<div class="layui-form-item">
+    <button type="button" class="layui-btn layui-btn-theme" id="submit">确定</button>
+    <button type="button" class="layui-btn layui-btn-primary" id="cancel">取消</button>
+</div>
+<script src="/src/views/ban/ban.js"></script>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)"></script>
+<script>
+    layui.data.sendParams = function (params) {
+        let reason = params.reason;
+    layui.use(['form', 'layedit', 'laydate'], function() {
+        var form = layui.form
+        ,$ = layui.jquery
+        ,table = layui.table
+        ,Info = []
+        ,admin = layui.admin
+        ,before_ban_reason = ''
+        ,before_min = ''
+        ,before_max = '';
+        form.render();
+        loadBanReason(reason);
+        //封禁理由 ban_reason
+        form.on('select(ban_reason)',function (e) {
+            if($(this)[0].innerText == '其他' || $(this)[0].innerText == '其它'){
+                //$(".rests_reason").css('display','block');
+            }else {
+                $(".rests_reason").css('display','none');
+            }
+        })
+
+         $.loadtable = function (){
+             table.render({
+                 id: 'auto_timiing',
+                 elem: '#auto_timiing',
+                 page: false,
+                 loading: true,
+                 cols: [[
+                     {field:'LAY_TABLE_INDEX' , title: '封禁次数',
+                     templet: function(d){
+                        return d.LAY_TABLE_INDEX+1;
+                     }
+                     }
+                     ,{field:'info', title: '封禁时长(分)','edit':'text'}
+                     ,{fixed: 'right', title:'操作', toolbar: '#auto'}
+                 ]],
+                 limit: 100,
+                 data: Info
+             });
+         }
+         $.loadtable();
+
+        if(params.id){
+            admin.req({
+                url: admin.getUrl('/api/ban/autoTiming/ToId'),
+                data: {
+                    id:params.id
+                },
+                type: 'get',
+                done: function (data) {
+                    if (data.code == 0) {
+                        if(data.data.list.banned_reason) $("select[name=ban_reason]").val(data.data.list.banned_reason);
+                        //if(data.data.list.vip) $("select[name=vip]").val(data.data.list.vip);
+                        //if(data.data.list.level) $("input[name=number]").val(data.data.list.level);
+                        before_ban_reason = data.data.list.banned_reason;
+                        before_min = data.data.list.min;
+                        before_max = data.data.list.max;
+                         $("input[name=min]").val(data.data.list.min);
+                         $("input[name=max]").val(data.data.list.max);
+                        if(data.data.list.banned_min.length > 0){
+                            for (var i = 0;i<data.data.list.banned_min.length;i++){
+                                var obj = data.data.list.banned_min[i];
+                                Info.push(obj);
+                                $.loadtable();
+                            }
+                        }
+                        layui.form.render('select');
+                    } else {
+                        layer.closeAll();
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                    }
+                }
+            });
+        }
+
+        // 添加封禁时长
+        $(".add").on('click',function () {
+            if(check()){
+                var no =  Info.length + 1;
+                var obj = {no:no,info:''};
+                Info.push(obj);
+                $.loadtable();
+            }
+        })
+        //删除封禁时长
+        $(document).off('click', '.del').on('click', '.del', function () {
+            Info.splice($(this).attr('data-no'), 1);
+            $.loadtable();
+        })
+        // 确定
+        $(document).off('click', '#submit').on('click', '#submit', function () {
+            var reg = /^[1-9]\d*$/;
+            if(check()) {
+                if(Info.length == 0) return layer.msg('请先填写完整',{icon:5});
+                for (var i=0;i<Info.length;i++){
+                    if(!Info[i].info) return layer.msg('封禁次数'+ Info[i].no + ',缺少封禁时长(分)',{icon:5});
+                    if(!reg.test(Info[i].info)) return layer.msg('封禁次数'+ Info[i].no + ',封禁时长要求为正整数',{icon:5});
+                }
+                admin.req({
+                    url: admin.getUrl('/api/ban/auto-timing'),
+                    data: {
+                        ban_reason:$("select[name=ban_reason]").val(),
+                        rests_reason:$("input[name=rests_reason]").val(),
+                        min:$("input[name=min]").val(),
+                        max:$("input[name=max]").val(),
+                        data:Info,
+                        id:params.id ? params.id : 0,
+                        type:params.type,
+                        before_ban_reason:before_ban_reason,
+                        before_min:before_min,
+                        before_max:before_max,
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        if (data.code == 0) {
+                            layer.msg(data.msg, {icon: 6, anim: 0});
+                            layer.closeAll();
+                            table.reload('table_auto-timing');
+                        } else {
+                            layer.msg(data.msg, {icon: 5, anim: 6});
+                        }
+                    }
+                });
+            }
+        })
+        // 取消
+        $(document).off('click', '#cancel').on('click', '#cancel', function () {
+            layer.closeAll();
+        });
+
+        function check() {
+            if(!$("select[name=ban_reason]").val()){
+                layer.msg('请先选择封禁理由',{icon:5});
+                return false;
+            }
+            if($("select[name=ban_reason] option:selected").text() == '其他' || $("select[name=ban_reason] option:selected").text() == '其它'){
+                if(!$("input[name=rests_reason]").val()){
+                    //layer.msg('请输入其他封禁理由',{icon:5});
+                    //return  false;
+                }
+            }
+            // if(!$("select[name=vip]").val()){
+            //      layer.msg('请先选择vip等级',{icon:5});
+            //     return false;
+            // }
+            if(!$("input[name=min]").val()){
+                 layer.msg('请输入最小vip经验,要求等于或大于0的正整数',{icon:5});
+                 return false;
+            }
+            if(!$("input[name=max]").val()){
+                layer.msg('请输入最大vip经验,要求等于或大于0的正整数',{icon:5});
+                return false;
+            }
+            var reg = /^(0|[1-9][0-9]*)$/;
+            if(!reg.test($("input[name=min]").val())){
+                 layer.msg('请输入最小vip经验,要求等于或大于0的正整数',{icon:5});
+                 return false;
+            }
+            if(!reg.test($("input[name=max]").val())){
+                layer.msg('请输入最大vip经验,要求等于或大于0的正整数',{icon:5});
+                return false;
+            }
+            return true;
+        }
+    })
+    }
+</script>
+
+<script type="text/html" id="auto">
+    <a class="layui-btn layui-btn-danger layui-btn-xs del" data-no="{{d.LAY_TABLE_INDEX}}" lay-event="del">删除</a>
+</script>

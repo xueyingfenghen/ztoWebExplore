@@ -1,0 +1,188 @@
+<style>
+    #pay_detail_dialog {
+        padding: 20px;
+    }
+    #pay_detail_dialog .layui-input-block {
+        width: 190px;
+    }
+    .layui-input-block span {
+        display: block;
+        line-height: 38px;
+        height: auto;
+        overflow: hidden;
+    }
+</style>
+<div id="pay_detail_dialog">
+
+    <blockquote class="layui-elem-quote" id="show_role_field" style="margin-bottom: 20px;">
+
+    </blockquote>
+
+<!--    <div id="show_role_field">-->
+<!--        <div class="layui-form-item" style="float: left;width: 200px;clear: none;">-->
+<!--            <label class="layui-form-label">发送类型：</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <span name="type">111</span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="layui-form-item" style="float: left;width: 200px;clear: none;">-->
+<!--            <label class="layui-form-label">发送类型：</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <span name="type">111</span>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+    <form class="layui-form layui-form-pane pay_detail_form">
+
+        <div class="layui-form-item" id="pay_detail_form">
+
+        </div>
+        <div class="layui-form-item">
+            <button type="button" class="layui-btn layui-btn-theme" id="pay_detail_search">查询</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="pay_detail_reset">重置</button>
+        </div>
+    </form>
+    <table id="pay_detail_list"></table>
+</div>
+<script>
+    layui.use(['table', 'common', 'form', 'admin', 'laydate'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let admin = layui.admin;
+
+
+
+        admin.getCols('pay_detail_show_role_field').then(function (data) {
+
+            let html = '';
+            let datas = data.data[0];
+            for (let k in datas) {
+                // html += "<div class='layui-form-item' style='float: left;width: 200px;clear: none;'>" +
+                //     "<label class='layui-form-label'>" + datas[k]['title'] + "：</label>" +
+                //     "<div class='layui-input-block'>" +
+                //     "<span style='color:red;' name='" + datas[k]['field'] + "'></span>" +
+                //     "</div>" +
+                //     "</div>";
+                html += "<span>" + datas[k]['title'] + '：' + "<span style='color: green;margin-right: 30px;' name='" + datas[k]['field'] + "'></span></span>";
+            }
+            $('#show_role_field').html(html);
+
+            admin.req({
+                url: admin.getUrl('/api/player/getPlayerList'),
+                data: {
+                    page: 1,
+                    limit: 1,
+                    role_id: role_id
+                },
+                type: 'get',
+                done: function (data) {
+                    for (let i = 0; i < $('#show_role_field span').length; i ++) {
+                        let name = data.data[0][$('#show_role_field span').eq(i).attr('name')];
+                        $('#show_role_field span').eq(i).html(name);
+                    }
+                }
+            });
+        });
+
+
+        admin.initForms('pay_order_detail_list_form', '#pay_detail_form').then(function () {
+
+            $("#pay_detail_form input[name='range_time']").parent().css('width', '500px');
+
+            admin.getCols('pay_order_detail_list_table').then(function (data) {
+
+                let param = admin.getFormParam('.pay_detail_form');
+                param.role_id = role_id;
+                // 玩家充值列表
+                table.render({
+                    id: 'pay_detail_list',
+                    elem: '#pay_detail_list',
+                    url: admin.getUrl('/api/player/rolePayList'),
+                    method: 'GET',
+                    where: param,//请求参数(额外)
+                    request: {
+                        pageName: 'page' //页码的参数名称，默认：page
+                        ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                    },
+                    response: { //定义后端 json 格式，详细参见官方文档
+                        statusName: 'code', //状态字段名称
+                        statusCode: '0', //状态字段成功值
+                        msgName: 'msg', //消息字段
+                        countName: 'countAll', //总页数字段
+                        dataName: 'data', //数据字段
+                    },
+                    page: true,
+                    loading: true,
+                    cols: data.data,
+                    done: function (res) {
+                        $("#show_role_field span[name='range_amount']").html(res.range_amount == undefined ? '' : res.range_amount);
+                    }
+                });
+
+            });
+        });
+
+        // 查询
+        $(document).off('click', '#pay_detail_search').on('click', '#pay_detail_search', function () {
+            admin.reload('.pay_detail_form', 'pay_detail_list');
+        })
+
+        // 重置
+        $(document).off('click', '#pay_detail_reset').on('click', '#pay_detail_reset', function () {
+            admin.resetForm('.pay_detail_form');
+            admin.reload('.pay_detail_form', 'pay_detail_list');
+        })
+
+        // 补单
+        $(document).off('click', '.pay_replenish').on('click', '.pay_replenish', function () {
+            admin.req({
+                url: admin.getUrl('/api/player/doReplenish'),
+                data: {
+                    uqid: $(this).attr('data-type'),
+                    server_id: $("span[name=server_id]")[0].innerText,
+                    role_id: $("span[name=role_id]")[0].innerText,
+                    nickname: $("span[name=nickname]")[0].innerText
+                },
+                type: 'post',
+                done: function (data) {
+                    if (data.code == 0) {
+                        layer.msg('补单成功', {icon: 6, anim: 0});
+                        admin.reload('.pay_detail_form', 'pay_detail_list');
+                    } else {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                    }
+                }
+            });
+        })
+
+    })
+</script>
+<!--只有充值状态2（推送失败需要重新推送）-->
+<script type="text/html" id="do_replenish">
+    {{#  if(d.pay_state == 2 ){ }}
+        <button type="button" class="layui-btn layui-btn-sm pay_replenish" data-type={{ d.uqid }}>重新推送</button>
+    {{#  } else if(d.state ==1 ) { }}
+
+    {{#  } else { }}
+    {{#  } }}
+</script>
+<script type="text/html" id="real_pay">
+    {{#  if(d.real_pay == 2 ){ }}
+        <span style="color: red;">否</span>
+    {{#  } else if(d.real_pay ==1 ) { }}
+        <span style="color: green;">是</span>
+    {{#  } else { }}
+    {{#  } }}
+</script>
+<script type="text/html" id="pay_state">
+    {{#  if(d.pay_state == 2 ){ }}
+    <span style="color: red;">失败</span>
+    {{#  } else if(d.pay_state ==1 ) { }}
+    <span style="color: green;">成功</span>
+    {{#  } else { }}
+    {{#  } }}
+</script>
+

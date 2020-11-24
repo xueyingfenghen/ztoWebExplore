@@ -1,0 +1,86 @@
+<title>失败详情</title>
+
+<div class="layui-fluid">
+
+    <div class="layui-card tabs  layui-show" id="list_edit-activity" style="display: none;">
+        <div class="layui-card-body">
+            <form>
+                <div class="layui-card-header">
+                    <input type="text" name="area" lay-verify="area" autocomplete="off" placeholder="请选择区服"
+                           class="layui-input" readonly>
+                    <input type="hidden" name="activity_id">
+                </div>
+                <table class="layui-hide" id="edit-activity"></table>
+                <script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+          </script>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    var $ = layui.jquery;
+    var laydate = layui.laydate;
+    var table = layui.table;
+    // 渲染表格
+    $(function () {
+        layui.data.sendParams = function (params) {
+            table.render({
+                id: 'edit-activity',
+                elem: '#' + 'edit-activity',
+                limit: Number.MAX_VALUE, // 数据表格默认全部显示-->
+                data: params['data'],
+                title: '用户表',
+                cols: [[ //表头
+                    {field: 'activity_type', title: '活动类型', align: 'center', unresize: true}
+                    , {
+                        field: 'activity_title', title: '活动名称', align: 'center', unresize: true,
+                    }
+                    , {
+                        field: 'logo_start_time', title: '图标出现时间', align: 'center', unresize: true,
+                        templet: function (d) {
+                            return ' <input type="text" class="layui-input layui-input-date" value="' + d.logo_start_time + '" id="logo_start_time">'
+                        }
+                    }
+                    , {
+                        field: 'logo_end_time', title: '图标结束时间', align: 'center', unresize: true,
+                        templet: function (d) {
+                            return ' <input type="text" class="layui-input layui-input-date" value="' + d.logo_end_time + '" id="logo_end_time">'
+                        }
+                    }
+                    , {
+                        field: 'start_time', title: '活动开始时间', align: 'center', unresize: true,
+                        templet: function (d) {
+                            return ' <input type="text" class="layui-input layui-input-date" value="' + d.start_time + '" id="start_time">'
+                        }
+                    }
+                    , {
+                        field: 'end_time', title: '活动结束时间', align: 'center', unresize: true,
+                        templet: function (d) {
+                            return ' <input type="text" class="layui-input layui-input-date" value="' + d.end_time + '" id="end_time">'
+                        }
+                    }
+
+                ]
+                ],
+                done: function (res) {//当数据渲染完后，执行的回调 //日期控件
+                    $(".layui-input-date").each(function (i) {
+                        layui.laydate.render({
+                            elem: this,
+                            type: 'datetime',
+                            format: "yyyy-MM-dd HH:mm:ss",
+                        });
+                    });
+                }
+            });
+
+
+            $("input[name=area]").val(params.serverDesc);
+            $("input[name=activity_id]").val(params.activity_id);
+        }
+    })
+    ;
+
+</script>

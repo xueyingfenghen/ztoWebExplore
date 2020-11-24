@@ -1,0 +1,108 @@
+<style>
+    #data_report_search .layui-inline {
+        margin-bottom: 10px!important;
+        margin-right: 20px!important;
+    }
+    #data_report_search .layui-input-block {
+        width: 190px;
+    }
+    #form_data_card_body thead tr th {
+        cursor: pointer;
+    }
+    .reportRight{
+        float: right;
+    }
+</style>
+
+<!--<div class="layui-card layadmin-header">-->
+<!--    <div class="layui-breadcrumb" lay-filter="breadcrumb">-->
+<!--        <a lay-href="">数据分析</a>-->
+<!--        <a><cite>数据报表</cite></a>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="">
+
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+                </ul>
+                <div class="layui-tab-content">
+                    <!--数据报表-->
+                    <div class="layui-tab-item" id="search_statistics-data-report" style="display: none;">
+                        <form class="layui-form layui-form-pane data_report_search">
+                            <div class="layui-form-item" id="data_report_search">
+                                <!--                    内容需要渲染-->
+
+                            </div>
+                            <div class="layui-form-item">
+                                <button type="button" class="layui-btn layui-btn-theme" id="search-btn">查询</button>
+                                <button type="button" class="layui-btn layui-btn-primary" id="reset-btn">重置</button>
+                                <button type="button" class="layui-btn" id="export-btn">导出</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!--渠道数据-->
+                    <div class="layui-tab-item" id="search_statistics-source-data" style="display: none;">
+                        <form class="layui-form layui-form-pane source_data_search">
+                            <div class="layui-form-item" id="source_data_search">
+                                <!--                    内容需要渲染-->
+
+                            </div>
+                            <div class="layui-form-item">
+                                <button type="button" class="layui-btn layui-btn-theme" id="source-search-btn">查询</button>
+                                <button type="button" class="layui-btn layui-btn-primary" id="source-reset-btn">重置</button>
+                                <button type="button" class="layui-btn" id="source-export-btn">导出</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card tabs" id="list_statistics-data-report" style="display: none;">
+        <div class="layui-card-header">
+            数据报表
+            <div class="layui-form-item reportRight">
+                <button type="button" class="layui-btn layui-btn-sm report_type" data-type=1>日报</button>
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary report_type" data-type=2>周报</button>
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary report_type" data-type=3>月报</button>
+            </div>
+        </div>
+        <div class="layui-card-body" id="form_data_card_body">
+            <table id="data_report_list" lay-filter="data_report_list"></table>
+        </div>
+    </div>
+
+    <div class="layui-card tabs" id="list_statistics-source-data" style="display: none;">
+        <div class="layui-card-header">
+            渠道数据
+        </div>
+        <div class="layui-card-body" id="source_form_data_card_body">
+            <table id="source_data_list" lay-filter="source_data_list"></table>
+        </div>
+    </div>
+
+</div>
+<script type="text/html" id="toolbarDemo">
+    <button type="button" class="layui-btn layui-btn-sm showDetail" id="showServerDetail" data-type="1">查看区服详情</button>
+    <button type="button" class="layui-btn layui-btn-sm showDetail" id="showSourceDetail" data-type="2">查看渠道详情</button>
+    <button type="button" class="layui-btn layui-btn-sm showRollServerRate" style="display: none;" id="showRollServerRate">各区服滚服率</button>
+</script>
+
+<script type="text/html" id="toolbarSourceData">
+</script>
+
+<script>
+    var jsArr = {
+        'statistics-data-report': 'statistics/report/report',
+        'statistics-source-data': 'statistics/report/source_data',
+    };
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+
+    // layui.use( 'statistics/report/report', layui.factory('statistics/report/report'));
+</script>
+

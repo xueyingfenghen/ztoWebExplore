@@ -1,0 +1,184 @@
+<form class="layui-form" lay-filter="judge-form">
+    <div class="layui-form" lay-filter="layuiadmin-exchange-judge" id="layuiadmin-exchange-judge"
+         style="padding: 20px 30px 0 0;">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">兑换码ID</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="id" value="" lay-filter="id-edit" id="id-edit" autocomplete="off"
+                           class="layui-input" style="width: 400px;" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">兑换码名称</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="name" value="" lay-filter="name-edit" id="name-edit" autocomplete="off"
+                           class="layui-input" style="width: 400px;" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">道具内容</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <textarea name="props" lay-verify="props-edit" lay-filter="props-edit" id="props-edit"
+                              style="width: 400px; height: 100px;" autocomplete="off" class="layui-textarea" disabled>
+                    </textarea>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">兑换码类型</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="type" value="" lay-filter="type-edit" id="type-edit" autocomplete="off"
+                           class="layui-input" style="width: 400px;" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">领取类型</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="receive_type" value="" lay-filter="receive-type-edit"
+                           id="receive-type-edit" autocomplete="off"
+                           class="layui-input" style="width: 400px;" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">限制条件</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="limitation" lay-verify="limitation-edit" lay-filter="limitation-edit"
+                           id="limitation-edit"
+                           style="width: 400px; " autocomplete="off"
+                           class="layui-input" style="width: 400px;" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">生成数量</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="amount" value="" lay-filter="amount-edit" id="amount-edit"
+                           autocomplete="off" style="width: 400px;" class="layui-input" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">生效时间</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="start_time" value="" lay-filter="start-time-edit" id="start-time-edit"
+                           autocomplete="off" style="width: 400px;" class="layui-input" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">失效时间</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="end_time" value="" lay-filter="end-time-edit" id="end-time-edit"
+                           autocomplete="off" style="width: 400px;" class="layui-input" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">申 请 人</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="apply_user" value="" lay-filter="apply-user-edit" id="apply-user-edit"
+                           autocomplete="off" style="width: 400px;"
+                           class="layui-input" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">申请理由</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="apply_reason" value="" lay-verify="apply-reason-edit"
+                           lay-filter="apply-reason-edit" id="apply-reason-edit"
+                           autocomplete="off" style="width: 400px;" class="layui-input" disabled>
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">申请时间</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="apply_time" value="" lay-filter="apply-time-edit" id="apply-time-edit"
+                           autocomplete="off" style="width: 400px;" class="layui-input" disabled>
+                </script>
+            </div>
+        </div>
+
+        <hr/>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核结果</label>
+            <div class="layui-input-inline">
+                <input type="radio" class="judge-pass" name="judge_result" value="20" title="通过" lay-verify="judge_result">
+                <input type="radio" name="judge_result" value="10" title="拒绝" lay-verify="judge_result">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核理由</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="judge_reason" value="" lay-filter="judge-reason-edit"
+                           id="judge-reason-edit" lay-verify="reason" placeholder="请输入审核理由"
+                           autocomplete="off" style="width: 400px;" class="layui-input">
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="password" name="password" value="" lay-filter="password-edit" id="password-edit"
+                           lay-verify="password" placeholder="请输入密码"
+                           autocomplete="new-password" class="layui-input" style="width: 400px;">
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label"></label>
+            <div class="layui-input-inline">
+                <input type="button" lay-submit lay-filter="judge-submit" value="提交" id="commit"
+                       class="layui-btn layui-btn-theme">
+                <button class="layui-btn layui-btn-primary" type="button" id="cancelBtn">取消</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.data.sendParams = function (params) {
+        layui.use('exchange_code/judge', function () {
+            $.sendJudgeParams(params);
+        });
+    };
+</script>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>

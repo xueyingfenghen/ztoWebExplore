@@ -1,0 +1,142 @@
+<style>
+    .layui-input-block {
+        width: 190px;
+    }
+    .layui-input a {
+        color: #1E9FFF;
+        line-height: 38px;
+        text-decoration: underline;
+    }
+    .layui-input span {
+        line-height: 38px;
+    }
+    #content-alert .layui-inline {
+        width: 300px;
+    }
+    .layui-hidden {
+        display: none;
+    }
+    .red {
+        color: red;
+    }
+    .green {
+        color: green;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+
+                <!--单个内充-->
+                <div class="layui-tab-item" id="search_interior-pay-person" style="display: none;">
+                    <form class="layui-form layui-form-pane form_interior_pay_person">
+                        <div class="layui-form-item" id="form_interior_pay_person">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","form_class": ".form_interior_pay_person","tableId": "interior_pay_person_list"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","form_class": ".form_interior_pay_person","tableId": "interior_pay_person_list"}'>重置</button>
+                            <button type="button" class="layui-btn" data-obj='{"event": "export_excel","form_class": ".form_interior_pay_person","tableId": "interior_pay_person_list", "url": "/api/pay/InteriorPersonListExport", "title": "单个内充列表"}'>导出</button>
+                        </div>
+                    </form>
+                </div>
+
+
+                <!--批量内充-->
+                <div class="layui-tab-item" id="search_interior-pay-mass" style="display: none;">
+                    <form class="layui-form layui-form-pane form_interior_pay_mass">
+                        <div class="layui-form-item" id="form_interior_pay_mass">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","form_class": ".form_interior_pay_mass","tableId": "interior_pay_mass_list"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","form_class": ".form_interior_pay_mass","tableId": "interior_pay_mass_list"}'>重置</button>
+                            <button type="button" class="layui-btn" data-obj='{"event": "export_excel","form_class": ".form_interior_pay_mass","tableId": "interior_pay_mass_list", "url": "/api/pay/InteriorMassListExport", "title": "批量内充列表"}'>导出</button>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_interior-pay-person" style="display: none;">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme" id="add_interior_pay_dialog" style="margin-bottom: 10px;">新增单个内充</button>
+        <table id="interior_pay_person_list"></table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_interior-pay-mass" style="display: none;">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme" id="add_mass_interior_pay_dialog" style="margin-bottom: 10px;">新增批量内充</button>
+        <table id="interior_pay_mass_list"></table>
+    </div>
+</div>
+
+<script>
+    var routerArray = [];
+    routerArray['interior-pay-person'] = {
+        // 单个内充
+        form_name: 'interior_pay_form',
+        cols_name: 'interior_pay_table_list',
+        tableId: 'interior_pay_person_list',
+        form_class: '.form_interior_pay_person',
+        form_id: '#form_interior_pay_person',
+        url: layui.admin.getUrl('/api/player/getInteriorPayList')
+    };
+    routerArray['interior-pay-mass'] = {
+        // 批量内充
+        form_name: 'interior_pay_mass_form',
+        cols_name: 'interior_pay_mass_table_list',
+        tableId: 'interior_pay_mass_list',
+        form_class: '.form_interior_pay_mass',
+        form_id: '#form_interior_pay_mass',
+        url: layui.admin.getUrl('/api/player/getMassPayList')
+    }
+
+    var voucher = '';
+
+    // 公共js
+    layui.use('interior_pay/common_pay', layui.factory('interior_pay/common_pay'));
+
+    var jsArr = {
+        'interior-pay-person': 'interior_pay/person_pay',    // 单个内部充值
+        'interior-pay-mass': 'interior_pay/mass_pay', // 批量内部充值
+    };
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+</script>
+<script type="text/html" id="replenish_state">
+    {{#  if(d.state == 0 ){ }}
+    <span class="green">充值成功</span>
+    {{#  } else { }}
+    <span class="red">充值失败</span>
+    {{#  } }}
+</script>
+<script type="text/html" id="edit">
+    {{#  if(d.state == 0 ){ }}
+    {{#  } else { }}
+    <button type="button" class="layui-btn layui-btn-sm look" data-type={{ d.id }}>查看详情</button>
+    {{#  } }}
+</script>
+<script type="text/html" id="repay_id">
+    <button type="button" class="layui-btn layui-btn-sm repay_id" data-type={{ d.id }} data-excel={{ d.excel_path }}>重新充值</button>
+</script>
+<!-- 批量内部充值操作 -->
+<script type="text/html" id="mass_edit">
+    {{#  if(d.state == 0 ){ }}
+    <button type="button" class="layui-btn layui-btn-sm mass_pay_detail_list" data-type={{ d.voucher }}>充值详情</button>
+    {{#  } else { }}
+    <button type="button" class="layui-btn layui-btn-sm mass_pay_detail_list" data-type={{ d.voucher }}>充值详情</button>
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger mass_pay_fail_detail_list" data-type={{ d.voucher }}>失败详情</button>
+    {{#  } }}
+</script>

@@ -1,0 +1,70 @@
+<div class="layui-tab-content">
+    <form class="layui-card-body layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">道具内容</label>
+            <div class="layui-input-inline">
+                <textarea name="content" lay-filter="props-list-multi" id="props-list-multi" autocomplete="off"
+                          class="layui-textarea" style="width: 400px; height: 100px;" disabled></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">上限数量</label>
+            <div class="layui-input-inline">
+                <input type="text" name="limit" value="" lay-filter="limit-edit" id="limit-edit" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <input type="button" lay-submit lay-filter="props-form-submit"
+                   value="提交" id="props-form-submit"
+                   class="layui-btn layui-btn-theme">
+        </div>
+    </form>
+</div>
+
+<script>
+    let $ = layui.jquery;
+    let admin = layui.admin;
+    let form = layui.form;
+    layui.data.sendMultiSetParams = function (params) {
+        var groupId = params.group_id;
+        var type = params.type;
+        var platformId = params.platform_id;
+        var selectedProps = params.selected_props;
+
+        var propNames = '';
+        var propIds = [];
+        $.each(selectedProps, function (idx, item) {
+            propNames += item.name;
+            propNames += ';';
+            propIds.push(item.prop_conf);
+        });
+        $('#props-list-multi').html(propNames);
+
+        form.on('submit(props-form-submit)', function (data) {
+            admin.req({
+                url: layui.admin.getUrl('/api/system/group/props'),
+                data: {
+                    conf_ids: propIds,
+                    group_id: groupId,
+                    limit: data.field.limit,
+                    platform_id: platformId,
+                    prop_type: type
+                },
+                method: 'post',
+                dataType: 'json',
+                done: function (res) {
+                    if (res.code == 0) {
+                        layer.close(params.popup_index);
+                        $.loadPropsLimitTable(groupId, platformId, type);
+                    } else {
+                        layer.msg(res.msg, {icon: 5});
+                    }
+                }
+            });
+        });
+    };
+</script>
+
+<script type="text/html" template lay-done="layui.data.sendMultiSetParams(d.params)">
+</script>

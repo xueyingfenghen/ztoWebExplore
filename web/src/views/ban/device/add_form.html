@@ -1,0 +1,124 @@
+<form class="layui-form ban_form">
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">设备号：</label>
+        <div class="layui-input-block " style="width: 70%">
+            <textarea  placeholder="请输入设备号" class="layui-textarea" name="user_list"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">封禁时长</label>
+        <div class="layui-input-inline" style="width: 400px">
+<!--            <input type="radio" name="ban_min_type" value="1" title="自动定时" disabled lay-filter="ban_min_type">-->
+            <input type="radio" name="ban_min_type" value="2" title="永久封禁" lay-filter="ban_min_type" checked>
+            <input type="radio" name="ban_min_type" value="3" title="手动定时" lay-filter="ban_min_type">
+        </div>
+    </div>
+    <div class="layui-form-item ban_min" style="display: block">
+        <label class="layui-form-label">输入时长</label>
+        <div class="layui-input-inline">
+            <input type="text" name="ban_min"  autocomplete="off" placeholder="请输入时长" class="layui-input" onkeyup="this.value=this.value.replace(/\D/g,'')" value="999999999" disabled>
+        </div>
+        <div class="layui-form-mid" style="color: red">分</div>
+    </div>
+    <div class="layui-form-item ban_min_" style="display: none">
+        <div class="layui-input-block" style="color: red">111111111111111111111111111</div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">封禁理由</label>
+            <div class="layui-input-inline">
+                <select name="ban_reason"  lay-search="" lay-filter="ban_reason">
+                    <option value="">直接选择或搜索选择</option>
+                </select>
+            </div>
+            <div class="layui-input-block rests_reason" style="display: none;width: 211px">
+                <input type="text" name="rests_reason"  autocomplete="off" placeholder="请输入其他理由" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="btn-wrapper">
+        <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="ban_submit">确定</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="ban_close">取消</button>
+    </div>
+</form>
+    <script src="/src/views/ban/ban.js"></script>
+<script>
+    var $ = layui.jquery;
+    layui.use('form',function () {
+        var form = layui.form;
+        form.render();
+        loadBanReason();
+        //封禁时长监听 ban_min_type
+        form.on('radio(ban_min_type)',function (e) {
+            if(e.value == 2){
+                $(".ban_min").css('display','block');
+                $(".ban_min_").css('display','none');
+                $("input[name=ban_min]").val(999999999);
+                $("input[name=ban_min]").attr('disabled',true);
+            }else if (e.value == 3){
+                $(".ban_min").css('display','block');
+                $(".ban_min_").css('display','none');
+                $("input[name=ban_min]").val('');
+                $("input[name=ban_min]").attr('disabled',false);
+            }else if(e.value == 1){
+                $(".ban_min").css('display','none');
+                $(".ban_min_").css('display','block');
+            }else {
+                $(".ban_min").css('display','none');
+            }
+        })
+        //封禁理由 ban_reason
+        form.on('select(ban_reason)',function (e) {
+            if($(this)[0].innerText == '其他' || $(this)[0].innerText == '其它'){
+                $(".rests_reason").css('display','block');
+            }else {
+                $(".rests_reason").css('display','none');
+            }
+        })
+    })
+
+    // 校验
+    $('#check').on('click',function () {
+        layui.admin.req({
+            url: layui.admin.getUrl('/api/public/checkUser'),
+            data: {
+                server_list: $("input[name='area']").val(),
+                user_list: $("textarea[name='user_list']").val(),
+            },
+            type: 'post',
+            done: function (data) {
+                if (data.code == 0) {
+                    // 弹出角色校验结果
+                    layui.admin.checkUser('设备号校验结果', data.data);
+                    layui.form.render('checkbox');
+                } else {
+                    layer.msg(data.msg, {icon: 5, anim: 6});
+                }
+            }
+        });
+    });
+
+    //清除
+    $('#clear').on('click',function () {
+        $('.layui-textarea').val('');
+    })
+    //选择区服
+    var area_arr = '';
+    function area(data){
+        layui.admin.popup({
+            title: '选择区服'
+            // ,area: layui.admin.screen() < 2 ? ['80%', '300px'] : ['700px', '500px']
+            ,area:  ['1200px', '500px']
+            ,id: 'select_area'
+            ,btn: ['确定', '取消']
+            ,success: function(layero, index){
+                layui.view(this.id).render('area', {...data});
+            },yes: function(index, layero){
+                //layui.jquery('#get_area').val(); 区服拼接后的值
+                area_arr = layui.jquery('#get_area_all').val(); //区服转数组的值
+                layui.jquery("input[name=area]").val(layui.jquery('#get_area').val());
+                layer.close(index);
+            }
+        });
+    }
+</script>

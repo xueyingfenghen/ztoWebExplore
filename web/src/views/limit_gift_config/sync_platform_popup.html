@@ -1,0 +1,122 @@
+<div id="sync_platform_popup">
+    <form class="layui-form sync_platform layui-form-pane " action="" lay-filter="example">
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择平台</label>
+            <div class="layui-input-block">
+                <select name="platform" id=""></select>
+            </div>
+        </div>
+
+        <div class="layui-form-item" id="sync_platform">
+
+        </div>
+        <div class="renderTable">
+            <table lay-filter="prop_table" id="prop_table"></table>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button lay-filter="submit_action" type="button" class="layui-btn layui-btn-theme submit_action"
+                    lay-submit>提交
+                </button>
+                <button type="button" class="layui-btn layui-btn-primary layer_close">取消</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    layui.extend({ props: '/common/props' });
+
+    layui.use(['form', 'props', 'table'], function () {
+        const {
+            form, admin, view, table
+        } = layui
+        const param = layui['limit_gift_config/rmb_gift']
+        const { layero, index, obj: tableParam = {} } = param
+        form.render('select')
+        layui.view('props_content_divs').render('common/prop_select', {
+            propData: [],
+            required_props: true,
+            is_email: true
+        })
+        let initArray = [
+            {
+                form_name: "limit_gift_config_rmb_form",
+                cols_name: "limit_gift_config_sync_table",
+                tableId: "prop_table",
+                form_class: ".sync_platform",
+                form_id: "#sync_platform",
+                url: admin.getUrl("/api/rmb_gift/list"),
+            },
+        ];
+        admin.req({
+            url: '/api/rmb_gift/getOtherPlatform'
+        }).then(res => {
+            const placeholder = `<option placeholder="请选择"></option>`
+            const str = res.data.map(item => {
+                return `<option value=${item.key}>${item.val}</option>`
+            }).join("")
+            layero.find(`select[name=platform]`).html(placeholder + str)
+        })
+
+
+        // 渲染搜索框
+        $.each(initArray, function (i, obj) {
+            admin.initForms(obj.form_name, obj.form_id).then(function () {
+                admin.getCols(obj.cols_name).then(function (data) {
+                    let param = admin.getFormParam(obj.form_class);
+                    data.data[0].pop()
+                    //  渲染图表
+                    table.render({
+                        id: obj.tableId,
+                        elem: "#" + obj.tableId,
+                        url: obj.url,
+                        method: "GET",
+                        parseData: function (res) {
+                            return {
+                                "code": res.code, //解析接口状态
+                                "msg": '', //解析提示文本
+                                "count": res.data.count, //解析数据长度
+                                "data": res.data.list
+                            };
+                        },
+                        request: {
+                            pageName: "page", //页码的参数名称，默认：page
+                            limitName: "page_size", //每页数据量的参数名，默认：limit
+                        },
+                        page: true,
+                        loading: true,
+                        cols: data.data,
+                    });
+
+
+                });
+            });
+        });
+
+        const submitAction = function submitAction() {
+            // const gift_id = layui.table.cache['prop_table'].map(item => (item.gift_id)).join(",")
+            const checkData = table.checkStatus('prop_table')
+            // console.log(checkData)
+            const gift_id = checkData.data.map(item => (item.gift_id)).join(",")
+            admin.req({
+                url: admin.getUrl('/api/rmb_gift/synchronization'),
+                data: {
+                    gift_id
+                }
+            }).then(res=>{
+                if(res.code === 0){
+                    layer.msg(res.msg,{icon:6})
+                }else{
+                    layer.msg(res.msg||res.error,{icon:5})
+                }
+                layer.close(index)
+                table.reload('rmb_gift_list')
+            })
+        }
+        layero.find('button[class~=submit_action]').unbind().on('click', submitAction)
+        layero.find('.layer_close').unbind().on('click', function () {
+            layer.close(index)
+        })
+    })
+</script>

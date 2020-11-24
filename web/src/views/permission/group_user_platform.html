@@ -1,0 +1,112 @@
+<form class="layui-form" lay-filter="user-form">
+    <div class="layui-form" lay-filter="layuiadmin-user-platform-form-list" id="layuiadmin-user-platform-form-list"
+         style="padding: 20px 30px 0 0;">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">已选用户</label>
+            <div class="layui-input-inline">
+                    <textarea name="users" lay-verify="" lay-filter="users-edit"
+                              style="width: 400px; height: 100px;" autocomplete="off" class="layui-textarea" disabled>
+                    </textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-inline" pane="" id="full-platform">
+            <label class="layui-form-label">选择平台</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="platform_ids[]" value="0" title="全平台" id="whole" lay-filter="whole">
+            </div>
+        </div>
+
+        <div id="platform-show" style="margin-top: 6px;margin-bottom: 15px"></div>
+
+        <script type="text/html" template>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-inline">
+                    <input type="button" lay-submit lay-filter="layuiadmin-user-platform-form-submit" value="提交"
+                           id="commit"
+                           class="layui-btn layui-btn-theme">
+                </div>
+            </div>
+        </script>
+    </div>
+</form>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+
+<script>
+    var $ = layui.jquery;
+    $(function () {
+        layui.data.sendParams = function (params) {
+            var user = '';
+            var gameId = params.game_id;
+
+            $.each(params.select_data, function (idx, item) {
+                user += (item.nick_name + ';');
+            });
+
+
+            $('textarea[name="users"]').html(user);
+
+            layui.admin.req({
+                url: layui.admin.getUrl('/api/game/platform_select'),
+                data: {game_id: gameId},
+                method: 'get',
+                dataType: 'json',
+                done: function (res) {
+                    if (res.code == 0) {
+                        $.each(res.data.list, function (i, category) {
+                            var html = '<div class="layui-form-block" pane=""><label class="layui-form-label" id="platform-text">';
+                            if (category.id != 0) {
+                                html += category.name;
+                            }
+                            html += '</label><div class="layui-input-inline">';
+
+                            $.each(category.platforms, function (i, platform) {
+                                html += ('<input type="checkbox" name="platform_ids[]" value="' + platform.id + '" title="' + platform.name + '" class="select-platform" lay-filter="select-platform">');
+                            });
+                            html += '</div></div>';
+
+                            $('#platform-show').append(html);
+                        });
+
+                        if (params.select_data.length === 1) {
+                            $.each(params.select_data[0].platform, function (idx, item) {
+                                if (item.id == 0) {
+                                    $('#full-platform input').prop('checked', true);
+                                    return;
+                                } else {
+                                    $('#platform-show input[value="' + item.id + '"]').prop('checked', true);
+                                }
+                            });
+                            layui.form.render(null, 'user-form');
+                        }
+
+                        layui.form.on('checkbox(whole)', function (data) {
+                            if (data.elem.checked) {
+                                $('.select-platform').prop('checked', false);
+                                layui.form.render(null, 'user-form');
+                            }
+                        });
+
+                        layui.form.on('checkbox(select-platform)', function (data) {
+                            if (data.elem.checked) {
+                                $('#full-platform input').prop('checked', false);
+                                layui.form.render(null, 'user-form');
+                            }
+                        });
+
+                        if (!res.data.full_platform) {
+                            $('#full-platform').remove();
+                            $('#platform-text').html('选择平台');
+                        }
+                        layui.form.render(null, 'user-form');
+                    }
+                }
+            });
+        };
+    });
+</script>

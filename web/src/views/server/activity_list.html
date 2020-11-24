@@ -1,0 +1,72 @@
+<table class="layui-hide" id="table_config-list" lay-filter="activity-list"></table>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+
+<script type="text/html" id="detail">
+    <a class="layui-btn layui-btn-normal layui-btn-xs config_list"
+       data-obj='{"tableId": "table_config-list", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"活动详情"}'>活动详情</a>
+</script>
+
+<script>
+    var $ = layui.jquery;
+    var admin = layui.admin;
+    var table = layui.table
+    var view = layui.view;
+    //定义表头
+    var cols = [[ //表头
+        {type: 'radio'}
+        , {field: 'file_name', title: '文件名称', align: 'center', unresize: true}
+        , {field: 'op', title: '操作', align: 'center', unresize: true, templet: '#detail'}
+    ]];
+    layui.data.sendParams = function (params) {
+        layui.use('table',
+            function () {
+                //表格
+                //执行一个 table 实例
+                table.render({
+                    id: "table_config-list",
+                    elem: '#table_config-list',
+                    url: admin.getUrl('/api/activity/config_list'),
+                    method: 'GET',
+                    // where: param,//请求参数(额外)
+                    request: {
+                        pageName: 'page' //页码的参数名称，默认：page
+                        , limitName: 'limit' //每页数据量的参数名，默认：limit
+                    },
+                    parseData: function (res) {
+                        return {
+                            "code": res.code, //解析接口状态
+                            "msg": '', //解析提示文本
+                            "count": res.data.count, //解析数据长度
+                            "data": res.data.list
+                        };
+                    },
+                    page: true,
+                    loading: true,
+                    cols: cols
+                });
+            });
+
+        $(document).off('click', '.config_list').on('click', '.config_list', function () {
+            var obj = JSON.parse($(this).attr('data-obj'));
+            ac_detail(obj);
+        });
+        function ac_detail(obj) {
+            console.log(obj);
+            var param = {
+                file_id: layui.table.cache[obj.tableId][obj.index]['id'],
+            };
+            admin.popup({
+                title: obj.title
+                , area: ['80%', '80%']
+                , id: 'LAY-popup-content-detail'
+                , success: function (layero, index) {
+                    view(this.id).render('server/ac_detail', param);
+                }
+            });
+        }
+    };
+</script>
+
+

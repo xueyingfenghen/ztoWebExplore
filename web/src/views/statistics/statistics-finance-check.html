@@ -1,0 +1,58 @@
+<div class="layui-card">
+  <div class="layui-card-body">
+    <div class="layui-tab layui-tab-brief" lay-filter="">
+      <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+      </ul>
+
+      <div class="layui-tab-content">
+
+        <!--财务对账-->
+        <div class="layui-tab-item" id="search_finance-check" style="display: none;">
+          <form class="layui-form layui-form-pane form_finance-check">
+            <div class="layui-form-item" id="statistics_finance-check_form">
+
+            </div>
+            <div class="layui-form-item">
+                <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".form_finance-check","tableId": "table_finance-check"}'>查询</button>
+                <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".form_finance-check","tableId": "table_finance-check"}'>重置</button>
+                <button type="button" class="layui-btn layui-btn-primary upload-btn" id="cost-upload" data-obj='{"event": "importCost","formClass": ".form_finance-check","tableId": "table_finance-check"}'>导入成本</button>
+                <button type="button" class="layui-btn layui-btn-primary upload-btn" id="income-upload"  data-obj='{"event": "importIncome","formClass": ".form_finance-check","tableId": "table_finance-check"}'>导入核对收入</button>
+                <button type="button" class="layui-btn" data-obj='{"event": "export","formClass": ".form_finance-check","tableId": "table_finance-check"}'>导出</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_finance-check" style="display: none;">
+    <div class="layui-card-header">账单数据</div>
+  <div class="layui-card-body">
+      <div class="layui-btn-group" style="margin-bottom: 10px;">
+          <button type="button" class="layui-btn button-statis" value="channel">渠道汇总</button>
+          <button type="button" class="layui-btn layui-btn-primary button-statis" value="date">时间汇总</button>
+      </div>
+      <input type="hidden" id="group" value="channel">
+    <table id="table_finance-check" style="display: none">
+    </table>
+  </div>
+</div>
+
+<script type="text/html" id="detail">
+    {{#
+    if (d.LAY_INDEX > 1) {
+    }}
+    <a class="layui-btn layui-btn-normal layui-btn-xs" data-obj='{"event": "detail_income","day":"{{d.day_id}}","day_str":"{{d.day}}","channel_id":"{{d.source_id || 0}}","channel_name":"{{d.source_name || ""}}"}'>计费点详情</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs" data-obj='{"event": "detail_cost","day":"{{d.day_id}}","day_str":"{{d.day}}","channel_id":"{{d.source_id || 0}}","channel_name":"{{d.source_name || ""}}"}'>成本详情</a>
+    {{#
+    }
+    }}
+</script>
+
+<script>
+    layui.use('statistics/finance', layui.factory('statistics/finance'));
+</script>
+

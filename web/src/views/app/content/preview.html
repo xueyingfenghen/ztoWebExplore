@@ -1,0 +1,140 @@
+<style>
+    @font-face{
+        font-family:myFont;
+        src:url(../src/style/img/shengong/kt.ttf);
+    }
+    @font-face{
+        font-family:myImg;
+        src:url(../src/style/img/shengong/bigtitle.fnt);
+    }
+    #show_gm_content {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 375px;
+        height: 482px;
+        z-index: 99999;
+        margin: auto;
+    }
+    #show_gm_content .bg_letter {
+        position: relative;
+        width: 375px;
+        height: 482px;
+        background: url(../src/style/img/shengong/box_huashan_2.png) no-repeat;
+        background-size: 375px 482px;
+    }
+    #show_gm_content .bg_letter .btn-close {
+        position: absolute;
+        width: 33px;
+        height: 33px;
+        top: 54px;
+        right: 25px;
+        cursor: pointer;
+    }
+    #show_gm_content .bg_letter .line_panel_l {
+        position: absolute;
+        width: 33px;
+        height: 33px;
+        top: 50px;
+        right: 220px;
+        transform: rotate(-180deg);
+        -webkit-transform: rotate(-180deg);
+        -moz-transform: rotate(-180deg);
+    }
+    #show_gm_content .bg_letter .line_panel_r {
+        position: absolute;
+        width: 33px;
+        height: 33px;
+        top: 59px;
+        right: 120px;
+    }
+    #show_gm_content .notice_title {
+        float: left;
+        width: 291px;
+        height: 40px;
+        text-align: center;
+        line-height: 40px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        /*font-weight: 700;*/
+        /*font-family: myFont;*/
+        color: #553a3a;
+        font-weight: bold;
+        margin-left: 42px;
+        margin-top: 50px;
+    }
+    #show_gm_content .notice_content {
+        float: left;
+        width: 254px;
+        height: 338px;
+        background: rgba(0,0,0,0);
+        font-size: 14px;
+        /*font-family: myFont;*/
+        margin-left: 62px;
+        margin-top: 10px;
+        padding: 0px;border: 0px;list-style: none;outline:none;resize:none;
+        /*overflow:hidden;*/
+        white-space:pre-wrap;
+        color: #553a3a;
+        font-weight: bold;
+    }
+    .notice_content::-webkit-scrollbar {
+        display: none; /* Chrome Safari */
+    }
+    .gong{
+        width:31px;
+        height:33px;
+        background:url(../src/style/img/shengong/bigtitle.png);
+        background-position: 6.5% 90%;
+        float: left;
+    }
+    .gao{
+        width:31px;
+        height:33px;
+        background:url(../src/style/img/shengong/bigtitle.png);
+        float: left;
+        background-position: 30% 57.5%;
+    }
+    .bigtitle{
+        position: absolute;
+        top: 20px;
+        right: 158px;
+    }
+</style>
+<div class="bg_letter">
+    <div class="bigtitle">
+        <div class="gong"></div>
+        <div class="gao"></div>
+    </div>
+    <div class="line_panel_l">
+        <img src="../src/style/img/shengong/line_common_panel_2.png" alt="" width="92px">
+    </div>
+    <div class="line_panel_r">
+        <img src="../src/style/img/shengong/line_common_panel_2.png" alt="" width="92px">
+    </div>
+    <div class="btn-close">
+        <img src="../src/style/img/shengong/btn_close_2.1whpg4s.png" alt="" width="31px">
+    </div>
+    <div class="notice_title"></div>
+    <div class="notice_content"></div>
+
+</div>
+<script type="text/html" template lay-done="layui.data.done(d.params)">
+
+</script>
+<script>
+    layui.data.done = function (d) {
+        console.log(d,'ttttttttt')
+        $('#show_gm_content .notice_title').html(d.title);
+        $('#show_gm_content .notice_content').html(d.cont);
+        //关闭
+        $('.btn-close').click(function () {
+            $('#show_gm_content').html('');
+        })
+    }
+
+</script>

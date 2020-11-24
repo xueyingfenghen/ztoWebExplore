@@ -1,0 +1,58 @@
+<style>
+    #add_wealth_number {
+        padding: 20px;
+    }
+</style>
+<div id="add_wealth_number">
+    <form class="layui-form layui-form-pane">
+        <div class="layui-inline">
+            <label class="layui-form-label">归属者</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="text" class="layui-input belong_name" placeholder="请输入归属者姓名">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">角色ID</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="text" class="layui-input role_id" placeholder="请输入角色ID">
+            </div>
+        </div>
+
+        <button type="button" class="layui-btn add_wealth" style="margin-left: 10px;">添加</button>
+        <button type="button" class="layui-btn layui-btn-primary reset_wealth">重置</button>
+
+        <table id="wealth_number_list"></table>
+
+        <div class="layui-form-item">
+            <button type="button" class="layui-btn layui-btn-theme" id="exec_add_wealth">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="channel_add_wealth">取消</button>
+        </div>
+    </form>
+</div>
+<script>
+    layui.use(['table', 'admin', 'common'], function () {
+        let table = layui.table;
+        let admin = layui.admin;
+
+        var wealthData = [];
+
+        admin.getCols('monitoring_wealth_number_list').then(function (data) {
+            table.render({
+                id: 'wealth_number_list',
+                elem: '#wealth_number_list',
+                page: false,
+                loading: true,
+                cols: data.data,
+                data: wealthData,
+                limit: 1000
+            });
+        })
+
+        // 添加福利号
+        $(document).off('click', '.add_wealth').on('click', '.add_wealth', function () {
+
+        })
+
+
+    })
+</script>

@@ -1,0 +1,119 @@
+<div id="editQQGroup">
+    <form class="layui-form" action="" lay-filter="example">
+        <div class="layui-form-item">
+            <label class="layui-form-label">已选区服</label>
+            <div class="layui-input-block">
+                <input type="text" name="server_list" autocomplete="off" placeholder="请输入区服编号" class="layui-input"
+                    readonly disabled style="cursor: not-allowed;">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">QQ群号</label>
+            <div class="layui-input-block">
+                <input type="text" name="qq_group" placeholder="请输入QQ群号" autocomplete="off" class="layui-input" required
+                    maxlength="15">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">IOSKey</label>
+            <div class="layui-input-block">
+                <input type="text" placeholder="请输入IOSKey" class="layui-input" name="ios_key" max="200"
+                    lay-verify="strlimit|EnOrNum" data-name="IOSKey">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">AndroidKey</label>
+            <div class="layui-input-block">
+                <input type="text" placeholder="请输入AndroidKey" class="layui-input" name="android_key" max="200"
+                    lay-verify="strlimit|EnOrNum" data-name="AndroidKey">
+            </div>
+        </div>
+        <div id="props_content_divs">
+
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+                <input type="password" placeholder="请输入密码" class="layui-input" name="password" data-name="password" autocomplete="new-password">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button lay-filter="submit_action" type="button" class="layui-btn layui-btn-theme submit_action"
+                    lay-submit>提交
+                </button>
+                <button type="button" class="layui-btn layui-btn-primary layer_close">取消</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    layui.extend({ props: '/common/props' });
+    layui.use(['props', 'form', 'admin'], function () {
+        const { props, form, admin } = layui
+
+        const {
+            index, layero, obj = {},ids:globalIds
+        } = layui['add_welfare/qq_welfare']
+        layui.$(".layer_close").click(function () {
+            layer.close(index);
+        });
+        const renderProp = function renderProp(prop = {}) {
+            layero.find('input[name][type!=checkbox]').each(function () {
+                const name = this.name
+                const value = prop[name]
+                $(this).val(value)
+            })
+        }
+        if (obj) {
+            renderProp(obj)
+            globalIds? layero.find('input[name=server_list]').val(globalIds):layero.find('input[name=server_list]').val(obj.server_id)
+        }
+        layui.view('props_content_divs').render('common/prop_select', {
+            props_list: obj && obj.props || [],
+            required_props: true,
+            is_email: true
+        })
+        layero.find('input[name=server_list]').unbind().on('click', admin.openDialog.bind(null, obj['server_id']))
+        form.on("submit(submit_action)", function (obj) {
+            const {
+                ios_key,
+                android_key,
+                password,
+                qq_group,
+                server_list="",
+                prop_choose_type,
+                gift_bag_name = "",
+                gift_bag_type = ""
+            } = obj.field;
+            const prop_content = layui.table.cache.prop_content;
+            const param = {
+                prop_content,
+                ios_key,
+                server_list,
+                android_key,
+                password,
+                qq_group,
+                prop_choose_type,
+                gift_bag_name,
+                gift_bag_type
+            };
+            admin.req({
+                url: admin.getUrl("/api/welfare/editGqWelfare"),
+                data: JSON.stringify(param),
+                method: "post",
+                dataType: 'json',
+                contentType: 'application/json;charset=utf-8'
+            }).then(res => {
+                if (res.code !== 0) {
+                    layer.msg(res.msg || '更新失败', { icon: 5 })
+                    return
+                }
+                layer.msg('更新成功',{icon:6})
+                layer.close(index)
+                layui.table.reload('qq_welfare_list')
+            });
+        });
+    })
+</script>

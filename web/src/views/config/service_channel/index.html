@@ -1,0 +1,394 @@
+<title>区服与渠道</title>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb">
+        <a lay-href="">配置管理</a>
+        <a><cite>区服与渠道</cite></a>
+        <a><cite id="crumbs">区服管理</cite></a>
+    </div>
+</div>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this crumbs_cont">区服管理</li>
+                    <li class="crumbs_cont">渠道管理</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="layui-form layui-form-pane">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label layui-required" style="width: 116px">游戏</label>
+                                    <div class="layui-input-block" style="margin-left: 116px;">
+                                        <select class="game_id" name="game_id" lay-filter="server_game">
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label layui-required" style="width: 116px">平台</label>
+                                    <div class="layui-input-block" style="margin-left: 116px;">
+                                        <select class="server_platform_id" name="platform_id">
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label" style="width: 116px">区服名称</label>
+                                    <div class="layui-input-block" style="margin-left: 116px">
+                                        <input type="text" name="name" class="layui-input">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <button type="button" class="layui-btn" lay-submit lay-filter="server_search">查询</button>
+                                <button type="reset" class="layui-btn layui-btn-primary" lay-submit lay-filter="server_reset">重置</button>
+                            </div>
+                        </form>
+                        <button type="button" class="layui-btn" id="server_add">新增</button>
+                        <table id="server" lay-filter="server"></table>
+                    </div>
+                    <div class="layui-tab-item">
+                        <form class="layui-form layui-form-pane">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label layui-required" style="width: 116px">游戏</label>
+                                    <div class="layui-input-block" style="margin-left: 116px;">
+                                        <select class="game_id" name="game_id" lay-filter="channel_game">
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label layui-required" style="width: 116px">平台</label>
+                                    <div class="layui-input-block" style="margin-left: 116px;">
+                                        <select class="channel_platform_id" name="platform_id">
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label" style="width: 116px">渠道名称</label>
+                                    <div class="layui-input-block" style="margin-left: 116px">
+                                        <input type="text" name="name" class="layui-input">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <button type="button" class="layui-btn" lay-submit lay-filter="channel_search">查询</button>
+                                <button type="reset" class="layui-btn layui-btn-primary" lay-submit lay-filter="channel_reset">重置</button>
+                            </div>
+                        </form>
+                        <button type="button" class="layui-btn" id="channel_add">新增</button>
+                        <table id="channel" lay-filter="channel"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var $  = layui.jquery;
+    $(".crumbs_cont").click(function () {
+       $("#crumbs").html($(this).html());
+    })
+
+    //接入服务
+    //定义表头
+    var s_cols = [ //表头
+        {field: 'id', title: 'ID',align: 'center'}
+        ,{field: 'name', title: '区服名称',align: 'center'}
+        ,{field: 'server_id', title: '区服id',align: 'center'}
+        ,{field: 'platform_name', title: '平台',align: 'center'}
+        ,{field: 'platform_id',hide:true}
+        ,{title: '操作',align: 'center',fixed: 'right', toolbar: '#server_op'}
+    ];
+    var c_cols = [ //表头
+        {field: 'id', title: 'ID',align: 'center'}
+        ,{field: 'name', title: '渠道名称',align: 'center'}
+        ,{field: 'channel_id', title: '渠道id',align: 'center'}
+        ,{field: 'platform_name', title: '平台',align: 'center'}
+        ,{field: 'platform_id',hide:true}
+        ,{title: '操作',align: 'center',fixed: 'right', toolbar: '#channel_op'}
+    ];
+    //渲染、监听 表格属性、数据
+    layui.use(['table','form'], function(){
+        var table = layui.table;
+        var form = layui.form;
+        var $ = layui.jquery;
+        var admin = layui.admin;
+        var str = '';
+        form.render();
+        table.set({
+            headers: {
+                Authorization: layui.data('layuiAdmin').Authorization,
+            }
+        });
+        table.render({
+            elem: '#server'
+            ,url: layui.admin.getUrl('/api/config/server/index') //模拟接口
+            ,where: {}
+            ,cols: [s_cols]
+            ,method:'get'
+            ,parseData: function(res){
+                return {
+                    "code":res.code, //解析接口状态
+                    "msg": '', //解析提示文本
+                    "count": res.data.count, //解析数据长度
+                    "data": res.data.list//解析数据列表
+                };
+            }
+            ,page: true,limit: 10,limits: [10, 15, 20, 25, 30]
+        });
+
+        table.render({
+            elem: '#channel'
+            ,url: layui.admin.getUrl('/api/config/channel/index') //模拟接口
+            ,where: {}
+            ,cols: [c_cols]
+            ,method:'get'
+            ,parseData: function(res){
+                return {
+                    "code":res.code, //解析接口状态
+                    "msg": '', //解析提示文本
+                    "count": res.data.count, //解析数据长度
+                    "data": res.data.list//解析数据列表
+                };
+            }
+            ,page: true,limit: 10,limits: [10, 15, 20, 25, 30]
+        });
+
+        // //平台列表
+        layui.admin.req({
+            url:layui.admin.getUrl('/api/config/server/platform'),
+            method: 'get',
+            data: {},
+            dataType: 'json',
+            done: function (res) {
+                if(res.data.length){
+                    for (var i = 0;i<res.data.length;i++){
+                        str += "<option value="+res.data[i].id+">"+res.data[i].name+"("+res.data[i].game_name+")</option>";
+                    }
+                }
+            }
+        })
+
+        //游戏列表
+        layui.admin.req({
+            url:layui.admin.getUrl('/api/config/server/game'),
+            method: 'get',
+            data: {},
+            dataType: 'json',
+            done: function (res) {
+                if(res.data.length){
+                    var option = '';
+                    for (var i = 0;i<res.data.length;i++){
+                        option += "<option value="+res.data[i].id+">"+res.data[i].cn+"</option>";
+                    }
+                    $(".game_id").append(option);
+                    form.render();
+                }
+            }
+        })
+        //区服游戏下拉框change
+        form.on('select(server_game)', function(data){
+            //平台列表
+            layui.admin.req({
+                url:layui.admin.getUrl('/api/config/server/platform'),
+                method: 'get',
+                data: {game_id:data.value},
+                dataType: 'json',
+                done: function (res) {
+                    var option = '<option value="">请选择</option>';
+                    if(res.data.length){
+                        for (var i = 0;i<res.data.length;i++){
+                            option += "<option value="+res.data[i].id+">"+res.data[i].name+"</option>";
+                        }
+                    }
+                    $(".server_platform_id").html(option);
+                    form.render();
+                }
+            })
+        });
+        //渠道游戏下拉框change
+        form.on('select(channel_game)', function(data){
+            //平台列表
+            layui.admin.req({
+                url:layui.admin.getUrl('/api/config/server/platform'),
+                method: 'get',
+                data: {game_id:data.value},
+                dataType: 'json',
+                done: function (res) {
+                    var option = '<option value="">请选择</option>';
+                    if(res.data.length){
+                        for (var i = 0;i<res.data.length;i++){
+                            option += "<option value="+res.data[i].id+">"+res.data[i].name+"</option>";
+                        }
+                    }
+                    $(".channel_platform_id").html(option);
+                    form.render();
+                }
+            })
+        });
+        //区服管理监听搜索
+        form.on('submit(server_search)', function(data){
+            var field = data.field;
+
+            //执行重载
+            table.reload('server', {
+                where: field
+            });
+        });
+        //区服管理重置
+        form.on('submit(server_reset)', function(data){
+            var field = {
+                name:null,
+                platform_id:null
+                ,page:1
+                ,limit:10
+            };
+            //执行重载
+            table.reload('server', {
+                where: field
+            });
+        });
+
+        //渠道管理监听搜索
+        form.on('submit(channel_search)', function(data){
+            var field = data.field;
+
+            //执行重载
+            table.reload('channel', {
+                where: field
+            });
+        });
+        //渠道管理重置
+        form.on('submit(channel_reset)', function(data){
+            var field = {
+                name:null,
+                platform_id:null
+                ,page:1
+                ,limit:10
+            };
+            //执行重载
+            table.reload('channel', {
+                where: field
+            });
+        });
+
+        //区服管理新增平台
+        $("#server_add").on('click',function () {
+            popup('新增区服',{});
+        })
+        //渠道管理新增平台
+        $("#channel_add").on('click',function () {
+            popup('新增渠道',{},'channel');
+        })
+        //区服监听修改
+        table.on('tool(server)', function(obj) {
+            switch (obj.event) {
+                case "edit":
+                    popup('编辑区服',obj.data);
+                    break;
+                case "del":
+                    layer.confirm('确定要删除吗', function (index) {
+                        if(obj.data.id > 0){
+                            layui.admin.req({
+                                url:layui.admin.getUrl('/api/config/server/del'),
+                                method: 'post',
+                                data: {id:obj.data.id},
+                                dataType: 'json',
+                                done: function (res) {
+                                    if(res.code == 0){
+                                        table.reload('server');
+                                        layer.close(index);
+                                    }else{
+                                        layer.msg(res.msg,{icon:5});
+                                    }
+                                }
+                            })
+                        }else {
+                            return layer.msg('删除失败,id有误',{icon:5});
+                        }
+                    })
+                    break;
+            }
+        })
+        //渠道监听修改
+        table.on('tool(channel)', function(obj) {
+            switch (obj.event) {
+                case "edit":
+                    popup('编辑渠道',obj.data,'channel');
+                    break;
+                case "del":
+                    layer.confirm('确定要删除吗', function (index) {
+                        if(obj.data.id > 0){
+                            layui.admin.req({
+                                url:layui.admin.getUrl('/api/config/channel/del'),
+                                method: 'post',
+                                data: {id:obj.data.id},
+                                dataType: 'json',
+                                done: function (res) {
+                                    if(res.code == 0){
+                                        table.reload('channel');
+                                        layer.close(index);
+                                    }else{
+                                        layer.msg(res.msg,{icon:5});
+                                    }
+                                }
+                            })
+                        }else {
+                            return layer.msg('删除失败,id有误',{icon:5});
+                        }
+                    })
+                    break;
+            }
+        })
+        //弹窗
+        function popup(title,obj = {},type='server'){
+            obj.option = str;
+            obj.type = type;
+            layui.admin.popup({
+                title: title
+                , area: ['540px', '610px']
+                , id: 'server_channel_info'
+                , success: function (layero, index) {
+                    layui.view(this.id).render('config/service_channel/add_service', obj).done(function () {
+                        $("#server_channel_close").on('click',function () {
+                            layer.close(index);
+                        })
+                        layui.form.on('submit(server_channel_submit)', function (data) {
+                            var formData = data.field;
+                            if(obj.id > 0) formData.id = obj.id;
+                            layui.admin.req({
+                                url:layui.admin.getUrl('/api/config/'+type+'/modify'),
+                                method: 'post',
+                                data: formData,
+                                dataType: 'json',
+                                done: function (res) {
+                                    if(res.code == 0){
+                                        table.reload(type);
+                                        layer.closeAll();
+                                    }else{
+                                        layer.msg(res.msg,{icon:5});
+                                    }
+                                }
+                            })
+                            return false;
+                        })
+                    });
+                }
+            });
+        }
+
+    });
+</script>
+<script type="text/html" id="server_op">
+    <a class="layui-btn  layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+</script>
+<script type="text/html" id="channel_op">
+    <a class="layui-btn  layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+</script>

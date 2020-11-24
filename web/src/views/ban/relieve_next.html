@@ -1,0 +1,66 @@
+<form class="layui-form">
+    <div class="layui-form-item layui-form-text select_list" style="display: none">
+        <label class="layui-form-label tip-text">已选账号：</label>
+        <div class="layui-input-block " style="width: 70%">
+            <textarea  class="layui-textarea" name="select_list" readonly></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">解禁理由</label>
+            <div class="layui-input-inline">
+                <select name="relieve_reason" lay-verify="required" lay-search="" lay-filter="relieve_reason">
+                </select>
+            </div>
+            <div class="layui-input-inline rests_reason" style="display: none;width: 184px">
+                <input type="text" name="relieve_rests_reason"  autocomplete="off" placeholder="请输入其他理由" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="relieve_submit">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="relieve_close">取消</button>
+        </div>
+    </div>
+</form>
+<script src="/src/views/ban/ban.js"></script>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+
+<script>
+    var $ = layui.jquery;
+    layui.data.sendParams = function (params) {
+        console.log('解禁下一步进来了',params);
+        layui.use('form',function () {
+            var form = layui.form;
+            //form.render();
+            loadRelieveReason();
+            //封禁理由 ban_reason
+            form.on('select(relieve_reason)',function (e) {
+                if($(this)[0].innerText == '其他' || $(this)[0].innerText == '其它'){
+                    $(".rests_reason").css('display','inline-block');
+                    $("input[name=relieve_reason]").attr('lay-verify','required');
+                }else {
+                    $(".rests_reason").css('display','none');
+                    $("input[name=relieve_reason]").attr('lay-verify','');
+                }
+            })
+        })
+        //填充 账号 设备号
+        if(params[1] != 'roles'){
+            var arr = params[0],str = ',',key = arr.length - 1,user_list = '';
+            for (i=0;i<arr.length;i++){
+                if(i == key) str = '';
+                user_list += arr[i]['banned_list_id'] + str;
+            }
+            $("textarea[name=select_list]").html(user_list);
+            $(".select_list").css('display','block');
+            if(params[1] == 'device'){
+                $(".tip-text").html('已选设备号：');
+            }
+        }
+    }
+</script>
+

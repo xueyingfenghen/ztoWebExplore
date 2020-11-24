@@ -1,0 +1,317 @@
+<style>
+    .layui-input a {
+        color: #1E9FFF;
+        line-height: 38px;
+        text-decoration: underline;
+    }
+    .layui-input span {
+        line-height: 38px;
+    }
+    #content-alert .layui-inline {
+        width: 350px;
+    }
+    #content-alert .layui-form-label {
+        width: 130px;
+    }
+    #content-alert .layui-input-block {
+        margin-left: 130px;
+    }
+</style>
+<div class="content" id="content-alert" style="padding: 0px;">
+
+    <div class="layui-tab layui-tab-brief" lay-filter="otherTabBrief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">基本信息</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form layui-form-pane">
+                    <div class="layui-form-item base_info">
+
+                    </div>
+                </form>
+            </div>
+<!--            <div class="layui-tab-item">-->
+<!--                <form class="layui-form layui-form-pane playerSearch">-->
+<!--                    <div class="layui-form-item" id="playerSearch">-->
+<!--                        &lt;!&ndash;                    内容需要渲染&ndash;&gt;-->
+<!--                    </div>-->
+<!--                    <div class="layui-form-item">-->
+<!--                        <button type="button" class="layui-btn layui-btn-theme">查询</button>-->
+<!--                        <button type="button" class="layui-btn layui-btn-primary">重置</button>-->
+<!--                    </div>-->
+<!--                </form>-->
+<!--                <table id="aaa"></table>-->
+<!--            </div>-->
+        </div>
+    </div>
+
+</div>
+<script type="text/html" template lay-done="layui.data.done(d)"></script>
+<script>
+    layui.data.done = function (d) {
+        let id = d.params.id;
+        console.log(id);
+        layui.use(['table', 'admin', 'form', 'view', 'element', 'common'], function () {
+
+            let admin = layui.admin;
+            let table = layui.table;
+            let form = layui.form;
+            let view = layui.view;
+            let $ = layui.jquery;
+            let element = layui.element;
+
+            let form_prefix = 'player_info_other_form_';
+            let table_prefix = 'player_info_other_table_';
+            let infoOtherList;  // 记录其他信息请求数据
+            let otherShowArr = []; // 将初始化过的其他信息id存起来，避免重复请求
+
+            // 初始化玩家字段信息
+            $.initPlayField = function () {
+                return new Promise(function (resolve, reject) {
+                    admin.req({
+                        url: admin.getUrl('/api/player/getPlayerDetailField'),
+                        data: {
+                            name: 'player_player_user_detail',
+                        },
+                        type: 'post',
+                        done: function (data) {
+                            let html = '';
+                            $.each(data.data, function (key, val) {
+                                html += "<blockquote class='layui-elem-quote'>" + val['value'] + "</blockquote>";
+                                $.each(val['children'], function (k, v) {
+                                    let spanOrA = v.do_more == null ? "<span name='" + v.field + "'></span>" : "<a href='javascript:;' name='" + v.field + "' class='" + v.do_more + "'></a>";
+                                    html +=
+                                        "<div class='layui-inline'>" +
+                                        "<label class='layui-form-label'>" + v.value + "</label>" +
+                                        "<div class='layui-input-block'>" +
+                                        "<div class='layui-input'>" + spanOrA + "</div>" +
+                                        "</div>" +
+                                        "</div>";
+                                })
+                            })
+                            $('#content-alert .base_info').html(html);
+                            resolve();
+                        }
+                    });
+                });
+            };
+
+            // 玩家信息详情
+            $.initPlayerValue = function (id) {
+                admin.req({
+                    url: admin.getUrl('/api/player/getPlayerDetailVal'),
+                    data: {
+                        id: id
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        $.each(data.data, function (key, val) {
+                            if (key != '') {
+                                $("#content-alert span[name=" + key + "]").html(val);
+                                $("#content-alert a[name=" + key + "]").html(val);
+                            }
+                        });
+                        $('.pwd').html('查看密码');
+                        $('.login_history').html('点击查看');
+                    }
+                });
+            }
+
+            // 渲染玩家详情内容
+            $.initPlayField().then(function () {
+                $.initPlayerValue(id);
+
+                otherShowArr = [];
+                // 渲染其他系统的显示列表
+                admin.req({
+                    url: admin.getUrl('/api/player/getPlayerInfoOther'),
+                    data: {},
+                    type: 'get',
+                    done: function (data) {
+                        if (data.code == 0) {
+                            infoOtherList = data.data;
+                            let html_ul = '';
+                            let html_cont = '';
+                            $.each(infoOtherList, function (key, val) {
+                                // tab项
+                                html_ul += "<li>" + val['name'] + "</li>";
+
+                                let html_btns =
+                                    "<div class='layui-form-item'>" +
+                                    "<button type='button' class='layui-btn other_form_btn' data-obj='{\"event\": \"search\",\"type\": \"" + val['type'] + "\"}'>查询</button>" +
+                                    "<button type='button' class='layui-btn layui-btn-primary other_form_btn' data-obj='{\"event\": \"reset\",\"type\": \"" + val['type'] + "\"}'>重置</button>" +
+                                    "</div>";
+
+                                // 不存在搜索框
+                                if (val['form_name'] == null || val['form_name'] == '' || val['form_name'] == undefined) {
+                                    html_btns = '';
+                                }
+
+                                // 内容
+                                html_cont +=
+                                    "<div class='layui-tab-item'>" +
+                                    "<div class='" + val['type'] + "_show_field'></div>" +
+                                    "<form class='layui-form layui-form-pane " + val['type'] + "_form'>" +
+                                    "<div class='layui-form-item' id='" + val['type'] + "_form'>" +
+                                    "</div>" +
+                                    html_btns +
+                                    "</form>" +
+                                    "<table id='" + val['type'] + "_table'></table>" +
+                                    "</div>";
+                            });
+                            $('#content-alert ul').append(html_ul);
+                            $('#content-alert .layui-tab-content').append(html_cont);
+                            $('.layui-tab-title').resize();
+                        }
+                    }
+                });
+
+            })
+
+            // 玩家详情-其他信息切换
+            element.on('tab(otherTabBrief)', function (data) {
+                // 排除第一个玩家信息
+                if (data.index > 0 && otherShowArr.indexOf(data.index) == -1) {
+                    otherShowArr.push(data.index);
+                    let list = infoOtherList[data.index - 1];
+                    if (list['show_fields'] != null || list['show_fields'] != '' || list['show_fields'] != undefined) {
+                        let html_field = '';
+                        $.each(list['show_fields'], function (key, val) {
+                            html_field += "<span>" + val['title'] + '：' + "<span style='color: green;margin-right: 30px;' name='" + val['field'] + "'></span></span>";
+                        })
+                        html_field = "<blockquote class='layui-elem-quote'>" + html_field + "</blockquote>";
+                        $('.' + list['type'] + '_show_field').html(html_field);
+                    }
+
+                    admin.initForms(list['form_name'], '#' + list['type'] + '_form').then(function () {
+                        admin.getCols(list['table_name']).then(function (res) {
+                            let cols = res.data;
+                            let param = admin.getFormParam('.' + list['type'] + '_form');
+                            param.type = list['type'];
+                            param.role_id = id;
+                            table.render({
+                                id: list['type'] + '_table',
+                                elem: '#' + list['type'] + '_table',
+                                url: admin.getUrl('/api/player/getOtherInfoByType'),
+                                method: 'GET',
+                                where: param,//请求参数(额外)
+                                request: {
+                                    pageName: 'page' //页码的参数名称，默认：page
+                                    , limitName: 'limit' //每页数据量的参数名，默认：limit
+                                },
+                                response: { //定义后端 json 格式，详细参见官方文档
+                                    statusName: 'code', //状态字段名称
+                                    statusCode: '0', //状态字段成功值
+                                    msgName: 'msg', //消息字段
+                                    countName: 'countAll', //总页数字段
+                                    dataName: 'data', //数据字段
+                                },
+                                page: true,
+                                loading: true,
+                                cols: cols,
+                                done: function (result) {
+                                    $.each(result['field'], function (key, val) {
+                                        $('.' + list['type'] + '_show_field' + " span[name='" + key + "']").html(val);
+                                    })
+                                }
+                            });
+                        })
+                    });
+
+                }
+
+            });
+
+
+            // 搜索 重置
+            $(document).off('click', '.other_form_btn').on('click', '.other_form_btn', function () {
+                if (!$(this).attr('data-obj')) return;
+                var obj = JSON.parse($(this).attr('data-obj'));
+                var event = obj.event;
+                active[event] ? active[event].call(this, obj) : '';
+            })
+
+            let active = {
+                search: search,
+                reset: reset
+            };
+
+            function search(obj) {
+                let param = admin.getFormParam('.' + obj.type + '_form');
+                param.type = obj.type;
+                admin.reload('.' + obj.type + '_form', obj.type + '_table', param);
+            }
+
+            function reset(obj) {
+                admin.resetForm('.' + obj.type + '_form');
+                let param = admin.getFormParam('.' + obj.type + '_form');
+                param.type = obj.type;
+                admin.reload('.' + obj.type + '_form', obj.type + '_table', param);
+            }
+
+
+            $.login_list = function (cols, id) {
+                table.render({
+                    id: 'login_list',
+                    elem: '#login_list',
+                    url: admin.getUrl('/api/player/loginHistoryList'),
+                    method: 'GET',
+                    where: {
+                        id: id,
+                    },//请求参数(额外)
+                    request: {
+                        pageName: 'page' //页码的参数名称，默认：page
+                        , limitName: 'limit' //每页数据量的参数名，默认：limit
+                    },
+                    response: { //定义后端 json 格式，详细参见官方文档
+                        statusName: 'code', //状态字段名称
+                        statusCode: '0', //状态字段成功值
+                        msgName: 'msg', //消息字段
+                        countName: 'countAll', //总页数字段
+                        dataName: 'data', //数据字段
+                    },
+                    page: true,
+                    loading: true,
+                    cols: cols
+                });
+            }
+            // 登录历史
+            $(document).off('click', '.login_history').on('click', '.login_history', function () {
+                admin.popup({
+                    title: '角色登录历史'
+                    , area: ['70%', '70%']
+                    , id: 'login_history'
+                    // ,btn: ['确定', '取消']
+                    , success: function (layero, index) {
+                        view(this.id).render('player/popup/loginHistory').done(function () {
+
+                            admin.req({
+                                url: admin.getUrl('/api/base/getTableCols'),
+                                data: {
+                                    name: 'player_player_user_login_history',
+                                },
+                                type: 'post',
+                                done: function (data) {
+                                    $.login_list(data.data, id)
+                                }
+                            });
+
+                        });
+                    }
+                    , yes: function (index, layero) {
+
+                    }
+                    , btn2: function (index, layero) {
+                        //按钮【按钮二】的回调
+                    }
+                    , cancel: function () {
+                        //右上角关闭回调
+                    },
+                });
+            });
+
+        })
+    }
+
+</script>

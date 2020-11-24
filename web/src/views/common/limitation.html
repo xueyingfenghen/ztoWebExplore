@@ -1,0 +1,38 @@
+<div class="layui-form-item layui-inline" pane="">
+    <label class="layui-form-label">限制条件</label>
+    <div class="layui-input-block">
+        <input type="radio" class="is-limit-select" lay-filter="is-limit-select" name="is_limit" value="0" title="否"
+               checked>
+        <input type="radio" class="is-limit-select" lay-filter="is-limit-select" name="is_limit" value="1" title="是">
+    </div>
+</div>
+
+<!--   动态加载条件列表 -->
+<div class="limitation-hide" id="list-container" style="width: 100%;padding: 0px">
+</div>
+<div id="list-form-hidden">
+</div>
+
+<div class="layui-form-item limitation-hide layui-form-text">
+    <label class="layui-form-label" style="width: 710px">已选条件</label>
+    <div class="layui-input-inline">
+            <textarea name="limitation_text" lay-filter="limitation-edit" id="limitation-edit"
+                      style="width: 710px; height: 50px;" autocomplete="off" class="layui-textarea" disabled>
+                    </textarea>
+    </div>
+</div>
+
+<script type="text/html" id="server_limit" lay-done="">
+    <div class="layui-form-item ">
+        <label class="layui-form-label">限制区服</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="server-limit-show" lay-filter="server-limit-show"
+                   lay-verify="server_limit" name=""
+                   value="" style="width: 600px;" placeholder="点击输入框进行区服勾选" readonly>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" template lay-done="layui.data.limitationSendParams(d.params)">
+
+</script>

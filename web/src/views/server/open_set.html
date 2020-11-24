@@ -1,0 +1,179 @@
+
+<div class="layui-card" id="top-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" lay-filter="tabs">
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show" id="search_time-open">
+                    <form class="layui-form layui-form-pane form_time-open">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">区服编号</label>
+                                <div class="layui-input-inline">
+                                    <select id="serverIdSelect" name="server_id" lay-filter="serverIdSelect">
+                                        <option value="">请选择区服</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">区服名称</label>
+                                <div class="layui-input-inline">
+                                   <input type="text" name="server_name" class="layui-input" placeholder="请输入区服名称" id="serverName"/>
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">区服状态</label>
+                                <div class="layui-input-inline">
+                                    <select id="stateSelect" name="state" lay-filter="stateSelect">
+                                        <option value="0">全部</option>
+                                        <option value="1">维护</option>
+                                        <option value="2">火爆</option>
+                                        <option value="3">推荐</option>
+                                        <option value="4">未开区</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">开区时间</label>
+                                <div class="layui-input-inline" style="width: 500px">
+                                    <input type="text" class="layui-input layui-unselect" id="openTime" name="open_time" placeholder="请选择开始时间 - 请选择结束时间">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-inline" id="searchBtn">
+                                <button type="button" class="layui-btn layui-btn-theme" id="districtSearchBtn">查询</button>
+                                <button type="button" class="layui-btn layui-btn-primary" id="districtResetBtn">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_time-open" style="display: none;">
+    <div class="layui-card-body">
+        <div id="list_time-open">
+            <table id="district-set-list" lay-filter="district-set-list"></table>
+            <div id="district-set-page"></div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_auto-open" style="display: none;">
+    <div class="layui-card-body">
+        <div id="list_auto-open">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-theme" id="setAutoOpenBtn">设置自动开区</button>
+            </div>
+            <table id="auto-open-list" lay-filter="auto-open-list"></table>
+            <div id="auto-open-page"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script type="text/html" id="operateTpl">
+    {{# if((d.open_time == null && d.show_set == 1) || new Date(d.open_time)> new Date()){ }}
+        <button type="button" lay-event="setOpen" class="layui-btn layui-btn-xs layui-btn-normal setOpen">设置开区</button>
+    {{# }else if(d.open_time != null && new Date(d.open_time) < new Date()){ }}
+        <button type="button" lay-event="editOpen" class="layui-btn layui-btn-xs layui-btn-warm editOpen">修改</button>
+    {{# } }}
+    {{# if(d.show_cancel == 1 && d.open_time != null && new Date(d.open_time)> new Date()){ }}
+    <button type="button" class="layui-btn layui-btn-danger layui-btn-xs cancelOpen" lay-event="cancelOpen" style="background-color: red;">取消开区</button>
+    {{# } }}
+</script>
+
+<script type="text/html" id="autoOperateTpl">
+    {{# if(d.opened == 2){ }}
+        {{#
+            var autoStr = 'checked'
+        }}
+    {{# }else{ }}
+        {{#
+        var autoStr = ''
+        }}
+    {{# } }}
+    <input type="checkbox" {{=autoStr}} name="auto_open" data-server_id="{{d.server_id}}" lay-skin="switch" lay-filter="openAuto" lay-text="开启|关闭">
+</script>
+
+<script type="text/html" id="serverIdAutoTpl">
+    {{# if(d.server_id == undefined || d.server_id == 0){ }}
+        --
+    {{# }else{ }}
+        {{d.server_id}}
+    {{# } }}
+</script>
+
+<script type="text/html" id="serverNameAutoTpl">
+    {{# if(d.server_name == undefined || d.server_name == ''){ }}
+        --
+    {{# }else{ }}
+        {{d.server_name}}
+    {{# } }}
+</script>
+
+<script type="text/html" id="serverActivityAutoTpl">
+    {{# if(d.opened == 1 || d.activity == undefined || d.activity == ''){ }}
+        --
+    {{# }else{ }}
+        {{d.activity}}
+    {{# } }}
+</script>
+
+<script type="text/html" id="serverActivityWriteAutoTpl">
+    {{# if(d.opened == 1 || d.activity_write == undefined || d.activity_write == 0){ }}
+        --
+    {{# }else if(d.activity_write == 1){ }}
+        失败
+    {{# }else{ }}
+        成功
+    {{# } }}
+</script>
+
+<script type="text/html" id="serverOpenNumTpl">
+    {{# if(d.opened == 1 || d.open_num == undefined || d.open_num == 0){ }}
+        --
+    {{# }else{ }}
+        {{d.open_num}}
+    {{# } }}
+</script>
+
+
+
+<script type="text/html" id="serverOpenRangeTpl">
+    {{# if(d.opened == 1 || d.auto_start_time == undefined || d.auto_start_time == '' || d.auto_end_time == undefined || d.auto_end_time == ''){ }}
+        --
+    {{# }else{ }}
+        {{d.auto_start_time}} -  {{d.auto_end_time}}
+    {{# } }}
+</script>
+<script type="text/html" id="serverPeopleNumTpl">
+    {{d.people_num}}
+</script>
+
+<script>
+
+    var jsArr = {
+        'time-open': 'server/open_set',
+        'auto-open': 'server/auto_open',
+    };
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+
+
+    // layui.use('server/open_set', layui.factory('server/open_set'));
+
+</script>

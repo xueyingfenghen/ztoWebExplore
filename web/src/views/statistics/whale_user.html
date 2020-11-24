@@ -1,0 +1,74 @@
+<style>
+    #data_report_search .layui-inline {
+        margin-bottom: 10px!important;
+        margin-right: 20px!important;
+    }
+    #data_report_search .layui-input-block {
+        width: 190px;
+    }
+    .reportRight{
+        float: right;
+    }
+</style>
+
+<!--<title>实时数据</title>-->
+
+<!--<div class="layui-card layadmin-header">-->
+<!--    <div class="layui-breadcrumb" lay-filter="breadcrumb">-->
+<!--        <a lay-href="">数据分析</a>-->
+<!--        <a><cite>鲸鱼用户分析</cite></a>-->
+<!--    </div>-->
+<!--</div>-->
+
+
+<div class="">
+
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+                </ul>
+                <div class="layui-tab-content">
+                    <!--数据报表-->
+                    <div class="layui-tab-item" id="search_whale-user" style="display: none;">
+                        <form class="layui-form layui-form-pane data_whale_search">
+                            <div class="layui-form-item" id="data_whale_search">
+                                <!--                    内容需要渲染-->
+
+                            </div>
+                            <div class="layui-form-item">
+                                <button type="button" class="layui-btn layui-btn-theme" id="search-btn">查询</button>
+                                <button type="button" class="layui-btn layui-btn-primary" id="reset-btn">重置</button>
+                                <button type="button" class="layui-btn" id="export-btn">导出</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card tabs" id="list_whale-user" style="display: none;">
+        <div class="layui-card-header">
+            鲸鱼用户分析
+        </div>
+        <div class="layui-card-body" id="">
+            <table id="data_whale_list" lay-filter="data_whale_list"></table>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/html" id="op">
+    <a class="layui-btn layui-btn-normal layui-btn-xs detail" data-obj='{"event": "detail"}' data-id="{{d.role_id}}">用户详情</a>
+</script>
+
+<script>
+
+    var jsArr = {
+        'whale-user': 'statistics/whale_user',
+    };
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+</script>
+

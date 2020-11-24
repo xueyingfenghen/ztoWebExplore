@@ -1,0 +1,119 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+
+                <!--新增留存-->
+                <div class="layui-tab-item" id="search_runoff-time" style="display: none;">
+                    <form class="layui-form layui-form-pane form_runoff_time">
+                        <div class="layui-form-item" id="form_runoff_time">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_runoff_time","tableId": "table_runoff_time_list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_runoff_time","tableId": "table_runoff_time_list"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_runoff_time","url":"/api/stats_export/user_loss/loss_time"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+
+                <div class="layui-tab-item" id="search_runoff-node" style="display: none;">
+                    <form class="layui-form layui-form-pane form_runoff_node">
+                        <div class="layui-form-item" id="form_runoff_node">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="node_search">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="node_reset">重置</button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_runoff_node","url":"/api/stats_export/user_loss/loss_node"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="layui-tab-item" id="search_runoff-watch" style="display: none;">
+                    <form class="layui-form layui-form-pane form_runoff-watch">
+                        <div class="layui-form-item" id="form_runoff-watch">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","form_class": ".form_runoff-watch","tableId": "table_runoff-watch_list"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","form_class": ".form_runoff-watch","tableId": "table_runoff-watch_list"}'>
+                                重置
+                            </button>
+                            <button type="button" class="layui-btn"
+                                    data-obj='{"event": "export_excel","form_class": ".form_runoff-watch","url":"/api/stats_export/user_loss/loss_monitor"}'>
+                                导出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs" id="list_runoff-time" style="display: none;">
+    <div class="layui-card-body">
+        <div id="echars_list_runoff_time" style="width: 100%;height: 500px;"></div>
+        <table id="table_runoff_time_list">
+        </table>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_runoff-node" style="display: none;">
+    <div class="layui-card-body">
+
+        <div class="layui-tab layui-tab-brief" lay-filter="runoffNodeTabBrief">
+            <ul class="layui-tab-title not-main" id="node_ul">
+                <!--                <li class="layui-this">VIP等级</li>-->
+            </ul>
+            <div class="layui-tab-content" id="node_cont">
+                <!--                <div class="layui-tab-item layui-show">-->
+                <!--                    <div id="echars_list_runoff_node" style="width: 100%;height: 500px;"></div>-->
+                <!--                    <table id="table_runoff_node_list_loss_vip"></table>-->
+                <!--                </div>-->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_runoff-watch" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_runoff-watch_list">
+        </table>
+    </div>
+</div>
+<script>
+
+    var jsArr = {
+        'runoff-time': 'statistics/runoff_analyze/runoff_time',
+        'runoff-node': 'statistics/runoff_analyze/runoff_node',
+        'runoff-watch': 'statistics/runoff_analyze/runoff_watch',
+    }
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+</script>

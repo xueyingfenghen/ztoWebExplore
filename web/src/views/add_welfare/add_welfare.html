@@ -1,0 +1,66 @@
+<style>
+    .email_form .layui-input-block {
+        width: 190px;
+    }
+
+    .layui-table-cell {
+        height: inherit;
+    }
+
+    .container {
+        overflow: hidden;
+
+    }
+
+    .container>div:first-child {
+        text-align: left;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+                <!--加群福利-->
+                <div class="layui-tab-item" id="search_qq-welfare" style="display: none;">
+                    <form class="layui-form layui-form-pane email_form qq_welfare">
+                        <div class="layui-form-item" id="qq_welfare">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search_qq_welfare" lay-submit
+                                lay-filter="submit_qq_welfare">查询</button>
+                            <button type="reset" class="layui-btn layui-btn-primary" id="reset_qq_welfare">重置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-card tabs container" style="display: none;" id="list_qq-welfare">
+    <div class="layui-card-body" style="margin:0;">
+        <button class="layui-btn layui-btn-theme layui-btn-" data-event="modifyAll">一键修改</button>
+    </div>
+
+    <div class="layui-card-body" style="margin:0;padding-top:0 ;">
+        <table id="qq_welfare_list" lay-filter="qq_welfare_list"></table>
+    </div>
+</div>
+
+
+<script>
+    var jsArr = {
+        'qq-welfare': 'add_welfare/qq_welfare',    // 全服邮件
+    };
+    console.log(tabs)
+    layui.use(jsArr[tabs[0]], layui.factory(jsArr[tabs[0]]));
+    elementTabs(jsArr);
+</script>
+<script type="text/html" id="edit">
+    <button class="layui-btn layui-btn-normal layui-btn-xs" data-event="edit">修改</button>
+</script>

@@ -1,0 +1,51 @@
+<style>
+    #serverNo{
+        background-color: #E6E6E6;
+    }
+</style>
+<div id="setDistrictPage">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-form-item">
+                <label class="layui-form-label">区服编号：</label>
+                <div class="layui-input-block" style="width: 80%">
+                    <input type="text" name="area" id="serverIdInput" autocomplete="off" placeholder="区服编号" class="layui-input" readonly disabled />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">区服名称：</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="serverNameInput" name="server_name" placeholder="区服名称">
+                </div>
+            </div>
+            <div class="layui-form-item" id="openTimeItem">
+                <label class="layui-form-label">开区时间：</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="openTimeInput" name="open_time" autocomplete="off" placeholder="请选择开区时间">
+                </div>
+            </div>
+            <div class="layui-form-item" id="activityItem">
+                <label class="layui-form-label">开区活动：</label>
+                <input type="radio" lay-filter="radioActivity" name="activity_type" class="activityType" checked value="1" title="自动导刷" />
+                <input type="radio" lay-filter="radioActivity" name="activity_type" class="activityType" value="2" title="手动导刷" />
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">密码：</label>
+                <div class="layui-input-inline">
+                    <input type="password" class="layui-input" id="openPwd" name="pwd" placeholder="请输入密码" autocomplete="new-password">
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="layui-form-item">
+        <div class="layui-inline" style="padding-left: 140px;">
+            <button type="button" class="layui-btn layui-btn-theme" id="submitBtn">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="cancelBtn">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    layui.use('server/set_district', layui.factory('server/set_district'));
+</script>

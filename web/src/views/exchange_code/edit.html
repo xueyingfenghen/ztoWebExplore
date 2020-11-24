@@ -1,0 +1,170 @@
+<form class="layui-form layui-form-pane" lay-filter="generate-code-form">
+    <div class="layui-form" lay-filter="layuiadmin-generate-code" id="layuiadmin-generate-code"
+         style="padding: 20px 30px 0 0;">
+
+        <div class="layui-form-item">
+            <div class="layui-form-inline">
+                <label class="layui-form-label">兑换码ID</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="id" value="" lay-filter="id-edit" id="id-edit" autocomplete="off"
+                           class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-inline event-edit-disable">
+                <label class="layui-form-label">兑换码名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="name" value="" lay-verify="name_length" lay-filter="name-edit"
+                           id="name-edit" autocomplete="off" placeholder="请输入兑换码名称"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <!--   动态道具添加选择
+        -->
+        <div class="layui-props" id="props-container" style="width: 100%;padding: 0px">
+
+        </div>
+
+        <div class="layui-form-item event-edit-hide">
+            <div class="layui-form-item layui-inline" pane="">
+                <label class="layui-form-label">兑换码类型</label>
+                <div class="layui-input-block">
+                    <input class="type-edit" lay-verify="required" lay-filter="type-edit" type="radio" name="type"
+                           value="1" title="动态兑换码"
+                           checked>
+                    <input class="type-edit" lay-verify="required" lay-filter="type-edit" type="radio" name="type"
+                           value="2" title="通用兑换码">
+                </div>
+            </div>
+            <div class="layui-inline" id="code-field">
+                <label class="layui-form-label">通用兑换码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="code" value="" lay-filter="code" id="code" autocomplete="off"
+                           lay-verify="common_code" placeholder="请输入通用兑换码字符串内容，必须是不大于16位的数字或字母"
+                           class="layui-input" style="width: 410px">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-form-item layui-inline" pane="">
+                <label class="layui-form-label">领取类型</label>
+                <div class="layui-input-block">
+                    <input type="radio" class="receive-count-edit" lay-verify="required" lay-filter="receive-type-edit"
+                           name="receive_type" value="1" title="单次领取"
+                           checked>
+                    <input type="radio" class="receive-count-edit" lay-verify="required" lay-filter="receive-type-edit"
+                           name="receive_type" value="2" title="多次领取">
+                </div>
+            </div>
+            <div class="layui-inline" id="receive-count-field" hidden>
+                <label class="layui-form-label">领取次数</label>
+                <div class="layui-input-block">
+                    <input type="text" name="receive_count" value="" lay-filter="receive-count-edit"
+                           lay-verify="receive_count" placeholder="请输入领取次数"
+                           id="receive-count-edit" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <!--
+            限制条件
+        -->
+        <div class="layui-limitation" id="limitation-container" style="width: 100%;padding: 0px">
+
+        </div>
+
+        <div class="layui-form-item event-edit-hide">
+            <label class="layui-form-label">生成数量</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="text" name="generate_count" value="" lay-filter="generate-count-edit"
+                           lay-verify="generate" placeholder="请输入生成数量"
+                           id="generate-count-edit"
+                           autocomplete="off"
+                           class="layui-input">
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline event-edit-hide">
+                <label class="layui-form-label">生效时间</label>
+                <div class="layui-input-inline date-time-input">
+                    <input type="text" name="start_time" value="" lay-filter="start-time-edit" id="start-time-edit"
+                           data-laydate='{"elem": "#start-time-edit","type": "datetime" , "range": false}'
+                           lay-verify="start_datetime" placeholder="请选择生效时间"
+                           autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">失效时间</label>
+                <div class="layui-input-inline date-time-input">
+                    <input type="text" name="end_time" value="" lay-filter="end-time-edit" id="end-time-edit"
+                           lay-verify="end_datetime" placeholder="请选择失效时间"
+                           data-laydate='{"elem": "#end-time-edit","type": "datetime" , "range": false}'
+                           autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item event-edit-hide">
+            <label class="layui-form-label">申请理由</label>
+            <div class="layui-input-inline">
+                <select name="reason_type" id="reason-type-edit" lay-filter="reason-type-edit" lay-verify="reason">
+                </select>
+            </div>
+            <div class="layui-input-inline" id="reason-edit-field" hidden>
+                <input type="text" name="apply_reason" value="" lay-filter="reason-edit" id="reason-edit"
+                       placeholder="请输入申请理由"
+                       autocomplete="off" class="layui-input" style="width: 400px;">
+            </div>
+        </div>
+
+        <div class="layui-form-item event-edit-hide">
+            <label class="layui-form-label">审核人</label>
+            <div class="layui-input-inline">
+                <select name="judge_user_id" id="judge-user-edit" lay-filter="judge-user-edit" lay-verify="judge_user">
+                    <option value="">请选择审核人</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item event-edit-show" id="password-field" hidden>
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-inline">
+                <script type="text/html" template>
+                    <input type="password" name="password" value="" lay-filter="password-edit" id="password-edit"
+                           lay-verify="password_edit" placeholder="请输入密码"
+                           autocomplete="new-password" class="layui-input">
+                </script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+
+            <div class="layui-input-inline">
+                <input type="button" lay-submit lay-filter="exchange-batch-submit" value="提交" id="commit"
+                       class="layui-btn layui-btn-theme">
+                <!-- 弹出 请输入密码后再点取消没反应，应该是 layer.index找不到的问题，改成通过id关闭弹窗 -->
+                <!-- <button class="layui-btn layui-btn-primary" type="button" onclick="layer.close(layer.index)">取消</button> -->
+                <button class="layui-btn layui-btn-primary" type="button" id="cancelBtn">取消</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.data.sendParams = function (params) {
+        layui.use('exchange_code/edit', function () {
+            $.editBatchParams(params);
+        });
+    };
+</script>
+
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+

@@ -1,0 +1,52 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+            <div class="layui-tab-content">
+
+                <!--登录前公告-->
+                <div class="layui-tab-item" id="search_import-detail" style="display: none;">
+                    <form class="layui-form layui-form-pane form_import-detail">
+                        <div class="layui-form-item" id="activity_import-detail_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme"
+                                    data-obj='{"event": "search","formClass": ".form_import-detail","tableId": "table_import-detail"}'>
+                                查询
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary"
+                                    data-obj='{"event": "reset","formClass": ".form_import-detail","tableId": "table_import-detail"}'>
+                                重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs " id="list_import-detail" style="display: none;">
+    <div class="layui-card-body">
+        <table id="table_import-detail" lay-filter="table_import-detail">
+        </table>
+    </div>
+</div>
+
+<script>
+    layui.use('activity/importDetail', layui.factory('activity/importDetail'));
+</script>
+
+<script type="text/html" id="op">
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "ac_detail",  "tableId": "table_import-detail", "index":"{{ d.LAY_TABLE_INDEX }}", "title":"活动详情"}'>活动详情</a>
+    {{#  if(d.state==-1){ }}
+    <a class="layui-btn layui-btn-danger layui-btn-xs"
+       data-obj='{"event": "fail_detail",  "tableId": "table_import-detail", "index":"{{ d.LAY_TABLE_INDEX }}"}'>失败详情</a>
+    {{# } }}
+</script>
+
+

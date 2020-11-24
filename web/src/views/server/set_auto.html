@@ -1,0 +1,50 @@
+<style>
+    .labelWidth{
+        width: 100px;
+    }
+</style>
+<div id="setAutoOpenPage">
+    <form class="layui-form">
+        <div class="layui-form-item" id="activityItem">
+            <label class="layui-form-label labelWidth">开区活动：</label>
+            <input type="radio" lay-filter="radioActivity" name="activity_type" class="activityType" checked value="1" title="自动导刷" />
+            <input type="radio" lay-filter="radioActivity" name="activity_type" class="activityType" value="2" title="手动导刷" />
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label labelWidth">开区条件：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="openNum" name="open_num" class="layui-input" placeholder="请输入开区条件" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label labelWidth">最早开区时间：</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="startTime" name="start_time" placeholder="请选择最早开区时间">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label labelWidth">最晚开区时间：</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="endTime" name="end_time" placeholder="请选择最晚开区时间">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label labelWidth">密码：</label>
+            <div class="layui-input-inline">
+                <input type="password" class="layui-input" id="autoOpenPwd" name="pwd" autocomplete="new-password" placeholder="请输入密码">
+            </div>
+        </div>
+    </form>
+
+    <div class="layui-form-item">
+        <div class="layui-inline" style="padding-left: 140px;">
+            <button type="button" class="layui-btn layui-btn-theme" id="submitBtn">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="cancelBtn">取消</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    layui.use('server/set_auto', layui.factory('server/set_auto'));
+</script>

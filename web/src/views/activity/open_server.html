@@ -1,0 +1,64 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" id="tabs" lay-filter="tabs">
+            </ul>
+
+
+            <div class="layui-tab-content">
+                <div class="layui-tab-item" id="search_activity-server" style="display: none;">
+                    <form class="layui-form layui-form-pane activity_open_server_form">
+                        <div class="layui-form-item" id="activity_open_server_form">
+
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" data-obj='{"event": "search","formClass": ".activity_open_server_form","tableId": "table_activity_open_server"}'>查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" data-obj='{"event": "reset","formClass": ".activity_open_server_form","tableId": "table_activity_open_server"}'>重置</button>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card tabs" id="list_activity-server" style="display: none;">
+    <div class="layui-card-body">
+        <button type="button" class="layui-btn layui-btn-theme btn-add" style="margin-bottom: 10px;" data-obj='{"event": "add","tableId": "table_activity_open_server"}'>新增活动</button>
+        <table id="table_activity_open_server"></table>
+    </div>
+</div>
+
+<script>
+    layui.use('activity/open_server', layui.factory('activity/open_server'));
+</script>
+
+<script type="text/html" id="op">
+    {{#  if(d.default == 1){ }}
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "detail","tableId": "table_activity_open_server", "title":"活动详情","index":"{{ d.LAY_TABLE_INDEX }}"}'>
+        活动详情
+    </a>
+    {{#  } else { }}
+    <a class="layui-btn  layui-btn-xs"
+       data-obj='{"event": "set_default","tableId": "table_activity_open_server","index":"{{ d.LAY_TABLE_INDEX }}"}'>
+        设为默认
+    </a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs"
+       data-obj='{"event": "detail","tableId": "table_activity_open_server", "title":"活动详情","index":"{{ d.LAY_TABLE_INDEX }}"}'>
+        活动详情
+    </a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs"
+       data-obj='{"event": "del","tableId": "table_activity_open_server","index":"{{ d.LAY_TABLE_INDEX }}"}'>
+        删除
+    </a>
+    {{#  } }}
+</script>
+
+<script type="text/html" id="default">
+    {{#  if(d.default == 1){ }}
+    <label class="layui-green">默认开区活动</label>
+    {{#  } }}
+</script>

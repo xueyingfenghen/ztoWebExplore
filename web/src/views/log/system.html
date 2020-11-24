@@ -1,0 +1,291 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title" lay-filter="tabs">
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show" id="search_system-log-tab1">
+                    <form class="layui-form layui-form-pane" lay-filter="user-form">
+                        <div class="layui-form-item" id="user-search">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">操作类型</label>
+                                <div class="layui-input-inline">
+                                    <select id="type" lay-filter="type" name="type">
+                                        <option value="">请选择操作类型</option>
+                                    </select>
+                                </div>
+                                <div class="layui-input-inline">
+                                    <select id="module-id" lay-filter="module-id" name="module_id" placeholder="请选择操作模块">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">日志标题</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="title" class="layui-input" id="title" placeholder="请输入日志标题">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">日志内容</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="content" class="layui-input" id="content" placeholder="请输入日志内容">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">操作人</label>
+                                <div class="layui-input-block">
+                                    <select id="operation-user-id" lay-filter="operation-user-id" name="operation_user_id">
+                                        <option value="">请选择操作人</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">操作时间</label>
+                                <div class="layui-input-inline" style="width: 390px">
+                                    <input type="text" class="layui-input" id="date-time" name="date_time" placeholder="请选择开始时间 - 请选择结束时间">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="button" class="layui-btn layui-btn-theme" id="search-commit">查询</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="search-reset">重置</button>
+                            <button type="button" class="layui-btn" id="export">导出</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card"  id="list_system-log-tab1">
+    <div class="layui-card-header">系统日志
+    </div>
+    <div class="layui-card-body">
+        <table id="system-log" lay-filter="system-log"></table>
+        <div id="system-log-paginate" lay-filter="system-log-paginate">
+        </div>
+    </div>
+</div>
+
+<script>
+    layui.use(['table', 'admin', 'form', 'laydate'], function () {
+        let admin = layui.admin;
+        let tableOjb = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+
+
+        layui.laydate.render({
+            elem: '#date-time'
+            , type: 'datetime'
+            , range: true
+        });
+
+        // 玩家列表
+        tableOjb.render({
+            id: 'system-log',
+            elem: '#system-log',
+            loading: true,
+            cols: [[
+                {field: 'module_id', title: '操作模块', align: 'center'},
+                {field: 'title', title: '日志标题', align: 'center'},
+                {field: 'content', title: '日志内容', align: 'center'},
+                {field: 'nick_name', title: '操作人', align: 'center'},
+                {field: 'created_at', title: '操作时间', align: 'center', sort: true}
+            ]]
+        });
+
+        //请求数据接口
+        var page = 1;
+        var pageSize = 10;
+        var filter = {};
+        var sort = {};
+        var loadTableData = function () {
+            filter.page = page;
+            filter.page_size = pageSize;
+            filter.sort = sort;
+            admin.req({
+                url: admin.getUrl('/api/log/system'), //实际使用请改成服务端真实接口
+                data: filter,
+                method: 'get',
+                done: function (res) {
+                    if (res.code == 0) {
+                        table = [];
+                        $.each(res.data.list, function (line, item) {
+                            //组别处理
+                            var groupStr = '';
+                            $.each(item.groups, function (index, group) {
+                                groupStr += (group.game_name + '-' + group.group_name + '|');
+                            });
+                            table[line] = {
+                                module_id: item.module_id || '',
+                                title: item.title || '',
+                                content: item.content || '',
+                                nick_name: item.nick_name || '',
+                                created_at: item.created_at
+                            };
+                        });
+
+                        tableOjb.reload('system-log', {
+                            data: table,
+                            limit: pageSize
+                        });
+
+                        layui.laypage.render({
+                            elem: 'system-log-paginate'
+                            , count: res.data.total //数据总数，从服务端得到
+                            , limit: pageSize
+                            , curr: page
+                            , limits: [10, 20, 30, 40, 50]
+                            , layout: ['prev', 'page', 'next', 'skip', 'count', 'limit']
+                            , prev: '<i class="layui-icon">&#xe603;</i>'
+                            , next: '<i class="layui-icon">&#xe602;</i>'
+                            , jump: function (obj, first) {
+                                //obj包含了当前分页的所有参数，比如：
+                                // console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                                // console.log(obj.limit); //得到每页显示的条数
+                                page = obj.curr;
+                                pageSize = obj.limit;
+
+                                if (!first) {
+                                    loadTableData();
+                                }
+                            }
+                        });
+
+                        //监听排序事件
+                        tableOjb.on('sort(system-log)', function (obj) {
+                            var column = obj.field;
+                            if (obj.type == 'asc') {
+                                sort[column] = 1;
+                            } else if (obj.type == 'desc') {
+                                sort[column] = -1;
+                            } else {
+                                delete sort[column];
+                            }
+                            loadTableData();
+                        });
+                    }
+                }
+            });
+        };
+
+        loadTableData();
+
+        //导出下载
+        var exportExcel = function () {
+            filter.export = 1;
+            filter.sort = sort;
+            admin.download({
+                url: admin.getUrl('/api/log/system'), //实际使用请改成服务端真实接口
+                data: filter,
+                method: 'get',
+                dataType: 'json'
+            });
+        };
+
+        $(function () {
+            //加载操作人列表
+            layui.admin.req({
+                url: admin.getUrl('/api/log/system/operator_list'),
+                data: {},
+                method: 'get',
+                dataType: 'json',
+                done: function (res) {
+                    if (res.code == 0) {
+                        var typeList = res.data.list;
+                        for (i = 0; i < typeList.length; i++) {
+                            var id = typeList[i]['operation_user_id'];
+                            var name = typeList[i]['nick_name'];
+                            $("#operation-user-id").append("<option value='" + id + "'>" + name + "</option>");
+                        }
+                        form.render();
+                    }
+                }
+            });
+
+
+            layui.admin.req({
+                url: layui.admin.getUrl('/api/log/system/type_list'),
+                data: {},
+                method: 'get',
+                dataType: 'json',
+                done: function (res) {
+                    if (res.code == 0) {
+                        var typeList = res.data.list;
+                        $.each(typeList, function (id, name) {
+                            $("#type").append("<option value='" + id + "'>" + name + "</option>");
+                        });
+                        form.render();
+
+                        var loadModule = function () {
+                            $("#module-id option").remove();
+                            form.render();
+                            //游戏下拉框选择
+                            var type = $("#type").val() || 0;
+                            if (type > 0) {
+                                layui.admin.req({
+                                    url: layui.admin.getUrl('/api/log/system/module_list'),
+                                    data: {type: type},
+                                    method: 'get',
+                                    dataType: 'json',
+                                    done: function (res) {
+                                        var moduleList = res.data.list;
+                                        $("#module-id").append('<option value="0"></option>');
+                                        $.each(moduleList, function (id, value) {
+                                            $("#module-id").append("<option value='" + value['id'] + "'>" + value['name'] + "</option>");
+                                        });
+                                        $("#module-id").val(0);
+                                        form.render();
+                                    }
+                                });
+                            }
+                        };
+
+                        form.on('select(type)', function (data) {
+                            loadModule();
+                        });
+                    }
+                }
+            });
+
+            //重置
+            $('#search-reset').click(function () {
+                $("#type").val('');
+                $("#module-id").val(0);
+                $("#title").val('');
+                $("#content").val('');
+                $("#operation-user-id").val('');
+                $("#date-time").val('');
+                form.render();
+            });
+
+            //提交搜索
+            $('#search-commit').click(function () {
+                var date = $("#date-time").val();
+                var date = date.split(' - ', 2);
+                filter = {
+                    type: $("#type").val() === '' ? 0 : $("#type").val(),
+                    module_id: $("#module-id").val(),
+                    title: $("#title").val(),
+                    content: $("#content").val(),
+                    operation_user_id: $("#operation-user-id").val() === '' ? 0 : $("#operation-user-id").val(),
+                    start_time: date[0],
+                    end_time: date[1]
+                };
+                page = 1;
+
+                // console.log(filter);
+                loadTableData();
+            });
+
+            //下载
+            $('#export').click(function () {
+                exportExcel();
+            });
+        });
+
+    });
+</script>

@@ -1,0 +1,43 @@
+
+<div class="layui-card" id="top-card">
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title">
+
+            </ul>
+            <div class="layui-tab-content">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="layui-card" id="sub-card">
+    <div class="layui-card-body">
+
+    </div>
+</div>
+
+
+
+<!-- 列表、分页模板  -->
+<script type="text/html" id="listWord">
+    <div class="layui-row">
+        {{# layui.each(d.data, function(index, item){ }}
+        <div class="layui-col-sm3">
+            <div class="word-item">
+                {{# if(!d.hideBox){ }}<input type="checkbox" class="layui-form-checkbox word-box" id="word-{{item.id}}" value="{{item.id}}">{{# } }} <label for="word-{{item.id}}">{{item.word}}</label>
+            </div>
+        </div>
+        {{# }); }}
+    </div>
+</script>
+
+<script>
+
+    layui.use('dirty_words/dirty_words', layui.factory('dirty_words/dirty_words'));
+</script>
+

@@ -1,0 +1,82 @@
+<style>
+    #interior_mass_dialog {
+        padding: 20px;
+    }
+    .red {
+        color: red;
+    }
+    .green {
+        color: green;
+    }
+</style>
+<!--补单失败结果详情-->
+<div id="interior_mass_dialog">
+    <button type="button" class="layui-btn" id="export">导出</button>
+    <table id="interior_mass_dialog_list"></table>
+</div>
+<script type="text/html" template lay-done="layui.data.done(d)"></script>
+<script>
+layui.data.done = function (d) {
+    let voucher_id = d.params.voucher_id;
+    layui.use(['table', 'admin','common'], function () {
+        let table = layui.table;
+        let admin = layui.admin;
+        let $ = layui.jquery;
+
+        let cols;
+        admin.getCols('player_interior_pay_mass_all_list').then(function (data) {
+            cols = data.data;
+            table.render({
+                id: 'interior_mass_dialog_list',
+                elem: '#interior_mass_dialog_list',
+                url: admin.getUrl('/api/player/getListByVoucher'),
+                method: 'GET',
+                where: {
+                    voucher: voucher_id
+                },//请求参数(额外)
+                request: {
+                    pageName: 'page' //页码的参数名称，默认：page
+                    , limitName: 'limit' //每页数据量的参数名，默认：limit
+                },
+                response: { //定义后端 json 格式，详细参见官方文档
+                    statusName: 'code', //状态字段名称
+                    statusCode: '0', //状态字段成功值
+                    msgName: 'msg', //消息字段
+                    countName: 'countAll', //总页数字段
+                    dataName: 'data', //数据字段
+                },
+                page: true,
+                loading: true,
+                cols: cols
+            });
+        });
+
+        // 充值详情导出
+        $('#interior_mass_dialog #export').click(function () {
+            admin.download({
+                url: admin.getUrl('/api/pay/massPayDetailExport'),
+                data: {
+                    param: {
+                        voucher: voucher_id
+                    },
+                    cols: cols,
+                    title: '充值详情'
+                },
+                method: 'get',
+                dataType: 'json',
+            });
+        })
+
+    })
+}
+</script>
+<script type="text/html" id="state">
+    {{#  if(d.state == 0 ){ }}
+    <span class="green">充值成功</span>
+    {{#  } else { }}
+    <span class="red">充值失败</span>
+    {{#  } }}
+</script>
+<script type="text/html" id="fail_reason">
+    <span class="red">{{ d.fail_reason }}</span>
+</script>

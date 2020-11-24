@@ -1,0 +1,225 @@
+<div class="layui-form layui-form-pane gift_form" lay-filter="layuiadmin-app-form-list"
+     id="layuiadmin-app-form-list">
+    <input type="hidden" name="prop_content">
+    <input type="hidden" name="id">
+    <div class="layui-form-item audit">
+        <label class="layui-form-label">礼包类型</label>
+        <div class="layui-input-inline">
+            <select name="gift_package_type">
+                <option value="">请选择礼包类型</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">礼包名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="template_name" autocomplete="off" placeholder="请输入礼包名称" class="layui-input">
+        </div>
+    </div>
+    <!--    道具选择-->
+    <div class="layui-form-item prop_conf">
+        <label class="layui-form-label">道具添加</label>
+        <div class="layui-input-inline">
+            <select name="prop_type" lay-filter="prop_type">
+                <option value="">请选择道具类别</option>
+            </select>
+        </div>
+        <div class="layui-input-inline">
+            <select name="prop_id" id="prop_id" class="prop_id" lay-search>
+                <option value="">请选择道具名称</option>
+            </select>
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" name="prop_num" class="layui-input" placeholder="请输入道具数量">
+        </div>
+        <button type="button" class="layui-btn layui-btn-theme" id="add_prop">添加</button>
+    </div>
+
+    <div class="layui-form-item prop_conf prop_content">
+        <table id="prop_content"></table>
+    </div>
+
+    <div class="layui-form-item audit">
+        <label class="layui-form-label">审核人</label>
+        <div class="layui-input-inline">
+            <select name="auditor">
+                <option value="">请选择审核人</option>
+            </select>
+        </div>
+    </div>
+    <script type="text/html" template>
+        {{#  if(d.params.event != 'detail'){ }}
+        <div class="layui-form-item">
+            <button type="button" lay-submit lay-filter="layuiadmin-app-form-submit" class="layui-btn layui-btn-theme">确定</button>
+            <button type="button" class="layui-btn layui-btn-primary" onclick="layer.closeAll();">取消</button>
+        </div>
+        {{#  } }}
+    </script>
+</div>
+<script type="text/html" template lay-done="layui.data.sendParams(d.params)">
+
+</script>
+<script type="text/html" id="prop_edit">
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger prop_del" data-type={{ d.prop_id }}
+            data-prop-type={{d.prop_type}}>删除
+    </button>
+</script>
+
+<script>
+    var admin = layui.admin;
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var propData = [];
+    // 渲染表单数据
+
+
+    $(function () {
+        // 设置表格（记录道具内容）
+        $.initTable = function () {
+            table.render({
+                id: 'prop_content',
+                elem: '#prop_content',
+                page: false,
+                loading: true,
+                cols: [[
+                    {field:'prop_type_name', title: '道具类型', align: 'center'},
+                    {field:'prop_type', title: '道具类型', align: 'center', 'hide': true},
+                    {field: 'prop_name', title: '道具名称', align: 'center'},
+                    {field: 'prop_num', title: '数量', align: 'center', edit: 'text'},
+                    {field: 'prop_id', title: '操作', align: 'center', templet: '#prop_edit'}
+                ]],
+                limit: 100,
+                data: propData
+            });
+        };
+
+
+        layui.data.sendParams = function (params) {
+            var editId = params.id;
+            $.initData = function () {
+                return new Promise(function (resolve, reject) {
+                    layui.admin.req({
+                        url: admin.getUrl('/api/gift_template/initAddGiftData'),
+                        data: {},
+                        type: 'get',
+                        done: function (data) {
+                            console.log(data);
+                            admin.initSelect(data.data['auditor'], "select[name='auditor']", '请选择审核人');
+                            admin.initSelect(data.data['type'], "select[name='gift_package_type']", '请选择礼包类型');
+                            getPropType();
+                            layui.form.render();
+                            resolve();
+                        }
+                    });
+                })
+            }
+            $.initData().then(function () {
+                if (editId != undefined) {
+                    // 单独渲染道具添加列表
+                    let options = {jsonValue: JSON.stringify(params), isDebug: false};
+                    $('.gift_form').initForm(options);
+                    form.render();
+                    propData = JSON.parse(params['prop_content']);
+                    $.initTable();
+                }
+            });
+
+        }
+        $.initTable();
+
+        // 获取道具类型,渲染下拉框
+        function getPropType() {
+            admin.req({
+                url: admin.getUrl('/api/gift_template/getPropType'),
+                data: {},
+                type: 'get',
+                done: function (data) {
+                    let res = data.data;
+                    admin.initSelect(res, "select[name='prop_type']", '请选择道具类型');
+                    form.render();
+                }
+            });
+        }
+
+        // 添加充值档位
+        function addProp(pushParam) {
+            for (let k in propData) {
+                if (pushParam.prop_id == propData[k]['prop_id'] && pushParam.prop_type == propData[k]['prop_type']) {
+                    pushParam.prop_num = parseInt(pushParam.prop_num);
+                    propData[k]['prop_num'] = parseInt( propData[k]['prop_num']);
+                    propData[k]['prop_num'] += pushParam.prop_num;
+                    return;
+                }
+            }
+            pushParam.prop_num = parseInt(pushParam.prop_num);
+            propData.push(pushParam);
+        }
+
+        // 删除
+        function delProp(prop_id, prop_type) {
+            for (let k in propData) {
+                if (propData[k]['prop_id'] == prop_id && propData[k]['prop_type'] == prop_type) {
+                    propData.splice(k, 1);
+                    return;
+                }
+            }
+        }
+
+        // 切换道具类型联动
+        form.on('select(prop_type)', function (data) {
+            admin.req({
+                url: admin.getUrl('/api/gift_template/getPropByType'),
+                data: {
+                    prop_type: data.value
+                },
+                type: 'get',
+                done: function (data) {
+                    admin.initSelect(data.data, "select[name='prop_id']", '请选择道具名称');
+                    $("select[name='prop_id']").val('');
+                    form.render();
+                }
+            });
+        });
+        // 添加道具
+        $(document).off('click', '#add_prop').on('click', '#add_prop', function () {
+            let prop_id = $("select[name='prop_id']").val();
+            let prop_num = $("input[name='prop_num']").val();
+            let prop_type = $("select[name='prop_type']").val();
+            if (prop_id.trim() === '') {
+                layer.msg('请选择道具', {icon: 5, anim: 6});
+                return;
+            }
+            if (prop_num.trim() === '') {
+                layer.msg('请输入道具数量', {icon: 5, anim: 6});
+                return;
+            }
+            if (!(/(^[1-9]\d*$)/.test(prop_num))) {
+                layer.msg('道具数量必须为正整数', {icon: 5, anim: 6});
+                return;
+            }
+            // 获取选择
+            let prop_name = admin.selectText("select[name='prop_id']");
+            let prop_type_name = admin.selectText("select[name='prop_type']");
+            let pushParam = {
+                prop_type_name: prop_type_name,
+                prop_type: prop_type,
+                prop_id: prop_id,
+                prop_name: prop_name,
+                prop_num: prop_num
+            };
+            addProp(pushParam);
+            // $("input[name='prop_content']").val(JSON.stringify(table.cache.prop_content))
+            $.initTable();
+        });
+
+        // 删除道具
+        $(document).off('click', '.prop_del').on('click', '.prop_del', function () {
+            delProp($(this).attr('data-type'), $(this).attr('data-prop-type'));
+            // $("input[name='prop_content']").val(JSON.stringify(table.cache.prop_content))
+            $.initTable();
+        });
+    })
+</script>
+
+

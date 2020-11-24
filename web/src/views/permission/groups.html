@@ -1,0 +1,362 @@
+<style>
+    .layui-inline {
+        margin-bottom: 10px !important;
+        margin-right: 0px !important;
+        margin-left: 0px !important;
+    }
+
+    .layui-input-block {
+        width: 130px;
+    }
+</style>
+
+<title>切换平台</title>
+
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb">
+        <a lay-href="">权限管理</a>
+        <a><cite>组别管理</cite></a>
+    </div>
+</div>
+
+<div class="layui-tab layui-tab-card" lay-filter="layui-game-card" style="height: 100%;">
+    <ul class="layui-tab-title" id="game-card">
+    </ul>
+    <div class="layui-container" id="group-info" style="width: 100%">
+        <div class="layui-row layui-inline" style="padding-top:4px">
+            <div class="layui-col-xs12 layui-col-md3 layui-bg-gray layui-inline"
+                 style="padding-bottom: 9px;padding-top: 15px">
+                <div id="tree-group"></div>
+            </div>
+            <div class="layui-col-xs12 layui-col-md9" style="padding-left: 15px;padding-bottom: 9px;padding-top: 0px">
+                <div class="layui-card-header">
+                    <div id="title" class="layui-inline" style="width: 91%"></div>
+                    <button data-type="add" class="layui-btn layui-btn-normal  btn-add layui-btn-sm layui-inline">
+                        新增组别
+                    </button>
+                </div>
+                <div id="table-group"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    layui.use(['admin', 'form', 'element', 'tree', 'treeTable'], function () {
+        var $ = layui.jquery;
+        //数组转树形结构
+        var array2tree = function (array, pid) {
+            var result = [];
+            $.each(array, function (i, item) {
+                console.log(item, pid);
+                if (item.pid == pid) {
+                    item.title = item.name;
+                    item.children = array2tree(array, item.id);
+                    item.spread = true;
+                    //无子节点，删除children
+                    if (item.children.length <= 0) {
+                        delete item.children;
+                    }
+                    result.push(item);
+                }
+            });
+            return result;
+        };
+
+        $(function () {
+            //初始加载
+            layui.admin.req({
+                url: layui.admin.getUrl('/api/system/common/group_list'),
+                data: {
+                    include_own: 1,
+                    whole_info: 1
+                },
+                method: 'get',
+                dataType: 'json',
+                done: function (res) {
+                    if (res.code == 0) {
+                        var groupPermissions = res.data.list;
+                        //加载树形组别图
+                        var loadTreeGroup = function (gameId) {
+                            //找出对应的游戏
+                            var groups = [];
+                            for (i = 0; i < groupPermissions.length; i++) {
+                                if (groupPermissions[i]['id'] == gameId) {
+                                    groups = groupPermissions[i]['groups'];
+                                    break;
+                                }
+                            }
+                            //树形组别建立
+                            var parentMap = {};
+                            for (j = 0; j < groups.length; j++) {
+                                parentMap[groups[j]['id']] = groups[j]['pid'];
+                            }
+
+                            var rootId = 0;
+                            var startId = 0;
+                            $.each(parentMap, function (id, pid) {
+                                if (typeof parentMap[pid] === 'undefined') {
+                                    rootId = pid;
+                                    startId = id;
+                                }
+                            });
+
+                            var treeGroup = array2tree(groups, rootId);
+
+                            //树形组别图
+                            layui.tree.render({
+                                elem: '#tree-group'
+                                , data: treeGroup
+                                , onlyIconControl: true
+                                , showLine: true
+                                , showCheckbox: false  //是否显示复选框
+                                , isJump: false //是否允许点击节点时弹出新窗口跳转
+                                , click: function (obj) {
+                                    loadChildrensTreeTable(obj.data.game_id, obj.data.id, rootId);
+                                },
+                                text: {
+                                    defaultNodeName: '未知组别' //节点默认名称
+                                    , none: '无组别' //数据为空时的提示文本
+                                }
+                            });
+                            loadChildrensTreeTable(gameId, startId, rootId);   //默认加载根节点详情
+
+                            //监听添加按钮事件
+                            $('.btn-add').off('click').on('click', function () {
+                                layui.admin.popup({
+                                    title: '新增组别'
+                                    , area: ['550px', '450px']
+                                    , id: 'LAY-popup-content'
+                                    , shadeClose: false
+                                    , success: function (layero, index) {
+                                        layui.view(this.id).render('permission/group_edit', {
+                                            drops: filterChildren(groups, rootId),
+                                            event: 'add',
+                                            data: {}
+                                        }).done(function () {
+                                            layui.form.render(null, 'layuiadmin-group-form-list');
+
+                                            //监听提交按钮
+                                            layui.form.on('submit(layuiadmin-group-form-submit)', function (data) {
+                                                var field = data.field; //获取提交的字段
+                                                field.game_id = gameId;
+                                                //提交修改
+                                                layui.admin.req({
+                                                    url: layui.admin.getUrl('/api/system/group/add'),
+                                                    data: field,
+                                                    method: 'post',
+                                                    dataType: 'json',
+                                                    done: function (res) {
+                                                        if (res.code == 0) {
+                                                            reloadGameGroup(gameId); //重载
+                                                            layer.close(index); //执行关闭
+                                                        }
+                                                    }
+                                                });
+                                            });
+                                        });
+                                    }
+                                });
+                            });
+                        };
+
+                        //重新加载游戏组别数据
+                        var reloadGameGroup = function (gameId) {
+                            layui.admin.req({
+                                url: layui.admin.getUrl('/api/system/common/group_list'),
+                                data: {
+                                    include_own: 1,
+                                    whole_info: 1,
+                                    game_id: gameId
+                                },
+                                method: 'get',
+                                dataType: 'json',
+                                done: function (res) {
+                                    if (res.code == 0) {
+                                        for (i = 0; i < res.data.list.length; i++) {
+                                            for (j = 0; j < groupPermissions.length; j++) {
+                                                if (groupPermissions[j]['id'] === res.data.list[i]['id']) {
+                                                    groupPermissions[j] = res.data.list[i];
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        loadTreeGroup(gameId);
+                                    }
+                                }
+                            });
+                        };
+
+                        //筛选子节点
+                        var filterChildren = function (arr, pid) {
+                            var result = [];
+                            $.each(arr, function (idx, item) {
+                                if (item.pid == pid) {
+                                    result.push(item);
+                                    $.each(filterChildren(arr, item.id), function (cid, citem) {
+                                        result.push(citem);
+                                    });
+                                }
+                            });
+                            return result;
+                        };
+
+                        //加载所有子组别
+                        var loadChildrensTreeTable = function (gameId, pid, rootId) {
+                            //找出对应的游戏与对应的组别
+                            var groups = [];
+                            for (i = 0; i < groupPermissions.length; i++) {
+                                if (groupPermissions[i]['id'] === gameId) {
+                                    groups = groupPermissions[i]['groups'];
+                                    for (j = 0; j < groups.length; j++) {
+                                        if (groups[j]['id'] == pid) {
+                                            $('#title').html(groups[j]['name']);
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+
+                            ptable = layui.treeTable.render({
+                                elem: '#table-group',
+                                style: 'margin:0;',
+                                tree: {
+                                    iconIndex: 0,           // 折叠图标显示在第几列
+                                    isPidData: true,        // 是否是id、pid形式数据
+                                    idName: 'id',  // id字段名称
+                                    pidName: 'pid',     // pid字段名称
+                                    openName: 'name'
+                                },
+                                text: {
+                                    none: '<div style="padding: 18px 0;">无子组别</div>'
+                                },
+                                data: filterChildren(groups, pid)
+                                , cols: [[
+                                    {field: 'name', edit: '', title: '组别名称'}
+                                    , {field: 'remark', edit: '', title: '备注说明'}
+                                    , {
+                                        title: '操作', align: 'center', minWidth: 95
+                                        , templet: function (d) {
+                                            var userBtn = '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="user">查看用户</a>';
+                                            var permissionBtn = '<a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="permission">权限管理</a>';
+                                            var editBtn = '<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">修改组别</a>';
+                                            var delBtn = '<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除组别</a>';
+                                            return userBtn + permissionBtn + editBtn + delBtn;
+                                        }
+                                    }
+                                ]]
+                                , page: false
+                            });
+
+                            //行操作监听
+                            layui.treeTable.on('tool(table-group)', function (obj) {
+                                var data = obj.data;  // 获得当前行数据
+                                var event = obj.event; // 获得lay-event对应的值
+                                obj.drops = filterChildren(groups, rootId);
+
+                                switch (event) {
+                                    case 'edit':
+                                        layui.admin.popup({
+                                            title: '修改组别'
+                                            , area: ['550px', '450px']
+                                            , id: 'LAY-popup-content'
+                                            , shadeClose: false
+                                            , success: function (layero, index) {
+                                                layui.view(this.id).render('permission/group_edit', obj).done(function () {
+                                                    layui.form.render(null, 'layuiadmin-group-form-list');
+
+                                                    //监听提交按钮
+                                                    layui.form.on('submit(layuiadmin-group-form-submit)', function (data) {
+                                                        var field = data.field; //获取提交的字段
+                                                        //提交修改
+                                                        layui.admin.req({
+                                                            url: layui.admin.getUrl('/api/system/group/edit?group_id=' + obj.data.id), //实际使用请改成服务端真实接口
+                                                            data: field,
+                                                            method: 'post',
+                                                            dataType: 'json',
+                                                            done: function (res) {
+                                                                if (res.code == 0) {
+                                                                    reloadGameGroup(gameId); //重载
+                                                                    layer.close(index); //执行关闭
+                                                                }
+                                                            }
+                                                        });
+                                                    });
+                                                });
+                                            }
+                                        });
+                                        break;
+                                    case 'del':
+                                        layer.confirm('真的删除?(组别成员以及无任何子组方可删除)', function (index) {
+                                            layui.admin.req({
+                                                url: layui.admin.getUrl('/api/system/group/delete?group_id=' + data.id), //实际使用请改成服务端真实接口
+                                                data: {},
+                                                method: 'post',
+                                                dataType: 'json',
+                                                done: function (res) {
+                                                    if (res.code == 0) {
+                                                        reloadGameGroup(data.game_id); //重载
+                                                        layer.close(index); //执行关闭
+                                                    }
+                                                }
+                                            });
+                                        });
+                                        break;
+                                    case 'user':
+                                        layui.admin.popup({
+                                            title: '查看用户'
+                                            , area: ['1280px', '750px']
+                                            , id: 'LAY-popup-content'
+                                            , shadeClose: false
+                                            , success: function (layero, index) {
+                                                obj.game_id = gameId;
+                                                layui.view(this.id).render('permission/group_user', obj).done(function () {
+                                                    layui.form.render(null, 'layuiadmin-group-user-form-list');
+                                                });
+                                            }
+                                        });
+                                        break;
+                                    case 'permission':
+                                        obj.gameId = gameId;
+                                        layui.admin.popup({
+                                            title: '权限管理'
+                                            , area: ['1280px', '750px']
+                                            , id: 'LAY-popup-content'
+                                            , shadeClose: false
+                                            , success: function (layero, index) {
+                                                layui.view(this.id).render('permission/group_permission', obj).done(function () {
+                                                    layui.form.render(null, 'layuiadmin-group-permission-form-list');
+                                                });
+                                            }
+                                        });
+                                        break;
+                                }
+                            });
+                        };
+
+                        //初次加载部分，tab栏与默认的树形组别
+                        for (i = 0; i < groupPermissions.length; i++) {
+                            //添加选项卡标题
+                            var gameId = groupPermissions[i]['id'];
+                            var gameName = groupPermissions[i]['name'];
+                            if (i === 0) {
+                                $("#game-card").append('<li class="layui-this" data-game-id="' + gameId + '">' + gameName + '</li>');
+                                loadTreeGroup(gameId);
+                            } else {
+                                $("#game-card").append('<li data-game-id="' + gameId + '">' + gameName + '</li>');
+                            }
+                        }
+
+                        //监听选项卡点击事件
+                        layui.element.on('tab(layui-game-card)', function (data) {
+                            var gameId = $(this).data('game-id');
+                            loadTreeGroup(gameId);
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>

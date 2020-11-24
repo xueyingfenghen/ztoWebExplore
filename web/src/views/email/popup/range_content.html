@@ -1,0 +1,315 @@
+<style>
+    .checkbox_box .layui-form-item {
+        position: relative;
+        height: 64px;
+        overflow: hidden;
+    }
+    .checkbox_box .show-auto {
+        position: relative;
+        height: auto;
+        overflow: hidden;
+    }
+    .checkbox_box .look_more {
+        position: absolute;
+        display: block;
+        width: 20px;
+        height: 20px;
+        background: #666;
+        color: #F1F1F1;
+        text-align: center;
+        line-height: 20px;
+        border-radius: 3px;
+        right: 0;
+        bottom: 0;
+        z-index: 999;
+        cursor: pointer;
+    }
+</style>
+<!--<div class="layui-form-item" pane="">-->
+<!--    <label class="layui-form-label">指定渠道</label>-->
+<!--    <div class="layui-input-block">-->
+<!--        <input type="checkbox" name="check_all_channel" lay-skin="primary" lay-filter="check_all_channel" title="全选">-->
+<!--        <div class="layui-clear"></div>-->
+<!--        <input type="checkbox" name="channel" value="1" lay-skin="primary" lay-filter="single_channel" title="渠道1">-->
+<!--        <input type="checkbox" name="channel" value="2" lay-skin="primary" lay-filter="single_channel" title="渠道2">-->
+<!--        <input type="checkbox" name="channel" value="3" lay-skin="primary" lay-filter="single_channel" title="渠道3">-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--checkbox专属模块-->
+<div class="checkbox_box"></div>
+
+<div class="layui-form-item">
+<!--    <span style="display: inline-block;margin-bottom: 10px;">指定帮会：</span>-->
+    <!--    <div class="layui-clear"></div>-->
+    <label class="layui-form-label" style="margin-right: 10px;">指定帮会</label>
+    <label class="layui-form-label">选择区服</label>
+    <div class="layui-input-inline">
+        <select class="server_id" lay-search>
+            <option value="">请选择区服</option>
+        </select>
+    </div>
+    <div class="layui-input-inline" style="width: 380px;">
+        <input type="text" class="layui-input league_id" placeholder="请输入帮会编号">
+    </div>
+    <button type="button" class="layui-btn layui-btn-theme" id="add_league">添加</button>
+</div>
+
+<div class="layui-form-item">
+    <table id="league_list"></table>
+</div>
+
+<div class="layui-form-item">
+    <label class="layui-form-label">创角时间</label>
+    <div class="layui-input-inline" style="width: 380px;">
+        <input type="text" class="layui-input" id="create_time" placeholder="请选择时间范围">
+    </div>
+</div>
+
+<!--<button type="button" class="test">测试</button>-->
+
+<script type="text/html" template lay-done="layui.data.done(d)">
+
+</script>
+<script>
+
+    layui.data.done = function (d) {
+
+        let editId = d.params.editId;
+        leagueData = [];
+
+        layui.use( ['table', 'admin', 'form', 'element', 'common'], function(){
+            let admin = layui.admin;
+            let table = layui.table;
+            let form = layui.form;
+            let element = layui.element;
+            let $ = layui.jquery;
+
+            let rangeData = {
+                vip: [],
+                channel: [],
+                school: [],
+                xiake: []
+            };
+
+            // 渲染时间选择器
+            layui.laydate.render({
+                elem: '#create_time'
+                ,type: 'datetime'
+                ,range: true
+            });
+
+            // 获取范围邮件的范围参数
+            admin.getRangeData = function () {
+                $.each(rangeData, function (key, val) {
+                    rangeData[key] = [];
+                    $("input[name='" + key + "']:checked").each(function() {
+                        rangeData[key].push($(this).val());
+                    });
+                });
+                rangeData.create_time = $('#create_time').val();
+
+                let leagueArr = [];
+                $.each(leagueData, function (key, val) {
+                    leagueArr.push({
+                        server_id: val['server_id'],
+                        league_id: val['league_id'],
+                        league_name: val['league_name']
+                    });
+                });
+                rangeData.league_content = leagueArr;
+
+                return rangeData;
+            };
+
+            // 初始化范围邮件内容 （range_content部分）
+            admin.initRangeContent = function () {
+                if (editId == undefined) {
+                    return ;
+                }
+
+                // 获取范围内容渲染
+                admin.req({
+                    url: admin.getUrl('/api/email/range/getRangeContent'),
+                    data: {id: editId},
+                    type: 'get',
+                    done: function (data) {
+                        let content = data.data['range_content'];
+                        $.each(content, function (key, val) {
+                            // 渲染checkbox内容
+                            if (rangeData[key] != undefined) {
+                                $("#range_content input[name='" + key + "']").each(function () {
+                                    for (let i = 0; i < val.length; i ++) {
+                                        if (this.value == val[i]) {
+                                            this.checked = true;
+                                        }
+                                    }
+                                })
+                            }
+                            // 渲染创建角色时间
+                            if (content['create_time'] != undefined) {
+                                $('#create_time').val(content['create_time']);
+                            }
+                            // 渲染选择区服
+                            if (content['league_content'] != undefined) {
+                                leagueData = content['league_content'];
+                                $.initLeagueTable();
+                            }
+                            form.render();
+                        })
+                    }
+                });
+
+            };
+
+            // 请求接口渲染界面及事件
+            admin.req({
+                url: admin.getUrl('/api/email/range/rangeEmailType'),
+                data: {},
+                type: 'get',
+                done: function (data) {
+                    let list = data.data;
+                    // 渲染checkbox
+                    admin.initCheckBox('.checkbox_box', list);
+                    // 全选，反选操作
+                    admin.checkboxOperator(list);
+                    admin.initRangeContent();
+                }
+            });
+
+            // 查看更多checkbox内容
+            $(document).off('click', '.look_more').on('click', '.look_more', function () {
+                if (!$(this).parent().hasClass('show-auto')) {
+                    $(this).removeClass('layui-icon-addition');
+                    $(this).addClass('layui-icon-subtraction');
+                    $(this).parent().addClass('show-auto');
+                } else {
+                    $(this).removeClass('layui-icon-subtraction');
+                    $(this).addClass('layui-icon-addition');
+                    $(this).parent().removeClass('show-auto');
+                }
+            });
+
+            /********范围邮件选择联盟部分********/
+
+            // 渲染选择区服
+            admin.req({
+                url: admin.getUrl('/api/public/getServerList'),
+                data: {},
+                type: 'get',
+                done: function (data) {
+                    admin.initSelect(data.data['list'], ".server_id", '请选择区服');
+                    form.render('select')
+                }
+            });
+
+            // 添加帮会
+            $.addLeague = function (pushParam) {
+                for (let k in leagueData) {
+                    if (pushParam.server_id == leagueData[k]['server_id'] && pushParam.league_id == leagueData[k]['league_id']) {
+                        layer.msg('帮会已存在，请勿重复添加', {icon: 5, anim: 6});
+                        return ;
+                    }
+                }
+                leagueData.push(pushParam);
+            };
+
+
+            // 删除帮会
+            $.delLeague = function (server_id, league_id) {
+                for (let k in leagueData) {
+                    if (leagueData[k]['server_id'] == server_id && leagueData[k]['league_id'] == league_id) {
+                        leagueData.splice(k, 1);
+                        return ;
+                    }
+                }
+            };
+
+            // 联盟（帮会）table
+            $.initLeagueTable = function () {
+                table.render({
+                    id: 'league_list',
+                    elem: '#league_list',
+                    page: false,
+                    loading: true,
+                    cols: [[
+                        {field:'server_id', title: '区服', align: 'center'},
+                        {field:'league_id', title: '帮会编号', align: 'center'},
+                        {field:'league_name', title: '帮会名称', align: 'center'},
+                        {field:'', title: '操作', align: 'center', templet: '#league_edit'}
+                    ]],
+                    limit: 1000,
+                    data: leagueData
+                });
+            };
+
+            $.initLeagueTable();
+
+
+            // 选择区服并且添加
+            $(document).off('click', '#add_league').on('click', '#add_league', function () {
+                let server_list = $("input[name='server_list']").val();
+                let server_id = $('#range_content .server_id').val();
+                let league_id = $('#range_content .league_id').val();
+
+                if (server_list.trim() == '') {
+                    layer.msg('请先选择区服', {icon: 5, anim: 6});
+                    return ;
+                }
+
+                if (server_id.trim() == '') {
+                    layer.msg('请先指定帮会所在区服', {icon: 5, anim: 6});
+                    return ;
+                }
+
+                if (league_id.trim() == '') {
+                    layer.msg('请先输入帮会编号', {icon: 5, anim: 6});
+                    return ;
+                }
+
+                admin.req({
+                    url: admin.getUrl('/api/player/checkLeagueIdByServer'),
+                    data: {
+                        server_list,
+                        server_id,
+                        league_id
+                    },
+                    type: 'post',
+                    done: function (data) {
+                        if (data.code == 0) {
+                            // 将校验通过的加入table
+                            for (let k in data.data) {
+                                let pushParam = {
+                                    server_id: data.data[k]['server_id'],
+                                    league_id: data.data[k]['league_id'],
+                                    league_name: data.data[k]['league_name']
+                                };
+                                $.addLeague(pushParam);
+                                $.initLeagueTable();
+                            }
+
+                        } else {
+                            layer.msg(data.msg, {icon: 5, anim: 6});
+                            return ;
+                        }
+                    }
+                });
+
+            });
+
+            $(document).off('click', '.league_del').on('click', '.league_del', function () {
+                $.delLeague($(this).attr('data-server'), $(this).attr('data-league'));
+                $.initLeagueTable();
+            });
+
+            /********范围邮件选择联盟********/
+
+        });
+
+    };
+
+</script>
+<script type="text/html" id="league_edit">
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger league_del" data-server={{ d.server_id }} data-league={{d.league_id}}>删除</button>
+</script>
+

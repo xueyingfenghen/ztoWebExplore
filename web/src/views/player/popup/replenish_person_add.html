@@ -1,0 +1,278 @@
+<style>
+    #replenish_person_add_dialog {
+        padding: 20px;
+    }
+    #replenish_person_add_dialog .formDiv {
+        width: auto;
+        display: inline-block;
+    }
+    #replenish_person_add_dialog .buttonDiv {
+        width: auto;
+        display: inline-block;
+        position: relative;
+        top: -2px;
+    }
+    .nickName {
+        display: inline-block;
+        padding-left: 30px;
+    }
+    .layui-hidden {
+        display: none;
+    }
+    .green {
+        color: green;
+    }
+    .red {
+        color: red;
+    }
+</style>
+<!--解禁/一键解禁-->
+<form class="layui-form layui-form-pane replenish_person_add_dialog" id="replenish_person_add_dialog">
+
+    <input type="hidden" name="hasUser" id="hasUser" value=0>
+<!--选择区服， 角色id-->
+    <div class="layui-form-item content content1" data-type="content1">
+        <div class="formDiv"></div>
+        <div class="buttonDiv">
+            <button type="button" class="layui-btn layui-btn-theme" id="checkUser">校验</button>
+            <span class="nickName"></span>
+        </div>
+    </div>
+<!--充值档位 数量-->
+    <div class="layui-form-item content content2" data-type="content2">
+        <div class="formDiv"></div>
+        <div class="buttonDiv">
+            <button type="button" class="layui-btn layui-btn-theme" id="add">添加</button>
+        </div>
+    </div>
+<!--    是否记录充值流水-->
+    <div class="layui-form-item" pane="">
+        <label class="layui-form-label">记录充值流水</label>
+        <div class="layui-input-block" style="width: 100%">
+            <input type="radio" name="record_bill" value="0" lay-filter="record_bill" title="否" checked="">
+            <input type="radio" name="record_bill" value="1" lay-filter="record_bill" title="是">
+        </div>
+    </div>
+<!--充值内容（table形式）-->
+    <div class="layui-form-item">
+
+        <table id="pay_content"></table>
+    </div>
+<!--补单-->
+    <div class="layui-form-item content content3" data-type="content3">
+        <div class="formDiv"></div>
+        <div class=""></div>
+    </div>
+<!--密码-->
+    <div class="layui-form-item content" data-type="content4">
+        <div class="formDiv"></div>
+        <div class=""></div>
+    </div>
+
+</form>
+<script>
+    layui.use(['table', 'admin', 'form'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let admin = layui.admin;
+        let $ = layui.jquery;
+
+        var payData = [];
+
+        let cols0 = [[
+            {field:'recharge_grade', title: '充值档位', align: 'center'},
+            {field:'recharge_num', title: '数量', align: 'center'},
+            {field:'recharge_grade_id', title: '操作', align: 'center', templet: '#pay_content_edit'}
+        ]];
+
+        let cols1 = [[
+            {field:'recharge_grade', title: '充值档位', align: 'center'},
+            {field:'recharge_num', title: '数量', align: 'center'},
+            {field:'order', title: '订单号', align: 'center', templet: '#order'},
+            {field:'recharge_grade_id', title: '操作', align: 'center', templet: '#pay_content_edit'}
+        ]];
+
+        let cols = cols0;
+
+        // 用于临时记录充值档位的id和名字
+        let rechargeId = '';
+        let rechargeName = '';
+
+
+        let nameArr = {};
+        for (let i = 0; i < $('#replenish_person_add_dialog .content').length; i ++) {
+            let contentName = $('#replenish_person_add_dialog .content').eq(i).attr('data-type');
+            nameArr[contentName] = 'player_replenish_person_add_dialog_' + contentName;
+        }
+
+        // 输入框等完成渲染
+        admin.req({
+            url: admin.getUrl('/api/base/getFromGroupList'),
+            data: {
+                nameArr: nameArr
+            },
+            type: 'post',
+            done: function (data) {
+                for (let k in data.data) {
+                    for (let i = 0; i < $('#replenish_person_add_dialog .content').length; i ++) {
+                        let contentName = $('#replenish_person_add_dialog .content').eq(i).attr('data-type');
+                        if (k == contentName) {
+                            $('#replenish_person_add_dialog .content').eq(i).find('.formDiv').html(data.data[k]);
+                        }
+                    }
+                }
+                $("select[name='recharge_grade']").attr('lay-filter', 'recharge_grade');
+                $("select[name='replenish_reason']").attr('lay-filter', 'replenish_reason');
+                $('.content3').find('.layui-inline').eq(1).addClass('layui-hidden');
+                form.render();
+            }
+        });
+
+        // 设置表格（记录充值档位内容）
+        $.initTable = function () {
+            table.render({
+                id: 'pay_content',
+                elem: '#pay_content',
+                page: false,
+                loading: true,
+                cols: cols,
+                data: payData
+            });
+        }
+
+        $.initTable();
+
+
+        // 添加充值档位
+        $.addRecharge = function (pushParam) {
+            // for (let k in payData) {
+            //     if (pushParam.recharge_grade_id == payData[k]['recharge_grade_id']) {
+            //         pushParam.recharge_num = parseInt(pushParam.recharge_num);
+            //         payData[k]['recharge_num'] += pushParam.recharge_num;
+            //         return ;
+            //     }
+            // }
+            pushParam.recharge_num = parseInt(pushParam.recharge_num);
+            payData.push(pushParam);
+        };
+
+        // 删除
+        $.delRecharge = function (recharge_grade_id) {
+            for (let k in payData) {
+                if (payData[k]['recharge_grade_id'] == recharge_grade_id) {
+                    payData.splice(k, 1);
+                    return ;
+                }
+            }
+        };
+
+        // 修改order
+        $.editRechargeOrder = function (recharge_grade_id, order) {
+            for (let k in payData) {
+                if (payData[k]['recharge_grade_id'] == recharge_grade_id) {
+                    payData[k]['order'] = order;
+                }
+            }
+        };
+
+        // 是否记录流水
+        form.on('radio(record_bill)', function (data) {
+            // 不记录充值流水
+            if (data.value == 0) {
+                cols = cols0;
+                $.initTable();
+            }
+            // 记录充值流水
+            if (data.value == 1) {
+                cols = cols1;
+                $.initTable();
+            }
+        });
+
+        // 补单理由
+        form.on('select(replenish_reason)', function (data) {
+            // 不记录充值流水
+            if (data.value === '0') {
+                $('.content3').find('.layui-inline').eq(1).removeClass('layui-hidden')
+            } else {
+                $('.content3').find('.layui-inline').eq(1).addClass('layui-hidden')
+            }
+        });
+
+        // 充值档位改变时
+        form.on('select(recharge_grade)', function (data) {
+            rechargeName =data.elem[data.elem.selectedIndex].text;
+            rechargeId = data.value;
+        });
+
+        // 删除充值档位
+        $(document).off('click', '.del').on('click', '.del', function () {
+            let recharge_grade_id = $(this).attr('data-type');
+            $.delRecharge(recharge_grade_id);
+            $.initTable();
+        })
+
+
+        // 添加充值档位
+        $(document).off('click', '#add').on('click', '#add', function () {
+            console.log(rechargeId)
+            if (rechargeId == '' || rechargeId == 0) {
+                layer.msg('请选择充值档位', {icon: 5, anim: 6});
+                return ;
+            }
+            if ($('#recharge_num').val().trim() == '') {
+                layer.msg('请填写数量', {icon: 5, anim: 6});
+                return ;
+            }
+            if (!(/(^[1-9]\d*$)/.test($('#recharge_num').val()))) {
+                layer.msg('数量必须为正整数', {icon: 5, anim: 6});
+                return ;
+            }
+            let pushParam = {
+                recharge_grade: rechargeName,
+                recharge_num: $('#recharge_num').val(),
+                recharge_grade_id: rechargeId,
+                order: ''
+            };
+            $.addRecharge(pushParam);
+            $.initTable();
+        })
+
+        // 修改order
+        $(document).off('blur', '.edit_order').on('blur', '.edit_order', function () {
+            $.editRechargeOrder($(this).attr('data-type'), $(this).val());
+        })
+
+        // 校验用户是否存在，返回昵称
+        $(document).off('click', '#checkUser').on('click', '#checkUser', function () {
+            admin.req({
+                url: admin.getUrl('/api/player/getNickname'),
+                data: {
+                    server_id: $('#replenish_person_add_dialog .content1 .server_id').val(),
+                    user_id: $('#replenish_person_add_dialog .content1 .user_id').val(),
+                },
+                type: 'post',
+                done: function (data) {
+                    $('.nickName').removeClass('red');
+                    $('.nickName').removeClass('green');
+                    if (data.code == 0) {
+                        $('.nickName').addClass('green');
+                        $('.nickName').html(data.data['nickname'])
+                        $('#hasUser').val(1)
+                    } else {
+                        $('.nickName').addClass('red');
+                        $('.nickName').html('未找到该玩家信息')
+                        $('#hasUser').val(0)
+                    }
+                }
+            });
+        })
+
+    })
+</script>
+<script type="text/html" id="pay_content_edit">
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger del" data-type={{ d.recharge_grade_id }}>删除</button>
+</script>
+<script type="text/html" id="order">
+    <input type="text" placeholder="请输入订单号" class="layui-input edit_order" style="height: 28px;" data-type={{ d.recharge_grade_id }} value={{ d.order }}>
+</script>

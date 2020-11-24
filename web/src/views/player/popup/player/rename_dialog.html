@@ -1,0 +1,153 @@
+<style>
+    #player_rename_dialog {
+        padding: 20px;
+    }
+</style>
+<!--修改角色昵称-->
+<form class="layui-form layui-form-pane player_rename_dialog" id="player_rename_dialog">
+    修改记录：
+    <table id="rename_list"></table>
+
+    <div class="layui-form-item" style="margin-top: 40px;">
+        <div class="layui-inline">
+            <label class="layui-form-label">旧昵称</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="text" name="old_name" class="layui-input old_name" placeholder="请输入旧昵称" readonly>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">新昵称</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="text" name="new_name" class="layui-input new_name" placeholder="请输入新昵称">
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">修改原因</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <select name="reason" lay-filter="rename_reason">
+                    <option value="">请选择修改原因</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline rename_reason_other" style="display: none">
+            <label class="layui-form-label">其他</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="text" name="reason_other" class="layui-input" placeholder="请输入修改原因">
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <input type="password" name="pwd" class="layui-input" placeholder="请输入密码" autocomplete="new-password">
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-theme" id="do_rename">确定</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="channel_rename">取消</button>
+    </div>
+
+</form>
+<script type="text/html" template lay-done="layui.data.done(d)"></script>
+<script>
+    layui.data.done = function (d) {
+        let role_id = d.params.id;
+        let nickname = d.params.name;
+
+        layui.use(['admin', 'table', 'form'], function () {
+            let admin = layui.admin;
+            let table = layui.table;
+            let form = layui.form;
+            let $ = layui.jquery;
+
+            // 渲染角色旧昵称
+            $('.old_name').val(nickname);
+
+            // 渲染下拉框
+            form.render();
+
+            admin.req({
+                url: admin.getUrl('/api/public/getReason'),
+                data: {
+                    dict_name: 'ReNameReason'
+                },
+                type: 'get',
+                done: function (data) {
+                    admin.initSelect(data.data, "select[name='reason']", '请选择修改原因');
+                    form.render();
+                }
+            });
+
+            // 角色昵称修改记录
+            admin.getCols('player_rename_list_table').then(function (data) {
+                table.render({
+                    id: 'rename_list',
+                    elem: '#rename_list',
+                    url: admin.getUrl('/api/player/getRenameList'),
+                    method: 'GET',
+                    where: {
+                        role_id: role_id,
+                    },//请求参数(额外)
+                    request: {
+                        pageName: 'page' //页码的参数名称，默认：page
+                        ,limitName: 'limit' //每页数据量的参数名，默认：limit
+                    },
+                    response: { //定义后端 json 格式，详细参见官方文档
+                        statusName: 'code', //状态字段名称
+                        statusCode: '0', //状态字段成功值
+                        msgName: 'msg', //消息字段
+                        countName: 'countAll', //总页数字段
+                        dataName: 'data', //数据字段
+                    },
+                    page: true,
+                    loading: true,
+                    cols: data.data
+                });
+            });
+
+            // 修改理由切换
+            form.on('select(rename_reason)', function (data) {
+                if (data.value === '0') {
+                    $('.rename_reason_other').show();
+                } else {
+                    $('.rename_reason_other').hide();
+
+                }
+            });
+
+            // 取消
+            $('#channel_rename').click(function () {
+                layer.closeAll();
+            });
+        
+            // 提交
+            $('#do_rename').click(function () {
+                let param = admin.getFormParam('.player_rename_dialog');
+                param.role_id = role_id;
+                admin.req({
+                    url: admin.getUrl('/api/player/doReName'),
+                    data: param,
+                    type: 'post',
+                    done: function (data) {
+                        if (data.code == 0) {
+                            admin.reload('.playerSearch', 'user_list');
+                            layer.closeAll();
+                            layer.msg('修改昵称成功', {icon: 6, anim: 0});
+                        } else {
+                            layer.msg(data.msg, {icon: 5, anim: 6});
+                        }
+                    }
+                });
+            })
+
+        })
+
+    }
+</script>

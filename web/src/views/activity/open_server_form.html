@@ -1,0 +1,63 @@
+<style>
+    #uploadActivity{
+        width: 100%;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="font-weight: bolder;font-size: 16px">上传配置</label>
+        </div>
+        <div class="layui-upload">
+            <button type="button" class="layui-btn layui-btn-theme" id="uploadActivity"><i class="layui-icon"></i>上传文件</button>
+            <div class="layui-upload-list">
+                <table class="layui-table">
+                    <thead>
+                    <tr>
+                        <th>文件名称</th>
+                        <th>大小</th>
+                        <th>上传进度</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="activityList">
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td style="color: #afb9c3">请选择上传文件</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="layui-progress layui-progress-big" lay-showpercent="true" lay-filter="demo" style="margin-top: 10px">
+                    <div class="layui-progress-bar layui-bg-green" lay-percent="0%"></div>
+                </div>
+
+                <div class="site-demo-button" style="margin-top: 20px; margin-bottom: 0;">
+                    <button class="layui-btn site-demo-active layui-hide" data-type="setPercent" id="setPercent">设置100%</button>
+                    <!--                    <button class="layui-btn site-demo-active layui-hide" data-type="loading">模拟loading</button>-->
+                </div>
+            </div>
+            <button type="button" class="layui-btn layui-hide" id="activityListAction">开始上传</button>
+        </div>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="font-weight: bolder;font-size: 16px">上传情况</label>
+        </div>
+        <table class="layui-table">
+            <thead>
+            <tr>
+                <th>错误</th>
+                <th>正常</th>
+            </tr>
+            </thead>
+            <tbody id="activitySituation"></tbody>
+        </table>
+    </div>
+</div>
+<script src="/src/controller/activity/open_server_form.js"></script>
